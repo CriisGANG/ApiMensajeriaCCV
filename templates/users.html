@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Usuarios</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/users.js"></script>
+</head>
+<body>
+  <h1>Lista de Usuarios</h1>
+  <ul id="users" class="user-list"></ul>
+  <div id="chat-container" class="chat-container">
+    <div id="chat-messages" class="chat-messages"></div>
+    <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
+    <button id="send-message" class="send-message-button">Enviar</button>
+  </div>
+  <button id="logout" class="logout-button">Cerrar Sesión</button>
+  <script id="users-data" type="application/json">{{ users | tojson }}</script>
+</body>
+</html>
