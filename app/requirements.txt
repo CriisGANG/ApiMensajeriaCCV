@@ -1,0 +1,6 @@
+fastapi[standard] 
+pymysql
+python-dotenv
+sqlalchemy
+werkzeug
+cryptography
