@@ -1,6 +1,6 @@
 import pymysql.cursors
 import sqlalchemy as database
-from werkzeug.security import generate_password_hash,check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import pymysql
 from urllib.parse import urlparse
@@ -40,24 +40,30 @@ class API_Mensajeria(object):
 
     def desconecta(self):
         self.db.close()
-        
+
     def carregaUsuaris(self):
-        sql="SELECT * from usuarisclase"
+        sql = "SELECT * from usuarisclase"
         self.cursor.execute(sql)
-        ResQuery=self.cursor.fetchall()
+        ResQuery = self.cursor.fetchall()
         return ResQuery
-    
-    def verificar_usuario(self, username, password):
-        sql="SELECT count(*) from usuarisclase WHERE username='"+username+"'"
+
+    def carregaGrups(self):
+        sql = "SELECT * FROM Groups"
         self.cursor.execute(sql)
-        ResQuery=self.cursor.fetchone()
-        if ResQuery['count(*)']==1:
+        ResQuery = self.cursor.fetchall()
+        return ResQuery
+
+    def verificar_usuario(self, username, password):
+        sql = "SELECT count(*) from usuarisclase WHERE username='"+username+"'"
+        self.cursor.execute(sql)
+        ResQuery = self.cursor.fetchone()
+        if ResQuery['count(*)'] == 1:
             sql = "SELECT password FROM usuarisclase WHERE username = %s"
             self.cursor.execute(sql, (username,))
             ResQuery = self.cursor.fetchone()
-            resposta=check_password_hash(ResQuery['password'],password)
+            resposta = check_password_hash(ResQuery['password'], password)
         else:
-            resposta=False
+            resposta = False
         return resposta
 
     def get_user_id(self, username):
@@ -72,6 +78,18 @@ class API_Mensajeria(object):
         user = self.cursor.fetchone()
         return user['username'] if user else None
 
+    def getGroup(self, groupId):
+        sql = "SELECT id, name FROM Groups WHERE id = %s"
+        self.cursor.execute(sql, (groupId,))
+        group = self.cursor.fetchone()
+        return group if group else None
+
+    def getGroupName(self, groupId):
+        sql = "SELECT id FROM Groups WHERE id = %s"
+        self.cursor.execute(sql, (groupId,))
+        group = self.cursor.fetchone()
+        return group['id'] if group else None
+
     def cargar_conversacion(self, logged_in_user_id, selected_user_id):
         sql = """
         SELECT * FROM messages 
@@ -83,7 +101,8 @@ class API_Mensajeria(object):
         print(f"Executing SQL: {sql}")
         print(f"With parameters: {logged_in_user_id}, {selected_user_id}, {selected_user_id}, {logged_in_user_id}")
 
-        self.cursor.execute(sql, (logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id))
+        self.cursor.execute(
+            sql, (logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id))
         ResQuery = self.cursor.fetchall()
 
         # Debugging statement
@@ -91,7 +110,23 @@ class API_Mensajeria(object):
 
         return ResQuery
 
+    def cargarConversacionGrupo(self, groupId):
+        sql = """
+        SELECT m.*, u.username as sender_username FROM messages m
+        JOIN usuarisclase u ON m.sender_id = u.id
+        WHERE m.group_id = %s
+        ORDER BY m.created_at
+        """
+        self.cursor.execute(sql, (groupId,))
+        ResQuery = self.cursor.fetchall()
+        return ResQuery
+
     def insertar_mensaje(self, sender_id, receiver_id, content):
         sql = "INSERT INTO messages (sender_id, receiver_id, content, created_at) VALUES (%s, %s, %s, NOW())"
         self.cursor.execute(sql, (sender_id, receiver_id, content))
+        self.db.commit()
+        
+    def insertarMensajeGrupo(self, sender_id, groupId, content):
+        sql = "INSERT INTO messages (sender_id, group_Id, content, created_at) VALUES (%s, %s, %s, NOW())"
+        self.cursor.execute(sql, (sender_id, groupId, content))
         self.db.commit()
