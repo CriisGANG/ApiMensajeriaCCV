@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat del Grupo {{ groupName }}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/chatGrupo.js"></script>
+</head>
+<body>
+  <h1>Chat del Grupo {{ groupName }}</h1>
+  <div id="chat-container" class="chat-container">
+    <div id="chat-messages-group" class="chat-messages">
+      {% for message in conversation %}
+        <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %}">
+          <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
+        </div>
+      {% endfor %}
+    </div>
+    <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
+    <button id="send-message-group" class="send-message-group-button">Enviar</button>
+  </div>
+  <button id="logout" class="logout-button">Cerrar Sesión</button>
+</body>
+</html>
