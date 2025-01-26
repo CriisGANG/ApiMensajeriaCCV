@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Usuarios</title>
+    <link rel="stylesheet" href="/static/styles.css"/>
+    <script defer src="/static/groups.js"></script>
+  </head>
+  <body>
+    <h1>Lista de Grupos</h1>
+    <ul id="groups" class="group-list"></ul>
+    <div id="chat-container" class="chat-container">
+      <div id="chat-messages" class="chat-messages"></div>
+    </div>
+    <button id="logout" class="logout-button">Cerrar Sesión</button>
+    <script id="groups-data" type="application/json">{{ groups | tojson }}</script>
+  </body>
+</html>
