@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 import database
 import datetime
+from fastapi import WebSocket, WebSocketDisconnect
+
 
 app = FastAPI()
 
@@ -226,3 +228,39 @@ def get_latest_conversation(username: str, request: Request, since: str = Query(
             message['status'] = 'enviat'
 
     return JSONResponse(content=conversation, status_code=200)
+
+# Lista para almacenar las conexiones WebSocket activas
+active_connections = []
+
+@app.websocket("/ws/chat/{username}")
+async def websocket_chat(websocket: WebSocket, username: str):
+    await websocket.accept()
+    active_connections.append(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_json()  # Recibe mensaje del cliente
+            sender_username = data["sender"]
+            message_content = data["content"]
+            
+            # Guardar mensaje en la base de datos
+            db.conecta()
+            sender_id = db.get_user_id(sender_username)
+            receiver_id = db.get_user_id(username)
+
+            if sender_id and receiver_id:
+                db.insertar_mensaje(sender_id, receiver_id, message_content)
+
+                # Construir el mensaje para enviar a todos los clientes conectados
+                message = {
+                    "sender_username": sender_username,
+                    "content": message_content
+                }
+
+                # Enviar mensaje a todos los clientes conectados
+                for connection in active_connections:
+                    await connection.send_json(message)
+
+            db.desconecta()
+    except WebSocketDisconnect:
+        active_connections.remove(websocket)
