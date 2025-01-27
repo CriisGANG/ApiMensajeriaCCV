@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, HTTPException, Request, Depends, Query
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -78,29 +78,28 @@ def get_conversation(username: str, request: Request):
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
 
-    # Debugging statements
-    print(f"Logged in user: {logged_in_user}, ID: {logged_in_user_id}")
-    print(f"Selected user: {username}, ID: {selected_user_id}")
-
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    
+    # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
+    for message in conversation:
+        if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
+            db.actualizar_estado_mensaje(message['id'], 'rebut')
+            message['status'] = 'rebut'
+    
     db.desconecta()
 
-    # Convert datetime objects to strings
     for message in conversation:
         message['created_at'] = message['created_at'].isoformat()
+        if message['receiver_id'] == logged_in_user_id:
+            message['status'] = 'llegit'
+        else:
+            message['status'] = 'enviat'
 
-    # Debugging statement
-    print(f"Conversation: {conversation}")
-
-    if conversation:
-        return JSONResponse(content=conversation, status_code=200)
-    else:
-        raise HTTPException(
-            status_code=404, detail="Conversación no encontrada")
+    return JSONResponse(content=conversation, status_code=200)
 
 @app.get("/chat/{username}", response_class=JSONResponse)
 def chat_page(username: str, request: Request):
@@ -169,7 +168,7 @@ async def send_message(request: Request, message: MessageRequest):
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    db.insertar_mensaje(sender_id, receiver_id, message.content)
+    db.insertar_mensaje(sender_id, receiver_id, message.content, 'enviat')
     db.desconecta()
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
@@ -193,3 +192,37 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
     db.desconecta()
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
+
+@app.get("/latest-conversation/{username}", response_class=JSONResponse)
+def get_latest_conversation(username: str, request: Request, since: str = Query(None)):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    selected_user_id = db.get_user_id(username)
+
+    if not logged_in_user_id or not selected_user_id:
+        db.desconecta()
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id, since)
+    
+    # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
+    for message in conversation:
+        if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
+            db.actualizar_estado_mensaje(message['id'], 'rebut')
+            message['status'] = 'rebut'
+    
+    db.desconecta()
+
+    for message in conversation:
+        message['created_at'] = message['created_at'].isoformat()
+        if message['receiver_id'] == logged_in_user_id:
+            message['status'] = 'llegit'
+        else:
+            message['status'] = 'enviat'
+
+    return JSONResponse(content=conversation, status_code=200)
