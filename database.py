@@ -108,3 +108,12 @@ class API_Mensajeria(object):
         sql = "INSERT INTO messages (sender_id, group_Id, content, created_at) VALUES (%s, %s, %s, NOW())"
         self.cursor.execute(sql, (sender_id, groupId, content))
         self.db.commit()
+
+    def get_group_members(self, groupId):
+        sql = """
+        SELECT u.username FROM usuarisclase u
+        JOIN group_members gm ON u.id = gm.user_id
+        WHERE gm.group_id = %s
+        """
+        self.cursor.execute(sql, (groupId,))
+        return self.cursor.fetchall()

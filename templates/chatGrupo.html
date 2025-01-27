@@ -20,6 +20,14 @@
     <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
     <button id="send-message-group" class="send-message-group-button">Enviar</button>
   </div>
+  <div id="group-members-container" class="group-members-container">
+    <h2>Miembros del Grupo</h2>
+    <ul id="group-members" class="group-members-list">
+      {% for member in members %}
+        <li>{{ member.username }}</li>
+      {% endfor %}
+    </ul>
+  </div>
   <button id="logout" class="logout-button">Cerrar Sesión</button>
 </body>
 </html>
