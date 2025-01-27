@@ -145,13 +145,14 @@ def chat_group(groupId: str, request: Request):
         raise HTTPException(status_code=404, detail="Grupo no encontrado")
     
     conversation = db.cargarConversacionGrupo(selectedGroup['id'])
+    members = db.get_group_members(groupId)
     
     for message in conversation:
         message['created_at'] = message['created_at'].isoformat()
 
     db.desconecta()
 
-    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name']})
+    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest):
