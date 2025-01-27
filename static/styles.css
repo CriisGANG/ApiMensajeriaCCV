@@ -21,6 +21,7 @@ h1 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+
 .user-list li, .group-list li {
   padding: 15px;
   border-bottom: 1px solid #ddd;
@@ -102,6 +103,7 @@ h1 {
   border-radius: 5px;
 }
 
+
 .send-message-button, .send-message-group-button {
   padding: 10px 20px;
   background-color: #075e54;
@@ -110,6 +112,7 @@ h1 {
   border-radius: 5px;
   cursor: pointer;
 }
+
 
 .send-message-button:hover, .send-message-group-button:hover {
   background-color: #064e48;

@@ -17,24 +17,18 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Modelo para recibir datos del login
-
-
 class LoginRequest(BaseModel):
     username: str
     password: str
 
 # Modelo para recibir datos del mensaje
-
-
 class MessageRequest(BaseModel):
     receiver_username: str
     content: str
 
-
 @app.get("/", response_class=JSONResponse)
 def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
-
 
 @app.post("/login")
 async def login(request: LoginRequest):
@@ -50,7 +44,6 @@ async def login(request: LoginRequest):
     else:
         raise HTTPException(
             status_code=401, detail="Usuario o contraseña incorrectos")
-
 
 @app.get("/users", response_class=JSONResponse)
 def usersList(request: Request):
@@ -73,7 +66,6 @@ async def groupList(request: Request):
                 group[key] = value.isoformat()
 
     return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
-
 
 @app.get("/conversation/{username}", response_class=JSONResponse)
 def get_conversation(username: str, request: Request):
@@ -110,7 +102,6 @@ def get_conversation(username: str, request: Request):
         raise HTTPException(
             status_code=404, detail="Conversación no encontrada")
 
-
 @app.get("/chat/{username}", response_class=JSONResponse)
 def chat_page(username: str, request: Request):
     db.conecta()
@@ -138,7 +129,6 @@ def chat_page(username: str, request: Request):
 
     return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username})
 
-
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
     db.conecta()
@@ -162,7 +152,6 @@ def chat_group(groupId: str, request: Request):
     db.desconecta()
 
     return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name']})
-
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest):

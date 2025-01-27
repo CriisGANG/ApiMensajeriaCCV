@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const chatInput = document.getElementById("chat-input");
   const sendMessageButton = document.getElementById("send-message");
-  const sendMessageButtonGroup = document.getElementById("send-message-group");
   const chatMessages = document.getElementById("chat-messages");
   const receiverUsername = window.location.pathname.split("/").pop();
   const loggedInUser = localStorage.getItem("loggedInUser");
