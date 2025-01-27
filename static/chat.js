@@ -33,12 +33,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (response.ok) {
       const newMessages = await response.json();
       if (newMessages.length > 0) {
+        // Eliminar nodos hijos antes de añadir nuevos mensajes
+        while (chatMessages.firstChild) {
+          chatMessages.removeChild(chatMessages.firstChild);
+        }
         newMessages.forEach(message => {
           const messageElement = document.createElement("div");
           messageElement.classList.add("message", message.sender_username === loggedInUser ? "sent" : "received", message.status === 'llegit' ? 'read' : message.status === 'rebut' ? 'received' : 'sent');
           messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
           chatMessages.appendChild(messageElement);
         });
+        // Actualizar el timestamp del último mensaje recibido
         lastMessageTimestamp.value = newMessages[newMessages.length - 1].created_at;
       }
     } else {
