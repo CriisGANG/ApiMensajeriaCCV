@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-print("Probando")
-=======
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -206,4 +203,3 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
     db.desconecta()
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
->>>>>>> Stashed changes
