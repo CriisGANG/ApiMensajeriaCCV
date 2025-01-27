@@ -12,7 +12,7 @@
   <div id="chat-container" class="chat-container">
     <div id="chat-messages" class="chat-messages">
       {% for message in conversation %}
-        <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %}">
+        <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %} {% if message.status == 'llegit' %}read{% elif message.status == 'rebut' %}received{% else %}sent{% endif %}">
           <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
         </div>
       {% endfor %}
@@ -20,6 +20,7 @@
     <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
     <button id="send-message" class="send-message-button">Enviar</button>
   </div>
+  <input type="hidden" id="last-message-timestamp" value="">
   <button id="logout" class="logout-button">Cerrar Sesión</button>
 </body>
 </html>
