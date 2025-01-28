@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 import database
 import datetime
 from fastapi import WebSocket, WebSocketDisconnect
+from user_agents import parse
 
 
 app = FastAPI()
@@ -130,7 +131,11 @@ def chat_page(username: str, request: Request):
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
+    user_agent = parse(request.headers.get('user-agent'))
+    if user_agent.is_mobile:
+        return templates.TemplateResponse("mobile_chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
+    else:
+        return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
