@@ -8,51 +8,21 @@
   <script src="https://unpkg.com/feather-icons"></script>
   <script defer src="/static/users.js"></script>
 </head>
-<body class="bg-gray-100 font-sans">
-  <div class="container mx-auto p-4 max-w-6xl">
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-      <!-- Header -->
-      <header class="bg-gray-200 p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">Lista de Usuarios</h1>
-        <div id="datetime" class="text-lg"></div>
-        <div class="flex items-center space-x-4">
-          <i data-feather="settings" class="w-6 h-6"></i>
-          <i data-feather="user" class="w-6 h-6"></i>
-        </div>
-      </header>
-
-      <!-- Main content -->
-      <div class="flex h-[calc(100vh-8rem)]">
-        <!-- Contacts sidebar -->
-        <aside class="w-1/4 bg-gray-50 border-r overflow-y-auto">
-          <div class="p-4 border-b">
-            <input type="text" placeholder="Buscar contacto..." class="w-full p-2 rounded border">
-          </div>
-          <ul id="users" class="user-list">
-            <!-- Aquí se generarán los elementos de la lista de usuarios -->
-          </ul>
-          <div class="p-4">
-            <button id="logout" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">
-              Cerrar sesión
-            </button>
-          </div>
-        </aside>
-
-        <!-- Chat area -->
-        <main class="flex-1 flex flex-col">
-          <div class="flex-1 p-4" id="chat-messages">
-            <!-- Chat messages will go here -->
-          </div>
-          <div class="p-4 bg-gray-100 flex items-center space-x-2">
-            <button class="p-2 bg-gray-200 rounded-full">
-              <i data-feather="camera" class="w-6 h-6"></i>
-            </button>
-            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." class="flex-1 p-2 rounded border">
-            <button id="send-message" class="p-2 bg-gray-200 rounded-full">
-              <i data-feather="mic" class="w-6 h-6"></i>
-            </button>
-          </div>
-        </main>
+<body>
+  <div class="app-container centered">
+    <div class="sidebar collapsed">
+      <h1>Lista de Usuarios</h1>
+      <button id="refresh-users">Actualizar</button>
+      <ul id="users" class="user-list">
+        <!-- Aquí se generarán los elementos de la lista de usuarios -->
+      </ul>
+      <button id="logout" class="logout-button">Cerrar Sesión</button>
+    </div>
+    <div id="chat-container" class="chat-container">
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
+        <button id="send-message" class="send-message-button">Enviar</button>
       </div>
     </div>
   </div>
