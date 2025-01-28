@@ -10,13 +10,13 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 app = FastAPI()
 
-db = database.API_Mensajeria()
-
 # Montar la carpeta "static" para servir archivos como JavaScript, CSS, imágenes, etc.
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Configuración de Jinja2 para servir HTML
 templates = Jinja2Templates(directory="templates")
+
+db = database.API_Mensajeria()
 
 # Modelo para recibir datos del login
 class LoginRequest(BaseModel):
@@ -126,9 +126,11 @@ def chat_page(username: str, request: Request):
         message['receiver_username'] = db.get_username(message['receiver_id'])
         message['created_at'] = message['created_at'].isoformat()
 
+    users = db.carregaUsuaris()  # Cargar la lista de usuarios
+
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username})
+    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
@@ -234,6 +236,7 @@ active_connections = []
 
 @app.websocket("/ws/chat/{username}")
 async def websocket_chat(websocket: WebSocket, username: str):
+    global active_connections  # Declarar la variable como global
     await websocket.accept()
     active_connections.append({"websocket": websocket, "sent_message_ids": set()})
 
