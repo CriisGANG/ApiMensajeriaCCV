@@ -38,49 +38,93 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Registrar el mensaje en el Set
       displayedMessageIds.add(message.id);
-
+      console.log(displayedMessageIds);
+      
       // Actualizar el timestamp del último mensaje recibido
       lastMessageTimestamp.value = message.created_at;
     }
   };
 
   // Función para enviar un mensaje
+  // sendMessageButton.addEventListener("click", async function () {
+  //   const messageContent = chatInput.value;
+  //   if (messageContent.trim() === "") return; // trim()elimina espacios en blanco del string
+
+  //   // Enviar mensaje a través del WebSocket
+  //   const messageId = Date.now(); // Generar un ID temporal para el mensaje
+  //   socket.send(JSON.stringify({
+  //     id: messageId,
+  //     sender: loggedInUser,
+  //     content: messageContent
+  //   }));
+
+  //   // Enviar mensaje a través de fetch
+  //   await fetch('/send-message', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       receiver_username: receiverUsername,
+  //       content: messageContent
+  //     })
+  //   });
+ 
+  //    // Verificar si el mensaje ya fue mostrado
+  //    if (displayedMessageIds.has(messageId)) {
+  //     return; // No agregar mensaje duplicado
+  // }
+
+  //   const messageElement = document.createElement("div");
+  //   messageElement.classList.add("message", "sent");
+  //   //console.log(messageElement)
+  //   messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
+  //   chatMessages.appendChild(messageElement);
+  //   chatInput.value = "";
+
+  //   // Registrar el mensaje en el Set
+  //   displayedMessageIds.add(messageId);
+
+  //   // Actualizar el timestamp del último mensaje enviado
+  //   lastMessageTimestamp.value = new Date().toISOString();
+  // });
+  // Función para enviar un mensaje
   sendMessageButton.addEventListener("click", async function () {
     const messageContent = chatInput.value;
     if (messageContent.trim() === "") return;
 
-    // Enviar mensaje a través del WebSocket
-    const messageId = Date.now(); // Generar un ID temporal para el mensaje
-    socket.send(JSON.stringify({
-      id: messageId,
-      sender: loggedInUser,
-      content: messageContent
-    }));
+    // Generar un ID único basado en timestamp + username
+    const messageId = `${Date.now()}-${loggedInUser}`;
+
+    // Verificar si el mensaje ya fue mostrado antes de enviarlo
+    if (displayedMessageIds.has(messageId)) {
+        return; // No agregar mensaje duplicado
+    }
+
+    // Registrar el mensaje en el Set antes de enviarlo
+    displayedMessageIds.add(messageId);
 
     // Enviar mensaje a través de fetch
     await fetch('/send-message', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        receiver_username: receiverUsername,
-        content: messageContent
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiver_username: receiverUsername, content: messageContent })
     });
- 
+
+    // Crear el elemento del mensaje y agregarlo al chat
     const messageElement = document.createElement("div");
     messageElement.classList.add("message", "sent");
+    messageElement.setAttribute("data-id", messageId); // Guardar el ID en el HTML
     messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
     chatMessages.appendChild(messageElement);
-    chatInput.value = "";
 
-    // Registrar el mensaje en el Set
-    displayedMessageIds.add(messageId);
+    // Limpiar el input de mensaje
+    chatInput.value = "";
 
     // Actualizar el timestamp del último mensaje enviado
     lastMessageTimestamp.value = new Date().toISOString();
   });
+
 
   // Evento para cerrar sesión
   document.getElementById("logout").addEventListener("click", function () {
@@ -88,33 +132,6 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "/";
   });
 
-  // Función para obtener los mensajes más recientes de la base de datos
-  async function fetchLatestMessages() {
-    const response = await fetch(`/latest-conversation/${receiverUsername}?since=${lastMessageTimestamp.value}`);
-    if (response.ok) {
-      const messages = await response.json();
-      messages.forEach((message) => {
-        if (!displayedMessageIds.has(message.id)) {
-          const messageElement = document.createElement("div");
-          messageElement.classList.add(
-            "message",
-            message.sender_username === loggedInUser ? "sent" : "received",
-            message.status === "llegit" ? "read" : message.status === "rebut" ? "received" : "sent"
-          );
-          messageElement.innerHTML = `<p><strong>${message.sender_username || "undefined"}</strong>: ${message.content}</p>`;
-          chatMessages.appendChild(messageElement);
-
-          // Registrar el mensaje en el Set
-          displayedMessageIds.add(message.id);
-
-          // Actualizar el timestamp del último mensaje recibido
-          lastMessageTimestamp.value = message.created_at;
-        }
-      });
-    } else {
-      console.error("Error fetching latest messages:", response.statusText);
-    }
-  }
 
   // Ejecutar fetchLatestMessages cada 5 segundos
   setInterval(fetchLatestMessages, 5000);

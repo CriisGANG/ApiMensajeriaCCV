@@ -197,39 +197,12 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
 
-@app.get("/latest-conversation/{username}", response_class=JSONResponse)
-def get_latest_conversation(username: str, request: Request, since: str = Query(None)):
+@app.get("/ultimas_conversaciones", response_class=JSONResponse)
+async def ultimas_conversaciones():
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
-    if not logged_in_user:
-        db.desconecta()
-        raise HTTPException(status_code=401, detail="Usuario no autenticado")
-
-    logged_in_user_id = db.get_user_id(logged_in_user)
-    selected_user_id = db.get_user_id(username)
-
-    if not logged_in_user_id or not selected_user_id:
-        db.desconecta()
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id, since)
-    
-    # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
-    for message in conversation:
-        if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
-            db.actualizar_estado_mensaje(message['id'], 'rebut')
-            message['status'] = 'rebut'
-    
+    lista_usuarios = db.carregaUsuaris()
+    print(lista_usuarios)
     db.desconecta()
-
-    for message in conversation:
-        message['created_at'] = message['created_at'].isoformat()
-        if message['receiver_id'] == logged_in_user_id:
-            message['status'] = 'llegit'
-        else:
-            message['status'] = 'enviat'
-
-    return JSONResponse(content=conversation, status_code=200)
 
 # Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []
