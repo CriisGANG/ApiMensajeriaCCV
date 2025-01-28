@@ -8,19 +8,30 @@
   <script defer src="/static/chat.js"></script>
 </head>
 <body>
-  <h1>Chat con {{ username }}</h1>
-  <div id="chat-container" class="chat-container">
-    <div id="chat-messages" class="chat-messages">
-      {% for message in conversation %}
-        <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %} {% if message.status == 'llegit' %}read{% elif message.status == 'rebut' %}received{% else %}sent{% endif %}">
-          <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
-        </div>
-      {% endfor %}
+  <div class="app-container">
+    <div class="sidebar">
+      <h1>Lista de Usuarios</h1>
+      <ul id="users" class="user-list">
+        <!-- Aquí se generarán los elementos de la lista de usuarios -->
+      </ul>
+      <button id="logout" class="logout-button">Cerrar Sesión</button>
     </div>
-    <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
-    <button id="send-message" class="send-message-button">Enviar</button>
+    <div id="chat-container" class="chat-container visible">
+      <h1>Chat con {{ username }}</h1>
+      <div id="chat-messages" class="chat-messages">
+        {% for message in conversation %}
+          <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %} {% if message.status == 'llegit' %}read{% elif message.status == 'rebut' %}received{% else %}sent{% endif %}">
+            <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
+        <button id="send-message" class="send-message-button">Enviar</button>
+      </div>
+    </div>
   </div>
   <input type="hidden" id="last-message-timestamp" value="{% if conversation %}{{ conversation[-1].created_at }}{% endif %}">
-  <button id="logout" class="logout-button">Cerrar Sesión</button>
+  <script id="users-data" type="application/json">{{ users | tojson }}</script>
 </body>
 </html>

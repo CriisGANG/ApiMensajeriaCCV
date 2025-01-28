@@ -5,8 +5,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const receiverUsername = window.location.pathname.split("/").pop();
   const loggedInUser = localStorage.getItem("loggedInUser");
   const lastMessageTimestamp = document.getElementById("last-message-timestamp");
+  const users = JSON.parse(document.getElementById("users-data").textContent);
+  const userList = document.getElementById("users");
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
+
+  // Cargar la lista de usuarios
+  users.forEach(user => {
+    const li = document.createElement("li");
+    li.textContent = user.username;
+    li.addEventListener("click", function () {
+      window.location.href = `/chat/${user.username}`;
+    });
+    userList.appendChild(li);
+  });
 
   // Conectar al WebSocket
   const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${receiverUsername}`);
