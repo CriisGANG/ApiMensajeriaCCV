@@ -117,3 +117,9 @@ class API_Mensajeria(object):
         sql = "UPDATE messages SET status = %s WHERE id = %s"
         self.cursor.execute(sql, (new_status, message_id))
         self.db.commit()
+
+    def get_last_message_id(self):
+        sql = "SELECT id FROM messages ORDER BY id DESC LIMIT 1"
+        self.cursor.execute(sql)
+        message = self.cursor.fetchone()
+        return message['id'] if message else None

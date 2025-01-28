@@ -229,19 +229,20 @@ def get_latest_conversation(username: str, request: Request, since: str = Query(
 
     return JSONResponse(content=conversation, status_code=200)
 
-# Lista para almacenar las conexiones WebSocket activas
+# Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []
 
 @app.websocket("/ws/chat/{username}")
 async def websocket_chat(websocket: WebSocket, username: str):
     await websocket.accept()
-    active_connections.append(websocket)
+    active_connections.append({"websocket": websocket, "sent_message_ids": set()})
 
     try:
         while True:
             data = await websocket.receive_json()  # Recibe mensaje del cliente
             sender_username = data["sender"]
             message_content = data["content"]
+            message_id = data["id"]
             
             # Guardar mensaje en la base de datos
             db.conecta()
@@ -249,18 +250,23 @@ async def websocket_chat(websocket: WebSocket, username: str):
             receiver_id = db.get_user_id(username)
 
             if sender_id and receiver_id:
-                db.insertar_mensaje(sender_id, receiver_id, message_content)
+                db.insertar_mensaje(sender_id, receiver_id, message_content, 'enviat')
 
                 # Construir el mensaje para enviar a todos los clientes conectados
                 message = {
+                    "id": message_id,
                     "sender_username": sender_username,
-                    "content": message_content
+                    "content": message_content,
+                    "status": "enviat",
+                    "created_at": datetime.datetime.now().isoformat()
                 }
 
                 # Enviar mensaje a todos los clientes conectados
                 for connection in active_connections:
-                    await connection.send_json(message)
+                    if message_id not in connection["sent_message_ids"]:
+                        await connection["websocket"].send_json(message)
+                        connection["sent_message_ids"].add(message_id)
 
             db.desconecta()
     except WebSocketDisconnect:
-        active_connections.remove(websocket)
+        active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
