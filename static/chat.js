@@ -38,7 +38,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (messageContent.trim() === "") return;
 
     // Enviar mensaje a través del WebSocket
+    const messageId = Date.now(); // Generar un ID temporal para el mensaje
     socket.send(JSON.stringify({
+      id: messageId,
       sender: loggedInUser,
       content: messageContent
     }));
@@ -48,6 +50,9 @@ document.addEventListener("DOMContentLoaded", function () {
     messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
     chatMessages.appendChild(messageElement);
     chatInput.value = "";
+
+    // Registrar el mensaje en el Set
+    displayedMessageIds.add(messageId);
 
     // Actualizar el timestamp del último mensaje enviado
     lastMessageTimestamp.value = new Date().toISOString();
@@ -59,14 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "/";
   });
 
-  // Cargar mensajes iniciales al cargar la página
-  async function loadInitialMessages() {
-    const response = await fetch(`/latest-conversation/${receiverUsername}`);
+  // Función para obtener los mensajes más recientes de la base de datos
+  async function fetchLatestMessages() {
+    const response = await fetch(`/latest-conversation/${receiverUsername}?since=${lastMessageTimestamp.value}`);
     if (response.ok) {
       const messages = await response.json();
       messages.forEach((message) => {
         if (!displayedMessageIds.has(message.id)) {
-          // Agregar mensaje al contenedor solo si no ha sido mostrado antes
           const messageElement = document.createElement("div");
           messageElement.classList.add(
             "message",
@@ -76,20 +80,18 @@ document.addEventListener("DOMContentLoaded", function () {
           messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
           chatMessages.appendChild(messageElement);
 
-          // Agregar el ID del mensaje al Set
+          // Registrar el mensaje en el Set
           displayedMessageIds.add(message.id);
+
+          // Actualizar el timestamp del último mensaje recibido
+          lastMessageTimestamp.value = message.created_at;
         }
       });
-
-      // Actualizar el timestamp del último mensaje recibido
-      if (messages.length > 0) {
-        lastMessageTimestamp.value = messages[messages.length - 1].created_at;
-      }
     } else {
-      console.error("Error loading initial messages:", response.statusText);
+      console.error("Error fetching latest messages:", response.statusText);
     }
   }
 
-  // Cargar mensajes iniciales al cargar la página
-  loadInitialMessages();
+  // Ejecutar fetchLatestMessages cada 5 segundos
+  setInterval(fetchLatestMessages, 5000);
 });

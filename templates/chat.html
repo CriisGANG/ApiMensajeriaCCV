@@ -20,7 +20,7 @@
     <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
     <button id="send-message" class="send-message-button">Enviar</button>
   </div>
-  <input type="hidden" id="last-message-timestamp" value="">
+  <input type="hidden" id="last-message-timestamp" value="{% if conversation %}{{ conversation[-1].created_at }}{% endif %}">
   <button id="logout" class="logout-button">Cerrar Sesión</button>
 </body>
 </html>
