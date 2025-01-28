@@ -95,7 +95,10 @@ class API_Mensajeria(object):
         return ResQuery
 
     def insertar_mensaje(self, sender_id, receiver_id, content, status):
-        sql = "INSERT INTO messages (sender_id, receiver_id, content, status, created_at) VALUES (%s, %s, %s, %s, NOW())"
+        sql = """
+        INSERT INTO messages (sender_id, receiver_id, content, status, created_at) 
+        VALUES (%s, %s, %s, %s, NOW())
+        """
         self.cursor.execute(sql, (sender_id, receiver_id, content, status))
         self.db.commit()
         

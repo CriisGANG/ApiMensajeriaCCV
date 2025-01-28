@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
         message.sender_username === loggedInUser ? "sent" : "received",
         message.status === "llegit" ? "read" : message.status === "rebut" ? "received" : "sent"
       );
-      messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
+      messageElement.innerHTML = `<p><strong>${message.sender_username || "undefined"}</strong>: ${message.content}</p>`;
       chatMessages.appendChild(messageElement);
 
       // Registrar el mensaje en el Set
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // Función para enviar un mensaje
-  sendMessageButton.addEventListener("click", function () {
+  sendMessageButton.addEventListener("click", async function () {
     const messageContent = chatInput.value;
     if (messageContent.trim() === "") return;
 
@@ -44,6 +44,18 @@ document.addEventListener("DOMContentLoaded", function () {
       sender: loggedInUser,
       content: messageContent
     }));
+
+    // Enviar mensaje a través de fetch
+    await fetch('/send-message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        receiver_username: receiverUsername,
+        content: messageContent
+      })
+    });
 
     const messageElement = document.createElement("div");
     messageElement.classList.add("message", "sent");
@@ -77,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
             message.sender_username === loggedInUser ? "sent" : "received",
             message.status === "llegit" ? "read" : message.status === "rebut" ? "received" : "sent"
           );
-          messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
+          messageElement.innerHTML = `<p><strong>${message.sender_username || "undefined"}</strong>: ${message.content}</p>`;
           chatMessages.appendChild(messageElement);
 
           // Registrar el mensaje en el Set
