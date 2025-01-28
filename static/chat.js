@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         content: messageContent
       })
     });
-
+ 
     const messageElement = document.createElement("div");
     messageElement.classList.add("message", "sent");
     messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
