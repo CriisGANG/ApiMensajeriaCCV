@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
   appContainer.classList.add("centered");
   sidebar.classList.add("collapsed");
 
+  // Inicialmente centrar la lista de usuarios
+  appContainer.classList.add("centered");
+  sidebar.classList.add("collapsed");
+
   users.forEach(user => {
     const li = document.createElement("li");
     li.textContent = user.username;
@@ -26,6 +30,20 @@ document.addEventListener("DOMContentLoaded", function () {
       window.location.href = `/chatsGrupos/${group.id}`;
     });
     userGroupList.appendChild(li);
+  });
+
+  // Añadir evento de clic para los elementos de la lista de usuarios
+  userList.addEventListener("click", function (event) {
+    if (event.target.tagName === "LI") {
+      // Desplazar la lista de usuarios a la izquierda y mostrar el chat
+      appContainer.classList.remove("centered");
+      appContainer.classList.add("shifted");
+      sidebar.classList.remove("collapsed");
+      chatContainer.classList.add("visible");
+
+      // Aquí puedes añadir el código para cargar el chat del usuario seleccionado
+      // ...
+    }
   });
 
   document.getElementById("logout").addEventListener("click", function () {

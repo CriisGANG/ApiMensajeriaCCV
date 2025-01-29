@@ -8,6 +8,7 @@ import datetime
 from fastapi import WebSocket, WebSocketDisconnect
 from flask import Flask, url_for, render_template
 
+
 app = FastAPI()
 
 # Montar la carpeta "static" para servir archivos como JavaScript, CSS, imágenes, etc.
@@ -95,8 +96,8 @@ def get_conversation(username: str, request: Request, since: str = None):
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id, since)
+
     
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
     for message in conversation:
@@ -223,13 +224,14 @@ active_connections = []
 async def websocket_chat(websocket: WebSocket, username: str):
     global active_connections  # Declarar la variable como global
     await websocket.accept()
-    active_connections.append(websocket)
+    active_connections.append({"websocket": websocket, "sent_message_ids": set()})
 
     try:
         while True:
             data = await websocket.receive_json()  # Recibe mensaje del cliente
             sender_username = data["sender"]
             message_content = data["content"]
+            message_id = data["id"]
             
             # Guardar mensaje en la base de datos
             db.conecta()
@@ -237,18 +239,23 @@ async def websocket_chat(websocket: WebSocket, username: str):
             receiver_id = db.get_user_id(username)
 
             if sender_id and receiver_id:
-                db.insertar_mensaje(sender_id, receiver_id, message_content)
+                db.insertar_mensaje(sender_id, receiver_id, message_content, 'enviat')
 
                 # Construir el mensaje para enviar a todos los clientes conectados
                 message = {
+                    "id": message_id,
                     "sender_username": sender_username,
-                    "content": message_content
+                    "content": message_content,
+                    "status": "enviat",
+                    "created_at": datetime.datetime.now().isoformat()
                 }
 
                 # Enviar mensaje a todos los clientes conectados
                 for connection in active_connections:
-                    await connection.send_json(message)
+                    if message_id not in connection["sent_message_ids"]:
+                        await connection["websocket"].send_json(message)
+                        connection["sent_message_ids"].add(message_id)
 
             db.desconecta()
     except WebSocketDisconnect:
-        active_connections.remove(websocket)
+        active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]

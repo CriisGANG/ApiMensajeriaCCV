@@ -74,8 +74,7 @@ class API_Mensajeria(object):
         WHERE ((sender_id = %s AND receiver_id = %s) 
         OR (sender_id = %s AND receiver_id = %s))
         """
-        params = [logged_in_user_id, selected_user_id,
-                  selected_user_id, logged_in_user_id]
+        params = [logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id]
         if since:
             sql += " AND created_at > %s"
             params.append(since)
@@ -122,3 +121,9 @@ class API_Mensajeria(object):
         sql = "UPDATE messages SET status = %s WHERE id = %s"
         self.cursor.execute(sql, (new_status, message_id))
         self.db.commit()
+
+    def get_last_message_id(self):
+        sql = "SELECT id FROM messages ORDER BY id DESC LIMIT 1"
+        self.cursor.execute(sql)
+        message = self.cursor.fetchone()
+        return message['id'] if message else None
