@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-4 max-w-4xl">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <!-- Header -->
+      <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <button id="profileBtn" class="text-2xl"><i class="fas fa-user-circle"></i></button>
+          <h1 class="text-xl font-bold" id="datetime"></h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="text-2xl"><i class="fas fa-home"></i></button>
+          <button class="text-2xl"><i class="fas fa-cog"></i></button>
+          <button id="appearanceBtn" class="text-2xl"><i class="fas fa-palette"></i></button>
+        </div>
+      </div>
+
+      <!-- Chat list -->
+      <div class="divide-y divide-gray-200" id="chat-list">
+        <!-- Aquí se generarán los elementos de la lista de chats -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-80">
+      <h2 class="text-xl font-bold mb-4">Perfil</h2>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded mb-2 w-full">Editar</button>
+      <button class="bg-gray-300 text-gray-800 px-4 py-2 rounded mb-4 w-full">Log out</button>
+      <div class="space-y-2">
+        <button class="text-blue-600 w-full text-left">Cambiar imagen</button>
+        <button class="text-blue-600 w-full text-left">Cambiar contraseña</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appearance Modal -->
+  <div id="appearanceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-80">
+      <h2 class="text-xl font-bold mb-4">Apariencia</h2>
+      <div class="space-y-2">
+        <button class="bg-gray-200 text-gray-800 px-4 py-2 rounded w-full">Modo oscuro</button>
+        <button class="bg-gray-200 text-gray-800 px-4 py-2 rounded w-full">Contraste alto</button>
+        <button class="bg-gray-200 text-gray-800 px-4 py-2 rounded w-full">Fuente</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const profileBtn = document.getElementById('profileBtn');
+    const profileModal = document.getElementById('profileModal');
+    const appearanceBtn = document.getElementById('appearanceBtn');
+    const appearanceModal = document.getElementById('appearanceModal');
+
+    profileBtn.addEventListener('click', () => {
+      profileModal.classList.toggle('hidden');
+      profileModal.classList.toggle('flex');
+    });
+
+    appearanceBtn.addEventListener('click', () => {
+      appearanceModal.classList.toggle('hidden');
+      appearanceModal.classList.toggle('flex');
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === profileModal) {
+        profileModal.classList.add('hidden');
+        profileModal.classList.remove('flex');
+      }
+      if (e.target === appearanceModal) {
+        appearanceModal.classList.add('hidden');
+        appearanceModal.classList.remove('flex');
+      }
+    });
+
+    // Update datetime
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      document.getElementById('datetime').textContent = now.toLocaleDateString('es-ES', options);
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 60000); // Update every minute
+  </script>
+</body>
+</html>

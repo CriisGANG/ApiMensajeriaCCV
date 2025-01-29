@@ -126,3 +126,14 @@ class API_Mensajeria(object):
         self.cursor.execute(sql)
         message = self.cursor.fetchone()
         return message['id'] if message else None
+
+    def actualizar_foto_perfil(self, user_id, profile_picture_url):
+        sql = "UPDATE usuarisclase SET user_profile_picture_url = %s WHERE id = %s"
+        self.cursor.execute(sql, (profile_picture_url, user_id))
+        self.db.commit()
+
+    def get_user_profile_picture_url(self, user_id):
+        sql = "SELECT user_profile_picture_url FROM usuarisclase WHERE id = %s"
+        self.cursor.execute(sql, (user_id,))
+        user = self.cursor.fetchone()
+        return user['user_profile_picture_url'] if user else None

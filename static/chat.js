@@ -125,6 +125,48 @@ document.addEventListener("DOMContentLoaded", function () {
     lastMessageTimestamp.value = new Date().toISOString();
   });
 
+  const settingsButton = document.getElementById("settings");
+  const settingsModal = document.getElementById("settings-modal");
+  const closeButton = document.querySelector(".close-button");
+  const saveProfilePictureButton = document.getElementById("save-profile-picture");
+  const profilePictureUrlInput = document.getElementById("profile-picture-url");
+
+  settingsButton.addEventListener("click", function () {
+    settingsModal.style.display = "flex";
+  });
+
+  closeButton.addEventListener("click", function () {
+    settingsModal.style.display = "none";
+  });
+
+  window.addEventListener("click", function (event) {
+    if (event.target === settingsModal) {
+      settingsModal.style.display = "none";
+    }
+  });
+
+  saveProfilePictureButton.addEventListener("click", async function () {
+    const profilePictureUrl = profilePictureUrlInput.value;
+    if (!profilePictureUrl) return;
+
+    try {
+      const response = await fetch("/update-profile-picture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile_picture_url: profilePictureUrl })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        document.querySelector(".profile-picture").src = data.new_profile_picture_url;
+        settingsModal.style.display = "none";
+      } else {
+        console.error("Error al actualizar la foto de perfil");
+      }
+    } catch (error) {
+      console.error("Error en la petición:", error);
+    }
+  });
 
   // Evento para cerrar sesión
   document.getElementById("logout").addEventListener("click", function () {

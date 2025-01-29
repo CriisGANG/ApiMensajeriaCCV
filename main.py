@@ -28,6 +28,9 @@ class MessageRequest(BaseModel):
     receiver_username: str
     content: str
 
+class UpdateProfilePictureRequest(BaseModel):
+    profile_picture_url: str
+
 @app.get("/", response_class=JSONResponse)
 def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -127,10 +130,19 @@ def chat_page(username: str, request: Request):
         message['created_at'] = message['created_at'].isoformat()
 
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
+    user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "conversation": conversation,
+        "username": username,
+        "users": users,
+        "user_profile_picture_url": user_profile_picture_url,  # Pasar la URL de la foto de perfil al template
+        "selected_user_profile_picture_url": selected_user_profile_picture_url  # Pasar la URL de la foto de perfil del usuario seleccionado al template
+    })
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
@@ -196,6 +208,20 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
     db.desconecta()
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
+
+@app.post("/update-profile-picture")
+async def update_profile_picture(request: Request, data: UpdateProfilePictureRequest):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+
+    user_id = db.get_user_id(logged_in_user)
+    db.actualizar_foto_perfil(user_id, data.profile_picture_url)
+    db.desconecta()
+
+    return JSONResponse(content={"message": "Foto de perfil actualizada"}, status_code=200)
 
 @app.get("/ultimas_conversaciones", response_class=JSONResponse)
 async def ultimas_conversaciones():
