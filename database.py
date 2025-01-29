@@ -137,3 +137,14 @@ class API_Mensajeria(object):
         self.cursor.execute(sql, (user_id,))
         user = self.cursor.fetchone()
         return user['user_profile_picture_url'] if user else None
+
+    def actualizar_imagen_fondo(self, user_id, bg_picture_url):
+        sql = "UPDATE usuarisclase SET user_bg_picture_url = %s WHERE id = %s"
+        self.cursor.execute(sql, (bg_picture_url, user_id))
+        self.db.commit()
+
+    def get_user_bg_picture_url(self, user_id):
+        sql = "SELECT user_bg_picture_url FROM usuarisclase WHERE id = %s"
+        self.cursor.execute(sql, (user_id,))
+        user = self.cursor.fetchone()
+        return user['user_bg_picture_url'] if user else None

@@ -31,6 +31,9 @@ class MessageRequest(BaseModel):
 class UpdateProfilePictureRequest(BaseModel):
     profile_picture_url: str
 
+class UpdateBgPictureRequest(BaseModel):
+    bg_picture_url: str
+
 @app.get("/", response_class=JSONResponse)
 def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -132,6 +135,7 @@ def chat_page(username: str, request: Request):
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
     user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
+    user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
     db.desconecta()
 
@@ -141,7 +145,8 @@ def chat_page(username: str, request: Request):
         "username": username,
         "users": users,
         "user_profile_picture_url": user_profile_picture_url,  # Pasar la URL de la foto de perfil al template
-        "selected_user_profile_picture_url": selected_user_profile_picture_url  # Pasar la URL de la foto de perfil del usuario seleccionado al template
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,  # Pasar la URL de la foto de perfil del usuario seleccionado al template
+        "user_bg_picture_url": user_bg_picture_url  # Pasar la URL de la imagen de fondo al template
     })
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
@@ -222,6 +227,20 @@ async def update_profile_picture(request: Request, data: UpdateProfilePictureReq
     db.desconecta()
 
     return JSONResponse(content={"message": "Foto de perfil actualizada"}, status_code=200)
+
+@app.post("/update-bg-picture")
+async def update_bg_picture(request: Request, data: UpdateBgPictureRequest):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+
+    user_id = db.get_user_id(logged_in_user)
+    db.actualizar_imagen_fondo(user_id, data.bg_picture_url)
+    db.desconecta()
+
+    return JSONResponse(content={"message": "Imagen de fondo actualizada"}, status_code=200)
 
 @app.get("/ultimas_conversaciones", response_class=JSONResponse)
 async def ultimas_conversaciones():
