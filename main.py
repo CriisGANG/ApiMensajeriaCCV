@@ -1,20 +1,22 @@
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, HTTPException, Request, Depends, Query
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 import database
 import datetime
+from fastapi import WebSocket, WebSocketDisconnect
+from flask import Flask, url_for, render_template
 
 app = FastAPI()
-
-db = database.API_Mensajeria()
 
 # Montar la carpeta "static" para servir archivos como JavaScript, CSS, imágenes, etc.
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Configuración de Jinja2 para servir HTML
 templates = Jinja2Templates(directory="templates")
+
+db = database.API_Mensajeria()
 
 # Modelo para recibir datos del login
 class LoginRequest(BaseModel):
@@ -48,10 +50,22 @@ async def login(request: LoginRequest):
 @app.get("/users", response_class=JSONResponse)
 def usersList(request: Request):
     db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    print(f"Username: {logged_in_user}") # Sale virginiajimenez
+    print(f"Username: {logged_in_user_id}") # Sale 14
     users = db.carregaUsuaris()
+    groups = db.carregaGrups(logged_in_user_id)
+    print(f"Grupos: {groups}")
     db.desconecta()
-    return templates.TemplateResponse("users.html", {"request": request, "users": users})
 
+    # Convert datetime objects to strings
+    for group in groups:
+        for key, value in group.items():
+            if isinstance(value, datetime.datetime):
+                group[key] = value.isoformat()
+
+    return templates.TemplateResponse("users.html", {"request": request, "users": users, "groups": groups})
 
 @app.get("/groups")
 async def groupList(request: Request):
@@ -68,7 +82,7 @@ async def groupList(request: Request):
     return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
 
 @app.get("/conversation/{username}", response_class=JSONResponse)
-def get_conversation(username: str, request: Request):
+def get_conversation(username: str, request: Request, since: str = None):
     db.conecta()
     logged_in_user = request.cookies.get("loggedInUser")
     if not logged_in_user:
@@ -78,29 +92,28 @@ def get_conversation(username: str, request: Request):
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
 
-    # Debugging statements
-    print(f"Logged in user: {logged_in_user}, ID: {logged_in_user_id}")
-    print(f"Selected user: {username}, ID: {selected_user_id}")
-
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id, since)
+    
+    # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
+    for message in conversation:
+        if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
+            db.actualizar_estado_mensaje(message['id'], 'rebut')
+            message['status'] = 'rebut'
+    
     db.desconecta()
 
-    # Convert datetime objects to strings
     for message in conversation:
         message['created_at'] = message['created_at'].isoformat()
+        if message['receiver_id'] == logged_in_user_id:
+            message['status'] = 'llegit'
+        else:
+            message['status'] = 'enviat'
 
-    # Debugging statement
-    print(f"Conversation: {conversation}")
-
-    if conversation:
-        return JSONResponse(content=conversation, status_code=200)
-    else:
-        raise HTTPException(
-            status_code=404, detail="Conversación no encontrada")
+    return JSONResponse(content=conversation, status_code=200)
 
 @app.get("/chat/{username}", response_class=JSONResponse)
 def chat_page(username: str, request: Request):
@@ -125,9 +138,11 @@ def chat_page(username: str, request: Request):
         message['receiver_username'] = db.get_username(message['receiver_id'])
         message['created_at'] = message['created_at'].isoformat()
 
+    users = db.carregaUsuaris()  # Cargar la lista de usuarios
+
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username})
+    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
@@ -145,13 +160,14 @@ def chat_group(groupId: str, request: Request):
         raise HTTPException(status_code=404, detail="Grupo no encontrado")
     
     conversation = db.cargarConversacionGrupo(selectedGroup['id'])
+    members = db.get_group_members(groupId)
     
     for message in conversation:
         message['created_at'] = message['created_at'].isoformat()
 
     db.desconecta()
 
-    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name']})
+    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest):
@@ -168,7 +184,7 @@ async def send_message(request: Request, message: MessageRequest):
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    db.insertar_mensaje(sender_id, receiver_id, message.content)
+    db.insertar_mensaje(sender_id, receiver_id, message.content, 'enviat')
     db.desconecta()
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
@@ -192,3 +208,47 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
     db.desconecta()
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
+
+@app.get("/ultimas_conversaciones", response_class=JSONResponse)
+async def ultimas_conversaciones():
+    db.conecta()
+    lista_usuarios = db.carregaUsuaris()
+    print(lista_usuarios)
+    db.desconecta()
+
+# Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
+active_connections = []
+
+@app.websocket("/ws/chat/{username}")
+async def websocket_chat(websocket: WebSocket, username: str):
+    global active_connections  # Declarar la variable como global
+    await websocket.accept()
+    active_connections.append(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_json()  # Recibe mensaje del cliente
+            sender_username = data["sender"]
+            message_content = data["content"]
+            
+            # Guardar mensaje en la base de datos
+            db.conecta()
+            sender_id = db.get_user_id(sender_username)
+            receiver_id = db.get_user_id(username)
+
+            if sender_id and receiver_id:
+                db.insertar_mensaje(sender_id, receiver_id, message_content)
+
+                # Construir el mensaje para enviar a todos los clientes conectados
+                message = {
+                    "sender_username": sender_username,
+                    "content": message_content
+                }
+
+                # Enviar mensaje a todos los clientes conectados
+                for connection in active_connections:
+                    await connection.send_json(message)
+
+            db.desconecta()
+    except WebSocketDisconnect:
+        active_connections.remove(websocket)

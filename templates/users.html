@@ -8,14 +8,24 @@
   <script defer src="/static/users.js"></script>
 </head>
 <body>
-  <h1>Lista de Usuarios</h1>
-  <ul id="users" class="user-list"></ul>
-  <div id="chat-container" class="chat-container">
-    <div id="chat-messages" class="chat-messages"></div>
-    <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
-    <button id="send-message" class="send-message-button">Enviar</button>
+  <div class="app-container centered">
+    <div class="sidebar collapsed">
+      <h1>Lista de Usuarios y Grupos</h1>
+      <button id="refresh-users">Actualizar</button>
+      <ul id="users-groups" class="user-list">
+        <!-- Aquí se generarán los elementos de la lista de usuarios y grupos -->
+      </ul>
+      <button id="logout" class="logout-button">Cerrar Sesión</button>
+    </div>
+    <div id="chat-container" class="chat-container">
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
+        <button id="send-message" class="send-message-button">Enviar</button>
+      </div>
+    </div>
   </div>
-  <button id="logout" class="logout-button">Cerrar Sesión</button>
   <script id="users-data" type="application/json">{{ users | tojson }}</script>
+  <script id="groups-data" type="application/json">{{ groups | tojson }}</script>
 </body>
 </html>

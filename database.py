@@ -7,8 +7,8 @@ import datetime
 class API_Mensajeria(object):
     def conecta(self):
         # Conexion a la BBDD del servidor mySQL
-        self.db = pymysql.connect(host='localhost',
-                                  user='root',
+        self.db = pymysql.connect(host='localhost',  # 192.168.48.123
+                                  user='root',  # virginia
                                   db='whatsapp2425',
                                   charset='utf8mb4',
                                   autocommit=True,
@@ -24,9 +24,10 @@ class API_Mensajeria(object):
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
-    def carregaGrups(self):
-        sql = "SELECT * FROM Groups"
-        self.cursor.execute(sql)
+    def carregaGrups(self, idUser):
+        # sql = "SELECT * FROM Groups"
+        sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
+        self.cursor.execute(sql, (idUser))
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
@@ -67,25 +68,21 @@ class API_Mensajeria(object):
         group = self.cursor.fetchone()
         return group['id'] if group else None
 
-    def cargar_conversacion(self, logged_in_user_id, selected_user_id):
+    def cargar_conversacion(self, logged_in_user_id, selected_user_id, since=None):
         sql = """
         SELECT * FROM messages 
-        WHERE (sender_id = %s AND receiver_id = %s) 
-        OR (sender_id = %s AND receiver_id = %s)
-        ORDER BY created_at
+        WHERE ((sender_id = %s AND receiver_id = %s) 
+        OR (sender_id = %s AND receiver_id = %s))
         """
-        # Debugging statement
-        print(f"Executing SQL: {sql}")
-        print(f"With parameters: {logged_in_user_id}, {
-              selected_user_id}, {selected_user_id}, {logged_in_user_id}")
+        params = [logged_in_user_id, selected_user_id,
+                  selected_user_id, logged_in_user_id]
+        if since:
+            sql += " AND created_at > %s"
+            params.append(since)
+        sql += " ORDER BY created_at"
 
-        self.cursor.execute(
-            sql, (logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id))
+        self.cursor.execute(sql, params)
         ResQuery = self.cursor.fetchall()
-
-        # Debugging statement
-        print(f"SQL Query Result: {ResQuery}")
-
         return ResQuery
 
     def cargarConversacionGrupo(self, groupId):
@@ -99,12 +96,29 @@ class API_Mensajeria(object):
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
-    def insertar_mensaje(self, sender_id, receiver_id, content):
-        sql = "INSERT INTO messages (sender_id, receiver_id, content, created_at) VALUES (%s, %s, %s, NOW())"
-        self.cursor.execute(sql, (sender_id, receiver_id, content))
+    def insertar_mensaje(self, sender_id, receiver_id, content, status):
+        sql = """
+        INSERT INTO messages (sender_id, receiver_id, content, status, created_at) 
+        VALUES (%s, %s, %s, %s, NOW())
+        """
+        self.cursor.execute(sql, (sender_id, receiver_id, content, status))
         self.db.commit()
-        
+
     def insertarMensajeGrupo(self, sender_id, groupId, content):
         sql = "INSERT INTO messages (sender_id, group_Id, content, created_at) VALUES (%s, %s, %s, NOW())"
         self.cursor.execute(sql, (sender_id, groupId, content))
+        self.db.commit()
+
+    def get_group_members(self, groupId):
+        sql = """
+        SELECT u.username FROM usuarisclase u
+        JOIN group_members gm ON u.id = gm.user_id
+        WHERE gm.group_id = %s
+        """
+        self.cursor.execute(sql, (groupId,))
+        return self.cursor.fetchall()
+
+    def actualizar_estado_mensaje(self, message_id, new_status):
+        sql = "UPDATE messages SET status = %s WHERE id = %s"
+        self.cursor.execute(sql, (new_status, message_id))
         self.db.commit()
