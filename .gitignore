@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-./__pycache__/
-__pycache__/
-=======
 
-__pycache__
-.DS_store
-app
->>>>>>> f83b860 (gitignore actualizado)
+__pycache__/
+.DS_Store
