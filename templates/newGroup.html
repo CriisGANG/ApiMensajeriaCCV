@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Nuevo Grupo</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/newGroup.js"></script>
+</head>
+<body>
+  <div class="app-container centered">
+    <div class="sidebar collapsed">
+      <ul id="users" class="user-list">
+        <!-- Aquí se generarán los elementos de la lista de usuarios -->
+      </ul>
+    </div>
+    <form id="new-group-form" method="POST" action="/newGroup">
+      <input type="text" id="group-name" class="group-name" name="groupName" placeholder="Nombre del grupo">
+      <button type="button" id="new-group" class="send-message-button">Crear</button>
+    </form>
+  </div>
+  <script id="users-data" type="application/json">{{ users | tojson }}</script>
+</body>
+</html>
