@@ -28,11 +28,17 @@ class LoginRequest(BaseModel):
 class MessageRequest(BaseModel):
     receiver_username: str
     content: str
-
-# Modelo para recibir datos del nuevo grupo
+    
 class NewGroupRequest(BaseModel):
     groupName: str
     users: list
+
+class UpdateProfilePictureRequest(BaseModel):
+    profile_picture_url: str
+
+class UpdateBgPictureRequest(BaseModel):
+    bg_picture_url: str
+
 
 @app.get("/", response_class=JSONResponse)
 def show_login_page(request: Request):
@@ -145,10 +151,21 @@ def chat_page(username: str, request: Request):
         message['created_at'] = message['created_at'].isoformat()
 
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
+    user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
+    user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "conversation": conversation,
+        "username": username,
+        "users": users,
+        "user_profile_picture_url": user_profile_picture_url,  # Pasar la URL de la foto de perfil al template
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,  # Pasar la URL de la foto de perfil del usuario seleccionado al template
+        "user_bg_picture_url": user_bg_picture_url  # Pasar la URL de la imagen de fondo al template
+    })
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
@@ -215,26 +232,32 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
 
-@app.post("/create-group", response_class=JSONResponse)
-async def create_group(request: Request, new_group: NewGroupRequest):
+@app.post("/update-profile-picture")
+async def update_profile_picture(request: Request, data: UpdateProfilePictureRequest):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+    user_id = db.get_user_id(logged_in_user)
+    db.actualizar_foto_perfil(user_id, data.profile_picture_url)
+    db.desconecta()
+
+    return JSONResponse(content={"message": "Foto de perfil actualizada"}, status_code=200)
+
+@app.post("/update-bg-picture")
+async def update_bg_picture(request: Request, data: UpdateBgPictureRequest):
     db.conecta()
     logged_in_user = request.cookies.get("loggedInUser")
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
 
-    # Crear el nuevo grupo
-    group_id = db.crear_grupo(new_group.groupName)
-
-    # Añadir los usuarios al grupo
-    for username in new_group.users:
-        user_id = db.get_user_id(username)
-        if user_id:
-            db.agregar_usuario_a_grupo(user_id, group_id)
-
+    user_id = db.get_user_id(logged_in_user)
+    db.actualizar_imagen_fondo(user_id, data.bg_picture_url)
     db.desconecta()
 
-    return JSONResponse(content={"message": "Grupo creado exitosamente"}, status_code=200)
+    return JSONResponse(content={"message": "Imagen de fondo actualizada"}, status_code=200)
 
 @app.get("/ultimas_conversaciones", response_class=JSONResponse)
 async def ultimas_conversaciones():
@@ -243,6 +266,33 @@ async def ultimas_conversaciones():
     print(lista_usuarios)
     db.desconecta()
     
+
+@app.post("/newGroup", response_class=JSONResponse)
+async def newGroup(request: Request, new_group: NewGroupRequest):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+
+    try:
+        # Crear el nuevo grupo
+        group_id = db.newGroup(new_group.groupName, logged_in_user_id)
+        db.addUsersToGroup(logged_in_user_id, group_id, 1)
+
+        # Añadir los usuarios al grupo
+        for username in new_group.users:
+            user_id = db.get_user_id(username)
+            if user_id:
+                db.addUsersToGroup(user_id, group_id, 0)
+
+        db.desconecta()
+        return JSONResponse(content={"message": "Grupo creado exitosamente"}, status_code=200)
+    except Exception as e:
+        db.desconecta()
+        print(f"Error creating group: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @app.get("/newGroup")
 def newGroup(request: Request):

@@ -10,13 +10,21 @@ document.addEventListener("DOMContentLoaded", function () {
   users.forEach(user => {
     const li = document.createElement("li");
     li.textContent = user.username;
+    li.addEventListener("click", function() {
+      li.classList.toggle("selected");
+      if (li.classList.contains("selected")) {
+        selectedUsers.add(user.username);
+      } else {
+        selectedUsers.delete(user.username);
+      }
+    });
     userList.appendChild(li);
   });
   
   newGroupButton.addEventListener("click", function() {
     const groupName = groupNameInput.value;
     if (groupName) {
-      fetch("/create-group", {
+      fetch("/newGroup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -31,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(data => {
         console.log(data.message);
+        window.location.href = "/users"; // Redirect to the user list
       })
       .catch(error => {
         console.error("Error:", error);
