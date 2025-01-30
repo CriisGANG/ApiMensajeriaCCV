@@ -7,8 +7,8 @@ import datetime
 class API_Mensajeria(object):
     def conecta(self):
         # Conexion a la BBDD del servidor mySQL
-        self.db = pymysql.connect(host='192.168.48.123',
-                                  user='virginia',
+        self.db = pymysql.connect(host='localhost',
+                                  user='root',
                                   db='whatsapp2425',
                                   charset='utf8mb4',
                                   autocommit=True,
