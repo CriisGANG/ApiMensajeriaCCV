@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat con {{ username }}</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
   <script defer src="/static/chat.js"></script>
 </head>
 <body>
@@ -47,100 +48,6 @@
   </div>
   <input type="hidden" id="last-message-timestamp" value="{% if conversation %}{{ conversation[-1].created_at }}{% endif %}">
   <script id="users-data" type="application/json">{{ users | tojson }}</script>
-
-  <!-- Modal para cambiar la foto de perfil -->
-  <div id="settings-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-button">&times;</span>
-      <h2>Cambiar foto de perfil</h2>
-      <input type="text" id="profile-picture-url" placeholder="Ingresa la URL de la imagen">
-      <button id="save-profile-picture" class="save-button">Guardar</button>
-    </div>
-  </div>
-
-  <!-- Modal para cambiar la imagen de fondo -->
-  <div id="bg-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-button">&times;</span>
-      <h2>Cambiar imagen de fondo</h2>
-      <input type="text" id="bg-picture-url" placeholder="Ingresa la URL de la imagen">
-      <button id="save-bg-picture" class="save-button">Guardar</button>
-    </div>
-  </div>
-
-  <script>
-  document.getElementById("profile-picture").addEventListener("click", function() {
-    document.getElementById("settings-modal").style.display = "block";
-  });
-
-  document.querySelectorAll(".close-button").forEach(button => {
-    button.addEventListener("click", function() {
-      button.closest(".modal").style.display = "none";
-    });
-  });
-
-  document.getElementById("save-profile-picture").addEventListener("click", async function() {
-    const profilePictureUrl = document.getElementById("profile-picture-url").value;
-    const response = await fetch("/update-profile-picture", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile_picture_url: profilePictureUrl })
-    });
-
-    if (response.ok) {
-      alert("Foto de perfil actualizada exitosamente.");
-      document.getElementById("settings-modal").style.display = "none";
-      location.reload();
-    } else {
-      alert("Error al actualizar la foto de perfil.");
-    }
-  });
-
-  document.getElementById("appearance-button").addEventListener("click", function() {
-    document.getElementById("appearance-dropdown").classList.toggle("show");
-  });
-
-  document.getElementById("dark-mode").addEventListener("click", function() {
-    document.body.classList.toggle("dark-mode");
-  });
-
-  document.getElementById("high-contrast").addEventListener("click", function() {
-    document.body.classList.toggle("high-contrast");
-  });
-
-  document.getElementById("change-bg").addEventListener("click", function() {
-    document.getElementById("bg-modal").style.display = "block";
-  });
-
-  document.getElementById("save-bg-picture").addEventListener("click", async function() {
-    const bgPictureUrl = document.getElementById("bg-picture-url").value;
-    const response = await fetch("/update-bg-picture", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bg_picture_url: bgPictureUrl })
-    });
-
-    if (response.ok) {
-      alert("Imagen de fondo actualizada exitosamente.");
-      document.getElementById("bg-modal").style.display = "none";
-      location.reload();
-    } else {
-      alert("Error al actualizar la imagen de fondo.");
-    }
-  });
-
-  window.onclick = function(event) {
-    if (!event.target.matches('.appearance-button')) {
-      var dropdowns = document.getElementsByClassName("appearance-dropdown");
-      for (var i = 0; i < dropdowns.length; i++) {
-        var openDropdown = dropdowns[i];
-        if (openDropdown.classList.contains('show')) {
-          openDropdown.classList.remove('show');
-        }
-      }
-    }
-  }
-  </script>
 </body>
 </html>
 
