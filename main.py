@@ -29,6 +29,11 @@ class MessageRequest(BaseModel):
     receiver_username: str
     content: str
 
+# Modelo para recibir datos del nuevo grupo
+class NewGroupRequest(BaseModel):
+    groupName: str
+    users: list
+
 @app.get("/", response_class=JSONResponse)
 def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -210,12 +215,45 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
 
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
 
+@app.post("/create-group", response_class=JSONResponse)
+async def create_group(request: Request, new_group: NewGroupRequest):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+
+    # Crear el nuevo grupo
+    group_id = db.crear_grupo(new_group.groupName)
+
+    # Añadir los usuarios al grupo
+    for username in new_group.users:
+        user_id = db.get_user_id(username)
+        if user_id:
+            db.agregar_usuario_a_grupo(user_id, group_id)
+
+    db.desconecta()
+
+    return JSONResponse(content={"message": "Grupo creado exitosamente"}, status_code=200)
+
 @app.get("/ultimas_conversaciones", response_class=JSONResponse)
 async def ultimas_conversaciones():
     db.conecta()
     lista_usuarios = db.carregaUsuaris()
     print(lista_usuarios)
     db.desconecta()
+    
+
+@app.get("/newGroup")
+def newGroup(request: Request):
+    db.conecta()
+    usersList = db.carregaUsuaris()
+    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    print(logged_in_user_id) # Mostrará mi id (14).
+    db.desconecta()
+    
+    return templates.TemplateResponse("newGroup.html", {"request": request, "users": usersList})
 
 # Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const users = JSON.parse(document.getElementById("users-data").textContent);
   const groups = JSON.parse(document.getElementById("groups-data").textContent);
   const userGroupList = document.getElementById("users-groups");
+  const newGroup = document.getElementById("new-group");
 
   // Inicialmente centrar la lista de usuarios
   appContainer.classList.add("centered");
@@ -33,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Añadir evento de clic para los elementos de la lista de usuarios
-  userList.addEventListener("click", function (event) {
+  userGroupList.addEventListener("click", function (event) {
     if (event.target.tagName === "LI") {
       // Desplazar la lista de usuarios a la izquierda y mostrar el chat
       appContainer.classList.remove("centered");
@@ -45,6 +46,10 @@ document.addEventListener("DOMContentLoaded", function () {
       // ...
     }
   });
+
+  newGroup.addEventListener("click", function (event) {
+    window.location.href = "/newGroup";
+  })
 
   document.getElementById("logout").addEventListener("click", function () {
     localStorage.removeItem("loggedInUser");

@@ -86,6 +86,10 @@ h1, h2 {
   background-color: #f1f1f1;
 }
 
+.user-list li.selected {
+  background-color: #d1e7dd;
+}
+
 .logout-button {
   display: block;
   width: 100%;
@@ -157,7 +161,7 @@ h1, h2 {
   margin-right: 10px;
 }
 
-.send-message-button, .send-message-group-button {
+.send-message-button, .send-message-group-button, .create-group-button {
   padding: 10px 20px;
   background-color: #075e54;
   color: #ffffff;
@@ -166,6 +170,14 @@ h1, h2 {
   cursor: pointer;
 }
 
-.send-message-button:hover, .send-message-group-button:hover {
+.send-message-button:hover, .send-message-group-button:hover, .create-group-button:hover {
   background-color: #064e48;
+}
+
+.group-input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }

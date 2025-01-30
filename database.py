@@ -127,3 +127,9 @@ class API_Mensajeria(object):
         self.cursor.execute(sql)
         message = self.cursor.fetchone()
         return message['id'] if message else None
+
+    def newGroup(self, name, idUser):
+        sql = "INSERT INTO Groups (Name, Admin_ID) VALUES (%s, %s)"
+        self.cursor.execute(sql, (name, idUser))
+        self.db.commit()
+        print(sql)
