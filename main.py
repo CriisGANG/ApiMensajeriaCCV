@@ -171,6 +171,9 @@ def chat_page(username: str, request: Request):
 def chat_group(groupId: str, request: Request):
     db.conecta()
     loggedInUser = request.cookies.get("loggedInUser")
+    loggedInUserId = db.get_user_id(loggedInUser)
+    esAdmin = db.isAdmin(loggedInUserId, groupId)
+    print(f"¿Es admin? {esAdmin}")
     if not loggedInUser:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")

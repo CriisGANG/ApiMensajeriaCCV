@@ -161,3 +161,15 @@ class API_Mensajeria(object):
         sql = "INSERT INTO group_members (group_id, user_id, is_admin) VALUES (%s, %s, %s)"
         self.cursor.execute(sql, (group_id, user_id, is_admin))
         self.db.commit()
+        
+    def convertToAdmin(self, user_id, group_id):
+        sql = "UPDATE group_members SET is_admin = 1 WHERE user_id = %s AND group_id = %s"
+        self.cursor.execute(sql, (user_id, group_id))
+        self.db.commit()
+        
+    def isAdmin(self, user_id, group_id):
+        sql = "SELECT is_admin FROM group_members WHERE user_id =%s AND group_id =%s"
+        self.cursor.execute(sql, (user_id, group_id))
+        ResQuery = self.cursor.fetchone()
+        print(ResQuery)
+        return ResQuery['is_admin'] if ResQuery else None # La idea es mirar si el is_admin es 0 o 1. Si es 1, entonces el usuario tendrá unas configuraciones extra: para hacer admin a otra persona o expulsar a alguien
