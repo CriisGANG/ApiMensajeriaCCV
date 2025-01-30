@@ -11,10 +11,11 @@
 <body>
   <div class="app-container centered">
     <div class="sidebar collapsed">
-      <h1>Lista de Usuarios</h1>
+      <h1>Lista de Usuarios y Grupos</h1>
       <button id="refresh-users">Actualizar</button>
-      <ul id="users" class="user-list">
-        <!-- Aquí se generarán los elementos de la lista de usuarios -->
+      <button id="new-group">Nuevo grupo</button>
+      <ul id="users-groups" class="user-list">
+        <!-- Aquí se generarán los elementos de la lista de usuarios y grupos -->
       </ul>
       <button id="logout" class="logout-button">Cerrar Sesión</button>
     </div>
@@ -27,19 +28,6 @@
     </div>
   </div>
   <script id="users-data" type="application/json">{{ users | tojson }}</script>
-  <script>
-    // Initialize Feather icons
-    feather.replace();
-
-    // Update datetime
-    function updateDateTime() {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-      document.getElementById('datetime').textContent = now.toLocaleDateString('es-ES', options);
-    }
-
-    updateDateTime();
-    setInterval(updateDateTime, 60000); // Update every minute
-  </script>
+  <script id="groups-data" type="application/json">{{ groups | tojson }}</script>
 </body>
 </html>

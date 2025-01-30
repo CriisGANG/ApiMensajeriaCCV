@@ -3,7 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const sidebar = document.querySelector(".sidebar");
   const chatContainer = document.querySelector(".chat-container");
   const users = JSON.parse(document.getElementById("users-data").textContent);
-  const userList = document.getElementById("users");
+  const groups = JSON.parse(document.getElementById("groups-data").textContent);
+  const userGroupList = document.getElementById("users-groups");
+  const newGroup = document.getElementById("new-group");
+
+  // Inicialmente centrar la lista de usuarios
+  appContainer.classList.add("centered");
+  sidebar.classList.add("collapsed");
 
   // Inicialmente centrar la lista de usuarios
   appContainer.classList.add("centered");
@@ -24,12 +30,21 @@ document.addEventListener("DOMContentLoaded", function () {
     li.addEventListener("click", function () {
       window.location.href = `/chat/${user.username}`;
     });
-    userList.appendChild(li);
+    userGroupList.appendChild(li);
+  });
+
+  groups.forEach(group => {
+    const li = document.createElement("li");
+    li.textContent = group.name;
+    li.addEventListener("click", function () {
+      window.location.href = `/chatsGrupos/${group.id}`;
+    });
+    userGroupList.appendChild(li);
   });
 
   // Añadir evento de clic para los elementos de la lista de usuarios
-  userList.addEventListener("click", function (event) {
-    if (event.target.tagName === "LI" || event.target.closest("li")) {
+  userGroupList.addEventListener("click", function (event) {
+    if (event.target.tagName === "LI") {
       // Desplazar la lista de usuarios a la izquierda y mostrar el chat
       appContainer.classList.remove("centered");
       appContainer.classList.add("shifted");
@@ -41,8 +56,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  newGroup.addEventListener("click", function (event) {
+    window.location.href = "/newGroup";
+  })
+
   document.getElementById("logout").addEventListener("click", function () {
     localStorage.removeItem("loggedInUser");
     window.location.href = "/";
   });
+
+  // document.getElementById("cambiar-a-grupos").addEventListener("click", function () {
+  //   window.location.href = "/groups";
+  // });
 });
