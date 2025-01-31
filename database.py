@@ -7,8 +7,8 @@ import datetime
 class API_Mensajeria(object):
     def conecta(self):
         # Conexion a la BBDD del servidor mySQL
-        self.db = pymysql.connect(host='localhost',  # 192.168.48.123
-                                  user='root',  # virginia
+        self.db = pymysql.connect(host='localhost',
+                                  user='root',
                                   db='whatsapp2425',
                                   charset='utf8mb4',
                                   autocommit=True,
@@ -24,10 +24,9 @@ class API_Mensajeria(object):
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
-    def carregaGrups(self, idUser):
-        # sql = "SELECT * FROM Groups"
-        sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
-        self.cursor.execute(sql, (idUser))
+    def carregaGrups(self):
+        sql = "SELECT * FROM Groups"
+        self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
@@ -102,7 +101,7 @@ class API_Mensajeria(object):
         """
         self.cursor.execute(sql, (sender_id, receiver_id, content, status))
         self.db.commit()
-
+        
     def insertarMensajeGrupo(self, sender_id, groupId, content):
         sql = "INSERT INTO messages (sender_id, group_Id, content, created_at) VALUES (%s, %s, %s, NOW())"
         self.cursor.execute(sql, (sender_id, groupId, content))
@@ -149,15 +148,3 @@ class API_Mensajeria(object):
         self.cursor.execute(sql, (user_id,))
         user = self.cursor.fetchone()
         return user['user_bg_picture_url'] if user else None
-
-    def newGroup(self, name, idUser):
-        sql = "INSERT INTO Groups (Name, Admin_ID) VALUES (%s, %s)"
-        self.cursor.execute(sql, (name, idUser))
-        group_id = self.cursor.lastrowid
-        self.db.commit()        
-        return group_id
-
-    def addUsersToGroup(self, user_id, group_id, is_admin):
-        sql = "INSERT INTO group_members (group_id, user_id, is_admin) VALUES (%s, %s, %s)"
-        self.cursor.execute(sql, (group_id, user_id, is_admin))
-        self.db.commit()
