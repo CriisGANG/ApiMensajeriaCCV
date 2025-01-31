@@ -17,7 +17,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   users.forEach(user => {
     const li = document.createElement("li");
-    li.textContent = user.username;
+    li.classList.add("border-b", "hover:bg-gray-100", "transition", "p-4", "flex", "items-center", "space-x-4");
+    li.innerHTML = `
+      <div class="flex-shrink-0">
+        <img class="w-10 h-10 rounded-full" src="https://via.placeholder.com/150" alt="${user.username}">
+      </div>
+      <div>
+        <h3 class="font-semibold">${user.username}</h3>
+        <p class="text-sm text-gray-600">Estado</p>
+      </div>
+    `;
     li.addEventListener("click", function () {
       window.location.href = `/chat/${user.username}`;
     });

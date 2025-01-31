@@ -157,15 +157,7 @@ def chat_page(username: str, request: Request):
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {
-        "request": request,
-        "conversation": conversation,
-        "username": username,
-        "users": users,
-        "user_profile_picture_url": user_profile_picture_url,  # Pasar la URL de la foto de perfil al template
-        "selected_user_profile_picture_url": selected_user_profile_picture_url,  # Pasar la URL de la foto de perfil del usuario seleccionado al template
-        "user_bg_picture_url": user_bg_picture_url  # Pasar la URL de la imagen de fondo al template
-    })
+    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
