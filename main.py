@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 import database
 import datetime
 from fastapi import WebSocket, WebSocketDisconnect
+#from flask import Flask, url_for, render_template
 
 
 app = FastAPI()
@@ -27,12 +28,17 @@ class LoginRequest(BaseModel):
 class MessageRequest(BaseModel):
     receiver_username: str
     content: str
+    
+class NewGroupRequest(BaseModel):
+    groupName: str
+    users: list
 
 class UpdateProfilePictureRequest(BaseModel):
     profile_picture_url: str
 
 class UpdateBgPictureRequest(BaseModel):
     bg_picture_url: str
+
 
 @app.get("/", response_class=JSONResponse)
 def show_login_page(request: Request):
@@ -56,10 +62,22 @@ async def login(request: LoginRequest):
 @app.get("/users", response_class=JSONResponse)
 def usersList(request: Request):
     db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    print(f"Username: {logged_in_user}") # Sale virginiajimenez
+    print(f"Username: {logged_in_user_id}") # Sale 14
     users = db.carregaUsuaris()
+    groups = db.carregaGrups(logged_in_user_id)
+    print(f"Grupos: {groups}")
     db.desconecta()
-    return templates.TemplateResponse("users.html", {"request": request, "users": users})
 
+    # Convert datetime objects to strings
+    for group in groups:
+        for key, value in group.items():
+            if isinstance(value, datetime.datetime):
+                group[key] = value.isoformat()
+
+    return templates.TemplateResponse("users.html", {"request": request, "users": users, "groups": groups})
 
 @app.get("/groups")
 async def groupList(request: Request):
@@ -76,7 +94,7 @@ async def groupList(request: Request):
     return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
 
 @app.get("/conversation/{username}", response_class=JSONResponse)
-def get_conversation(username: str, request: Request):
+def get_conversation(username: str, request: Request, since: str = None):
     db.conecta()
     logged_in_user = request.cookies.get("loggedInUser")
     if not logged_in_user:
@@ -89,8 +107,8 @@ def get_conversation(username: str, request: Request):
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id, since)
 
-    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
     
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
     for message in conversation:
@@ -139,15 +157,7 @@ def chat_page(username: str, request: Request):
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {
-        "request": request,
-        "conversation": conversation,
-        "username": username,
-        "users": users,
-        "user_profile_picture_url": user_profile_picture_url,  # Pasar la URL de la foto de perfil al template
-        "selected_user_profile_picture_url": selected_user_profile_picture_url,  # Pasar la URL de la foto de perfil del usuario seleccionado al template
-        "user_bg_picture_url": user_bg_picture_url  # Pasar la URL de la imagen de fondo al template
-    })
+    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request):
@@ -221,7 +231,6 @@ async def update_profile_picture(request: Request, data: UpdateProfilePictureReq
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
-
     user_id = db.get_user_id(logged_in_user)
     db.actualizar_foto_perfil(user_id, data.profile_picture_url)
     db.desconecta()
@@ -248,6 +257,45 @@ async def ultimas_conversaciones():
     lista_usuarios = db.carregaUsuaris()
     print(lista_usuarios)
     db.desconecta()
+    
+
+@app.post("/newGroup", response_class=JSONResponse)
+async def newGroup(request: Request, new_group: NewGroupRequest):
+    db.conecta()
+    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    if not logged_in_user:
+        db.desconecta()
+        raise HTTPException(status_code=401, detail="Usuario no autenticado")
+
+    try:
+        # Crear el nuevo grupo
+        group_id = db.newGroup(new_group.groupName, logged_in_user_id)
+        db.addUsersToGroup(logged_in_user_id, group_id, 1)
+
+        # Añadir los usuarios al grupo
+        for username in new_group.users:
+            user_id = db.get_user_id(username)
+            if user_id:
+                db.addUsersToGroup(user_id, group_id, 0)
+
+        db.desconecta()
+        return JSONResponse(content={"message": "Grupo creado exitosamente"}, status_code=200)
+    except Exception as e:
+        db.desconecta()
+        print(f"Error creating group: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+@app.get("/newGroup")
+def newGroup(request: Request):
+    db.conecta()
+    usersList = db.carregaUsuaris()
+    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user_id = db.get_user_id(logged_in_user)
+    print(logged_in_user_id) # Mostrará mi id (14).
+    db.desconecta()
+    
+    return templates.TemplateResponse("newGroup.html", {"request": request, "users": usersList})
 
 # Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []
