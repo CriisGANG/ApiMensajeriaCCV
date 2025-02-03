@@ -455,3 +455,7 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   background-color: #ffff00;
   color: #000000;
 }
+
+.bg_change{
+  background-color: #ad1f1f;
+}
