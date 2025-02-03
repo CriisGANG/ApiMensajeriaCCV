@@ -469,10 +469,6 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   color: #000000;
 }
 
-.group-input {
-  width: calc(100% - 20px);
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+.bg_change{
+  background-color: #ad1f1f;
 }
