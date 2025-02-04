@@ -1,3 +1,4 @@
+
 body {
   font-family: Arial, sans-serif;
   background-color: #e5ddd5;
@@ -76,25 +77,14 @@ h1, h2 {
 
 .user-list li, .group-list li, .group-members-list li {
   padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  border-bottom: 1px solid #ddd;
   display: flex;
   align-items: center;
   cursor: pointer;
-  background-color: #f9f9f9;
-  transition: background-color 0.3s ease;
 }
 
 .user-list li:hover, .group-list li:hover, .group-members-list li:hover {
   background-color: #f1f1f1;
-}
-
-.user-list li.selected {
-  background-color: #d1e7dd;
-}
-
-.selected {
-  background-color: #d3d3d3; /* Light gray background for selected users */
 }
 
 .logout-button {
@@ -133,14 +123,12 @@ h1, h2 {
 .message.sent {
   background-color: #dcf8c6;
   align-self: flex-end;
-  margin-left: auto; /* Alinear a la derecha */
 }
 
 .message.received {
   background-color: #ffffff;
   border: 1px solid #ddd;
   align-self: flex-start;
-  margin-right: auto; /* Alinear a la izquierda */
 }
 
 .message p {
@@ -170,7 +158,7 @@ h1, h2 {
   margin-right: 10px;
 }
 
-.send-message-button, .send-message-group-button, .create-group-button {
+.send-message-button, .send-message-group-button {
   padding: 10px 20px;
   background-color: #075e54;
   color: #ffffff;
@@ -179,7 +167,7 @@ h1, h2 {
   cursor: pointer;
 }
 
-.send-message-button:hover, .send-message-group-button:hover, .create-group-button:hover {
+.send-message-button:hover, .send-message-group-button:hover {
   background-color: #064e48;
 }
 
@@ -469,10 +457,18 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   color: #000000;
 }
 
-.group-input {
-  width: calc(100% - 20px);
+/** JQuery **/
+
+/* .chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
   padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+} */
+
+.bg_change{
+  background-color: #ad1f1f;
 }
+>>>>>>> Stashed changes

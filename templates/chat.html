@@ -1,11 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat con {{ username }}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="/static/jQuery.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
   <script defer src="/static/chat.js"></script>
 </head>
 <body>
@@ -48,232 +50,101 @@
   </div>
   <input type="hidden" id="last-message-timestamp" value="{% if conversation %}{{ conversation[-1].created_at }}{% endif %}">
   <script id="users-data" type="application/json">{{ users | tojson }}</script>
+
+  <!-- Modal para cambiar la foto de perfil -->
+  <div id="settings-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Cambiar foto de perfil</h2>
+      <input type="text" id="profile-picture-url" placeholder="Ingresa la URL de la imagen">
+      <button id="save-profile-picture" class="save-button">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Modal para cambiar la imagen de fondo -->
+  <div id="bg-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Cambiar imagen de fondo</h2>
+      <input type="text" id="bg-picture-url" placeholder="Ingresa la URL de la imagen">
+      <button id="save-bg-picture" class="save-button">Guardar</button>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById("profile-picture").addEventListener("click", function() {
+    document.getElementById("settings-modal").style.display = "block";
+  });
+
+  document.querySelectorAll(".close-button").forEach(button => {
+    button.addEventListener("click", function() {
+      button.closest(".modal").style.display = "none";
+    });
+  });
+
+  document.getElementById("save-profile-picture").addEventListener("click", async function() {
+    const profilePictureUrl = document.getElementById("profile-picture-url").value;
+    const response = await fetch("/update-profile-picture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile_picture_url: profilePictureUrl })
+    });
+
+    if (response.ok) {
+      alert("Foto de perfil actualizada exitosamente.");
+      document.getElementById("settings-modal").style.display = "none";
+      location.reload();
+    } else {
+      alert("Error al actualizar la foto de perfil.");
+    }
+  });
+
+  document.getElementById("appearance-button").addEventListener("click", function() {
+    document.getElementById("appearance-dropdown").classList.toggle("show");
+  });
+
+  document.getElementById("dark-mode").addEventListener("click", function() {
+    document.body.classList.toggle("dark-mode");
+  });
+
+  document.getElementById("high-contrast").addEventListener("click", function() {
+    document.body.classList.toggle("high-contrast");
+  });
+
+  document.getElementById("change-bg").addEventListener("click", function() {
+    document.getElementById("bg-modal").style.display = "block";
+  });
+
+  document.getElementById("save-bg-picture").addEventListener("click", async function() {
+    const bgPictureUrl = document.getElementById("bg-picture-url").value;
+    const response = await fetch("/update-bg-picture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bg_picture_url: bgPictureUrl })
+    });
+
+    if (response.ok) {
+      alert("Imagen de fondo actualizada exitosamente.");
+      document.getElementById("bg-modal").style.display = "none";
+      location.reload();
+    } else {
+      alert("Error al actualizar la imagen de fondo.");
+    }
+  });
+
+  window.onclick = function(event) {
+    if (!event.target.matches('.appearance-button')) {
+      var dropdowns = document.getElementsByClassName("appearance-dropdown");
+      for (var i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
+  </script>
 </body>
 </html>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background-color: #e5ddd5;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
 
-.app-container {
-  display: flex;
-  width: 90%;
-  max-width: 1200px;
-  height: 90vh;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.sidebar {
-  width: 30%;
-  background-color: #075e54;
-  color: #ffffff;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
-
-.settings-button {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #075e54;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.chat-container {
-  width: 70%;
-  display: flex;
-  flex-direction: column;
-  background-color: #e5ddd5;
-  padding: 0;
-}
-
-.chat-header {
-  background-color: #075e54;
-  color: #ffffff;
-  padding: 15px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.profile-picture {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.chat-messages {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 20px;
-  background-image: url('{{ user_bg_picture_url }}');
-  background-size: cover;
-}
-
-.message {
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 10px;
-  max-width: 70%;
-  word-wrap: break-word;
-}
-
-.message.sent {
-  background-color: #dcf8c6;
-  align-self: flex-end;
-  text-align: right;
-}
-
-.message.received {
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  align-self: flex-start;
-}
-
-.chat-input-container {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #ffffff;
-  border-top: 1px solid #ddd;
-}
-
-.chat-input {
-  flex-grow: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  margin-right: 10px;
-}
-
-.send-message-button {
-  padding: 10px;
-  background-color: #075e54;
-  color: #ffffff;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background-color: #fefefe;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 500px;
-  border-radius: 10px;
-}
-
-.close-button {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close-button:hover,
-.close-button:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.save-button {
-  padding: 10px;
-  background-color: #075e54;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-}
-
-.appearance-button {
-  margin-left: 10px;
-  padding: 10px;
-  background-color: #075e54;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.appearance-dropdown {
-  display: none;
-  position: absolute;
-  background-color: #ffffff;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  right: 10px;
-  top: 60px;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.appearance-dropdown.show {
-  display: block;
-}
-
-.dropdown-item {
-  padding: 10px;
-  background-color: #ffffff;
-  color: #000000;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background-color: #ddd;
-}
-
-.dark-mode {
-  background-color: #333;
-  color: #ffffff;
-}
-
-.high-contrast {
-  background-color: #000000;
-  color: #ffffff;
-}
-</style>
