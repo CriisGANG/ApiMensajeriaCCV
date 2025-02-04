@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, Query
+from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -6,8 +6,8 @@ from fastapi.staticfiles import StaticFiles
 import database
 import datetime
 from fastapi import WebSocket, WebSocketDisconnect
-#from flask import Flask, url_for, render_template
-
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 app = FastAPI()
 
@@ -18,6 +18,50 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 db = database.API_Mensajeria()
+
+SECRET_KEY = "your_secret_key"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def create_access_token(data: dict, expires_delta: datetime.timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def get_current_user(request: Request):
+    token = request.cookies.get("access_token")
+    if token is None:
+        raise HTTPException(
+            status_code=401,
+            detail="No se proporcionó un token de autenticación",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="No se pudieron validar las credenciales",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    return username
 
 # Modelo para recibir datos del login
 class LoginRequest(BaseModel):
@@ -51,18 +95,22 @@ async def login(request: LoginRequest):
     db.desconecta()
 
     if user:
-        response = JSONResponse(
-            content={"message": "Login exitoso", "username": request.username}, status_code=200)
-        response.set_cookie(key="loggedInUser", value=request.username)
+        access_token_expires = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": request.username}, expires_delta=access_token_expires
+        )
+        response = JSONResponse(content={"message": "Login exitoso", "username": request.username, "access_token": access_token}, status_code=200)
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
         return response
     else:
         raise HTTPException(
-            status_code=401, detail="Usuario o contraseña incorrectos")
+            status_code=401, detail="Usuario o contraseña incorrectos"
+        )
 
 @app.get("/users", response_class=JSONResponse)
-def usersList(request: Request):
+def usersList(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print(f"Username: {logged_in_user}") # Sale virginiajimenez
     print(f"Username: {logged_in_user_id}") # Sale 14
@@ -128,13 +176,9 @@ def get_conversation(username: str, request: Request, since: str = None):
     return JSONResponse(content=conversation, status_code=200)
 
 @app.get("/chat/{username}", response_class=JSONResponse)
-def chat_page(username: str, request: Request):
+def chat_page(username: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
-    if not logged_in_user:
-        db.desconecta()
-        raise HTTPException(status_code=401, detail="Usuario no autenticado")
-
+    logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
 
@@ -157,16 +201,20 @@ def chat_page(username: str, request: Request):
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {"request": request, "conversation": conversation, "username": username, "users": users})
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "conversation": conversation,
+        "username": username,
+        "users": users,
+        "user_profile_picture_url": user_profile_picture_url,  # Asegúrate de pasar esta variable a la plantilla
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,
+        "user_bg_picture_url": user_bg_picture_url
+    })
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
-def chat_group(groupId: str, request: Request):
+def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
-    loggedInUser = request.cookies.get("loggedInUser")
-    if not loggedInUser:
-        db.desconecta()
-        raise HTTPException(status_code=401, detail="Usuario no autenticado")
-
+    loggedInUser = current_user
     loggedInUser = db.get_user_id(loggedInUser)
     selectedGroup = db.getGroup(groupId)
 
@@ -185,9 +233,9 @@ def chat_group(groupId: str, request: Request):
     return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
 
 @app.post("/send-message", response_class=JSONResponse)
-async def send_message(request: Request, message: MessageRequest):
+async def send_message(request: Request, message: MessageRequest, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
@@ -205,9 +253,9 @@ async def send_message(request: Request, message: MessageRequest):
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
 
 @app.post("/send-message-group", response_class=JSONResponse)
-async def sendMessageGroup(request: Request, message: MessageRequest):
+async def sendMessageGroup(request: Request, message: MessageRequest, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
@@ -225,9 +273,9 @@ async def sendMessageGroup(request: Request, message: MessageRequest):
     return JSONResponse(content={"message": "Mensaje enviado"}, status_code=200)
 
 @app.post("/update-profile-picture")
-async def update_profile_picture(request: Request, data: UpdateProfilePictureRequest):
+async def update_profile_picture(request: Request, data: UpdateProfilePictureRequest, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
@@ -238,9 +286,9 @@ async def update_profile_picture(request: Request, data: UpdateProfilePictureReq
     return JSONResponse(content={"message": "Foto de perfil actualizada"}, status_code=200)
 
 @app.post("/update-bg-picture")
-async def update_bg_picture(request: Request, data: UpdateBgPictureRequest):
+async def update_bg_picture(request: Request, data: UpdateBgPictureRequest, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
@@ -260,9 +308,9 @@ async def ultimas_conversaciones():
     
 
 @app.post("/newGroup", response_class=JSONResponse)
-async def newGroup(request: Request, new_group: NewGroupRequest):
+async def newGroup(request: Request, new_group: NewGroupRequest, current_user: str = Depends(get_current_user)):
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     if not logged_in_user:
         db.desconecta()
@@ -287,10 +335,10 @@ async def newGroup(request: Request, new_group: NewGroupRequest):
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @app.get("/newGroup")
-def newGroup(request: Request):
+def newGroup(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     usersList = db.carregaUsuaris()
-    logged_in_user = request.cookies.get("loggedInUser")
+    logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print(logged_in_user_id) # Mostrará mi id (14).
     db.desconecta()
@@ -339,3 +387,5 @@ async def websocket_chat(websocket: WebSocket, username: str):
             db.desconecta()
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
+
+
