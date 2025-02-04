@@ -14,7 +14,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Cargar la lista de usuarios
   users.forEach(user => {
     const li = document.createElement("li");
-    li.textContent = user.username;
+    li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
+    li.innerHTML = `
+      <img src="${user.profile_picture_url}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
+      <div class="user-info">
+        <span class="user-name">${user.username}</span>
+        <span class="user-status">${user.status}</span>
+      </div>
+    `;
     li.addEventListener("click", function () {
       window.location.href = `/chat/${user.username}`;
     });

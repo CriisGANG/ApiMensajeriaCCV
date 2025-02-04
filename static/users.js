@@ -11,20 +11,14 @@ document.addEventListener("DOMContentLoaded", function () {
   appContainer.classList.add("centered");
   sidebar.classList.add("collapsed");
 
-  // Inicialmente centrar la lista de usuarios
-  appContainer.classList.add("centered");
-  sidebar.classList.add("collapsed");
-
   users.forEach(user => {
     const li = document.createElement("li");
-    li.classList.add("border-b", "hover:bg-gray-100", "transition", "p-4", "flex", "items-center", "space-x-4");
+    li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
     li.innerHTML = `
-      <div class="flex-shrink-0">
-        <img class="w-10 h-10 rounded-full" src="https://via.placeholder.com/150" alt="${user.username}">
-      </div>
-      <div>
-        <h3 class="font-semibold">${user.username}</h3>
-        <p class="text-sm text-gray-600">Estado</p>
+      <img src="${user.profile_picture_url}" alt="${user.username}" class="profile-picture rounded-circle mr-2">
+      <div class="user-info">
+        <span class="user-name">${user.username}</span>
+        <span class="user-status">${user.status}</span>
       </div>
     `;
     li.addEventListener("click", function () {

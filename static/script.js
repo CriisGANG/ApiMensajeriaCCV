@@ -61,12 +61,20 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 // Verificar si el usuario ya está logueado
 if (localStorage.getItem("loggedInUser")) {
   document.body.innerHTML = `
-    <h1>Bienvenido, ${localStorage.getItem("loggedInUser")}!</h1>
-    <button id="logout">Cerrar Sesión</button>
+    <div class="welcome-container">
+      <h1 class="welcome-title">Bienvenido, ${localStorage.getItem("loggedInUser")}!</h1>
+      <p class="welcome-message">Ya has iniciado sesión.</p>
+      <button id="go-to-chat" class="btn btn-primary">Ir al chat</button>
+      <button id="logout" class="btn btn-secondary">Cerrar Sesión</button>
+    </div>
   `;
 
   document.getElementById("logout").addEventListener("click", function () {
       localStorage.removeItem("loggedInUser");
       window.location.reload();
+  });
+
+  document.getElementById("go-to-chat").addEventListener("click", function () {
+      window.location.href = "/chat";
   });
 }

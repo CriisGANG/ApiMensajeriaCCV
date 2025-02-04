@@ -211,6 +211,30 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         "user_bg_picture_url": user_bg_picture_url
     })
 
+@app.get("/chat", response_class=JSONResponse)
+def chat_page(request: Request, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user = current_user
+    logged_in_user_id = db.get_user_id(logged_in_user)
+
+    if not logged_in_user_id:
+        db.desconecta()
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    users = db.carregaUsuaris()  # Cargar la lista de usuarios
+    user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
+    user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
+
+    db.desconecta()
+
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "username": logged_in_user,
+        "users": users,
+        "user_profile_picture_url": user_profile_picture_url,
+        "user_bg_picture_url": user_bg_picture_url
+    })
+
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
@@ -387,5 +411,9 @@ async def websocket_chat(websocket: WebSocket, username: str):
             db.desconecta()
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)  # Añadir reload=True para recargar automáticamente
 
 
