@@ -83,6 +83,7 @@ h1, h2 {
   cursor: pointer;
   background-color: #f9f9f9;
   transition: background-color 0.3s ease;
+  color: #000000; /* Cambiar el color de los nombres de la lista de usuarios a negro */
 }
 
 .user-list li:hover, .group-list li:hover, .group-members-list li:hover {
@@ -469,10 +470,10 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   color: #000000;
 }
 
-.group-input {
-  width: calc(100% - 20px);
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+.bg_change{
+  background-color: #ad1f1f;
+}
+
+.username {
+  color: #000000; /* Cambiar el color del nombre de usuario a negro */
 }

@@ -45,8 +45,8 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       if (response.ok) {
           alert(`Inicio de sesión exitoso. Bienvenido, ${responsejson.username}!`);
           localStorage.setItem("loggedInUser", responsejson.username);
-          document.cookie = `session=${responsejson.session}; path=/`; // Ensure the cookie is set correctly
-          window.location.href = "/users";  // Redirigir a otra página tras el login
+          // No es necesario establecer manualmente la cookie HttpOnly desde el cliente
+          window.location.href = "/chat";  // Redirigir a otra página tras el login
       } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
       }
