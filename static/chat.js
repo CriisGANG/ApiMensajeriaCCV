@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   const chatInput = document.getElementById("chat-input");
   const sendMessageButton = document.getElementById("send-message");
@@ -174,7 +175,8 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "/";
   });
 
-
+  
   // Ejecutar fetchLatestMessages cada 5 segundos
   setInterval(fetchLatestMessages, 5000);
 });
+>>>>>>> development

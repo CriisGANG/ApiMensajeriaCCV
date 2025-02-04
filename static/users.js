@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   const appContainer = document.querySelector(".app-container");
   const sidebar = document.querySelector(".sidebar");
@@ -32,8 +33,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+
+ 
+  
+
   document.getElementById("logout").addEventListener("click", function () {
     localStorage.removeItem("loggedInUser");
     window.location.href = "/";
   });
 });
+
