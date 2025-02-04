@@ -3,29 +3,12 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
-from fastapi.security import OAuth2PasswordBearer
-from werkzeug.security import generate_password_hash, check_password_hash
 import database
 import datetime
 from fastapi import WebSocket, WebSocketDisconnect
-from fastapi import FastAPI, Depends, HTTPException, status, Request
-from werkzeug.security import generate_password_hash, check_password_hash
-from passlib.context import CryptContext
-from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordBearer
-from typing import Optional, List
-from datetime import datetime, timedelta
-from jose import JWTError, jwt
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 
-SECRET_KEY = "mysecretkey"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 app = FastAPI()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Montar la carpeta "static" para servir archivos como JavaScript, CSS, imágenes, etc.
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -34,15 +17,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 db = database.API_Mensajeria()
-
-class User(BaseModel):
-    username: str
-    password: str
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
 # Modelo para recibir datos del login
 class LoginRequest(BaseModel):
@@ -60,93 +34,24 @@ class UpdateProfilePictureRequest(BaseModel):
 class UpdateBgPictureRequest(BaseModel):
     bg_picture_url: str
 
-# @app.get("/", response_class=JSONResponse)
-# def show_login_page(request: Request):
-#     return templates.TemplateResponse("login.html", {"request": request})
-
-@app.get("/")
-async def serve_login_page(request: Request):
+@app.get("/", response_class=JSONResponse)
+def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-# Función para verificar el usuario en la base de datos y validar la contraseña
-def authenticate_user(username: str, password: str):
+@app.post("/login")
+async def login(request: LoginRequest):
     db.conecta()
-    # Obtiene el usuario sin filtrar por contraseña
-    user = db.checkUser(username)
-    print("User fetched from DB:", user)  # Debug
+    user = db.verificar_usuario(request.username, request.password)
+    db.desconecta()
 
-    if not user:
-        print("Usuario no encontrado en la BD.")
-        return None  # Si el usuario no existe, retorna None
-
-    stored_password = user["password"]
-    print("Stored password (hashed):", stored_password)  # Debug
-    print("Input password:", password)  # Debug
-
-    if check_password_hash(stored_password, password):
-        print("Contraseña correcta.")
-        # Usuario autenticado correctamente
-        return {"username": user["username"]}
-
-    print("Contraseña incorrecta.")
-    return None  # Si la contraseña es incorrecta
-
-
-# Función para generar un token JWT
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-# Middleware para verificar el token
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="No se pudo validar las credenciales",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        return username
-    except JWTError:
+    if user:
+        response = JSONResponse(
+            content={"message": "Login exitoso", "username": request.username}, status_code=200)
+        response.set_cookie(key="loggedInUser", value=request.username)
+        return response
+    else:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token no válido",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-# Endpoint para autenticarse y generar un token
-
-
-@app.post("/token", response_model=Token)
-async def login(user: User):
-    authenticated_user = authenticate_user(user.username, user.password)
-    if not authenticated_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Nombre de usuario o contraseña incorrectos",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": authenticated_user["username"]}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
-
-# Ruta protegida que requiere autenticación
-
-
-@app.get("/protected-endpoint")
-async def protected_route(current_user: str = Depends(get_current_user)):
-    return {"message": "Acceso concedido", "user": current_user}
-
+            status_code=401, detail="Usuario o contraseña incorrectos")
 
 @app.get("/users", response_class=JSONResponse)
 def usersList(request: Request):

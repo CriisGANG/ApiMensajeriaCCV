@@ -125,10 +125,15 @@ document.addEventListener("DOMContentLoaded", function () {
     lastMessageTimestamp.value = new Date().toISOString();
   });
 
+  const settingsButton = document.getElementById("settings");
   const settingsModal = document.getElementById("settings-modal");
   const closeButton = document.querySelector(".close-button");
   const saveProfilePictureButton = document.getElementById("save-profile-picture");
   const profilePictureUrlInput = document.getElementById("profile-picture-url");
+
+  settingsButton.addEventListener("click", function () {
+    settingsModal.style.display = "flex";
+  });
 
   closeButton.addEventListener("click", function () {
     settingsModal.style.display = "none";

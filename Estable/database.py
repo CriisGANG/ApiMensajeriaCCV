@@ -7,8 +7,8 @@ import datetime
 class API_Mensajeria(object):
     def conecta(self):
         # Conexion a la BBDD del servidor mySQL
-        self.db = pymysql.connect(host='localhost',  # 192.168.48.123
-                                  user='root',  # virginia
+        self.db = pymysql.connect(host='localhost',
+                                  user='root',
                                   db='whatsapp2425',
                                   charset='utf8mb4',
                                   autocommit=True,
@@ -24,18 +24,24 @@ class API_Mensajeria(object):
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
-    def carregaGrups(self, idUser):
-        # sql = "SELECT * FROM Groups"
-        sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
-        self.cursor.execute(sql, (idUser))
+    def carregaGrups(self):
+        sql = "SELECT * FROM Groups"
+        self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
 
     def verificar_usuario(self, username, password):
-        # La consulta solo debe traer la contraseña del usuario sin compararla en SQL
-        sql = "SELECT username, password FROM users WHERE username = %s"
-        self.cursor.execute(sql, (username,))
-        return self.cursor.fetchone()  # Devuelve el usuario si existe, None si no
+        sql = "SELECT count(*) from usuarisclase WHERE username='"+username+"'"
+        self.cursor.execute(sql)
+        ResQuery = self.cursor.fetchone()
+        if ResQuery['count(*)'] == 1:
+            sql = "SELECT password FROM usuarisclase WHERE username = %s"
+            self.cursor.execute(sql, (username,))
+            ResQuery = self.cursor.fetchone()
+            resposta = check_password_hash(ResQuery['password'], password)
+        else:
+            resposta = False
+        return resposta
 
     def get_user_id(self, username):
         sql = "SELECT id FROM usuarisclase WHERE username = %s"
@@ -95,7 +101,7 @@ class API_Mensajeria(object):
         """
         self.cursor.execute(sql, (sender_id, receiver_id, content, status))
         self.db.commit()
-
+        
     def insertarMensajeGrupo(self, sender_id, groupId, content):
         sql = "INSERT INTO messages (sender_id, group_Id, content, created_at) VALUES (%s, %s, %s, NOW())"
         self.cursor.execute(sql, (sender_id, groupId, content))
@@ -142,27 +148,3 @@ class API_Mensajeria(object):
         self.cursor.execute(sql, (user_id,))
         user = self.cursor.fetchone()
         return user['user_bg_picture_url'] if user else None
-
-    def newGroup(self, name, idUser):
-        sql = "INSERT INTO Groups (Name, Admin_ID) VALUES (%s, %s)"
-        self.cursor.execute(sql, (name, idUser))
-        group_id = self.cursor.lastrowid
-        self.db.commit()        
-        return group_id
-
-    def addUsersToGroup(self, user_id, group_id, is_admin):
-        sql = "INSERT INTO group_members (group_id, user_id, is_admin) VALUES (%s, %s, %s)"
-        self.cursor.execute(sql, (group_id, user_id, is_admin))
-        self.db.commit()
-        
-    def convertToAdmin(self, user_id, group_id):
-        sql = "UPDATE group_members SET is_admin = 1 WHERE user_id = %s AND group_id = %s"
-        self.cursor.execute(sql, (user_id, group_id))
-        self.db.commit()
-        
-    def isAdmin(self, user_id, group_id):
-        sql = "SELECT is_admin FROM group_members WHERE user_id =%s AND group_id =%s"
-        self.cursor.execute(sql, (user_id, group_id))
-        ResQuery = self.cursor.fetchone()
-        print(ResQuery)
-        return ResQuery['is_admin'] if ResQuery else None # La idea es mirar si el is_admin es 0 o 1. Si es 1, entonces el usuario tendrá unas configuraciones extra: para hacer admin a otra persona o expulsar a alguien
