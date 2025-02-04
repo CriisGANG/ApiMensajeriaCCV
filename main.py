@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, Query
+from fastapi import FastAPI, HTTPException, Request, Depends, Query, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -7,17 +7,10 @@ from fastapi.security import OAuth2PasswordBearer
 from werkzeug.security import generate_password_hash, check_password_hash
 import database
 import datetime
-from fastapi import WebSocket, WebSocketDisconnect
-from fastapi import FastAPI, Depends, HTTPException, status, Request
-from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.context import CryptContext
-from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordBearer
 from typing import Optional, List
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 
 SECRET_KEY = "mysecretkey"
 ALGORITHM = "HS256"
