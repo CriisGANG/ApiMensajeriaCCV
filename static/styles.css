@@ -81,6 +81,9 @@ h1, h2 {
   display: flex;
   align-items: center;
   cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+  color: #000000; /* Cambiar el color de los nombres de la lista de usuarios a negro */
 }
 
 .user-list li:hover, .group-list li:hover, .group-members-list li:hover {
@@ -457,18 +460,7 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   color: #000000;
 }
 
-/** JQuery **/
-
-/* .chat-messages {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 10px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-} */
-
-.bg_change{
-  background-color: #ad1f1f;
+.username {
+  color: #000000; /* Cambiar el color del nombre de usuario a negro */
 }
->>>>>>> development
+

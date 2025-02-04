@@ -174,9 +174,8 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.removeItem("loggedInUser");
     window.location.href = "/";
   });
-
   
   // Ejecutar fetchLatestMessages cada 5 segundos
   setInterval(fetchLatestMessages, 5000);
 });
->>>>>>> development
+
