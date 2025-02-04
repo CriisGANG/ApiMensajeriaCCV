@@ -81,6 +81,9 @@ h1, h2 {
   display: flex;
   align-items: center;
   cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+  color: #000000; /* Cambiar el color de los nombres de la lista de usuarios a negro */
 }
 
 .user-list li:hover, .group-list li:hover, .group-members-list li:hover {
@@ -457,6 +460,7 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   color: #000000;
 }
 
+<<<<<<< HEAD
 /** JQuery **/
 
 /* .chat-messages {
@@ -472,3 +476,12 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   background-color: #ad1f1f;
 }
 >>>>>>> Stashed changes
+=======
+.bg_change{
+  background-color: #ad1f1f;
+}
+
+.username {
+  color: #000000; /* Cambiar el color del nombre de usuario a negro */
+}
+>>>>>>> refs/remotes/origin/development
