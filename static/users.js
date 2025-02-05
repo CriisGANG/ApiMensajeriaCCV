@@ -35,16 +35,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   groups.forEach(group => {
     const li = document.createElement("li");
+    li.classList.add("border-b", "hover:bg-gray-100", "transition", "p-4", "flex", "items-center", "space-x-4");
     li.textContent = group.name;
-    li.addEventListener("click", function () {
-      window.location.href = `/chatsGrupos/${group.id}`;
-    });
-    userGroupList.appendChild(li);
+    li.innerHTML = `
+    <div class="flex-shrink-0">
+      <img class="w-10 h-10 rounded-full" src="https://via.placeholder.com/150" alt="${group.name}">
+    </div>
+    <div>
+      <h3 class="font-semibold">${group.name}</h3>
+      <p class="text-sm text-gray-600">Estado</p>
+    </div>
+  `;
+  li.addEventListener("click", function () {
+    window.location.href = `/chatsGrupos/${group.id}`;
+  });
+  userGroupList.appendChild(li);
   });
 
   // Añadir evento de clic para los elementos de la lista de usuarios
   userGroupList.addEventListener("click", function (event) {
-    if (event.target.tagName === "LI") {
+    if (event.target.tagName === "li") {
       // Desplazar la lista de usuarios a la izquierda y mostrar el chat
       appContainer.classList.remove("centered");
       appContainer.classList.add("shifted");
