@@ -4,44 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat con {{ username }}</title>
+<<<<<<< HEAD
+=======
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+>>>>>>> development
   <link rel="stylesheet" href="/static/styles.css">
   <script defer src="/static/chat.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <div class="sidebar">
-      <h1>Chats</h1>
-      <ul id="users" class="user-list">
-        <!-- Lista de usuarios -->
-      </ul>
-      <button id="logout" class="logout-button">Cerrar Sesión</button>
-    </div>
-    <div id="chat-container" class="chat-container visible">
-      <div class="chat-header">
-        <div class="chat-header-info">
-          <img src="{{ selected_user_profile_picture_url }}" alt="Foto de perfil" class="profile-picture">
-          <h2>{{ username }}</h2>
-        </div>
-        <div class="header-actions">
-          <img src="{{ user_profile_picture_url }}" alt="Foto de perfil" class="profile-picture" id="profile-picture">
-          <button id="appearance-button" class="appearance-button">Apariencia</button>
-          <div id="appearance-dropdown" class="appearance-dropdown">
-            <button id="dark-mode" class="dropdown-item">Modo Oscuro</button>
-            <button id="high-contrast" class="dropdown-item">Contraste Alto</button>
-            <button id="change-bg" class="dropdown-item">Cambiar Fondo</button>
+  <div class="container-fluid h-100">
+    <div class="row h-100">
+      <div id="Prueba" class="col-md-3 col-sm-12 sidebar bg-dark text-white p-3">
+        <h1>Chats</h1>
+        <ul id="users" class="list-group user-list">
+          <!-- Lista de usuarios -->
+        </ul>
+        <button id="logout" class="btn btn-danger mt-3">Cerrar Sesión</button>
+      </div>
+      <div id="chat-container" class="col-md-9 col-sm-12 chat-container d-flex flex-column">
+        <div class="chat-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+          <div class="chat-header-info d-flex align-items-center">
+            <img src="{{ selected_user_profile_picture_url }}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
+            <h2 class="username">{{ username }}</h2>
+          </div>
+          <div class="header-actions d-flex align-items-center position-relative">
+            <img src="{{ user_profile_picture_url }}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2" id="profile-picture">
+            <button id="appearance-button" class="btn btn-secondary dropdown-toggle">Apariencia</button>
+            <div id="appearance-dropdown" class="appearance-dropdown dropdown-menu dropdown-menu-right">
+              <button id="dark-mode" class="dropdown-item">Modo Oscuro</button>
+              <button id="high-contrast" class="dropdown-item">Contraste Alto</button>
+              <button id="change-bg" class="dropdown-item">Cambiar Fondo</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div id="chat-messages" class="chat-messages" style="background-image: url('{{ user_bg_picture_url }}');">
-        {% for message in conversation %}
-          <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %}">
-            <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
-          </div>
-        {% endfor %}
-      </div>
-      <div class="chat-input-container">
-        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
-        <button id="send-message" class="send-message-button">&#9658;</button>
+        <div id="chat-messages" class="chat-messages flex-grow-1 p-3" style="background-image: url('{{ user_bg_picture_url }}');">
+          {% for message in conversation %}
+            <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %} p-2 mb-2 rounded">
+              <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="chat-input-container d-flex p-3 bg-light border-top">
+          <input type="text" id="chat-input" class="form-control mr-2" placeholder="Escribe un mensaje...">
+          <button id="send-message" class="btn btn-primary">&#9658;</button>
+        </div>
       </div>
     </div>
   </div>
@@ -54,7 +60,7 @@
       <span class="close-button">&times;</span>
       <h2>Cambiar foto de perfil</h2>
       <input type="text" id="profile-picture-url" placeholder="Ingresa la URL de la imagen">
-      <button id="save-profile-picture" class="save-button">Guardar</button>
+      <button id="save-profile-picture" class="btn btn-primary">Guardar</button>
     </div>
   </div>
 
@@ -64,10 +70,14 @@
       <span class="close-button">&times;</span>
       <h2>Cambiar imagen de fondo</h2>
       <input type="text" id="bg-picture-url" placeholder="Ingresa la URL de la imagen">
-      <button id="save-bg-picture" class="save-button">Guardar</button>
+      <button id="save-bg-picture" class="btn btn-primary">Guardar</button>
     </div>
   </div>
 
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
   document.getElementById("profile-picture").addEventListener("click", function() {
     document.getElementById("settings-modal").style.display = "block";
@@ -130,7 +140,7 @@
   });
 
   window.onclick = function(event) {
-    if (!event.target.matches('.appearance-button')) {
+    if (!event.target.matches('#appearance-button')) {
       var dropdowns = document.getElementsByClassName("appearance-dropdown");
       for (var i = 0; i < dropdowns.length; i++) {
         var openDropdown = dropdowns[i];
@@ -318,6 +328,7 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .appearance-button {
@@ -336,8 +347,8 @@ body {
   background-color: #ffffff;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1;
-  right: 10px;
-  top: 60px;
+  right: 0;
+  top: 100%;
   border-radius: 5px;
   overflow: hidden;
 }

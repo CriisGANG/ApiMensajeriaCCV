@@ -2,7 +2,9 @@ import pymysql.cursors
 import sqlalchemy as database
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
+from passlib.context import CryptContext
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class API_Mensajeria(object):
     def conecta(self):
@@ -32,10 +34,18 @@ class API_Mensajeria(object):
         return ResQuery
 
     def verificar_usuario(self, username, password):
-        # La consulta solo debe traer la contraseña del usuario sin compararla en SQL
-        sql = "SELECT username, password FROM users WHERE username = %s"
+        sql = "SELECT password FROM usuarisclase WHERE username = %s"
         self.cursor.execute(sql, (username,))
-        return self.cursor.fetchone()  # Devuelve el usuario si existe, None si no
+        ResQuery = self.cursor.fetchone()
+        if ResQuery and ResQuery['password']:
+            hashed_password = ResQuery['password']
+            if hashed_password:
+                try:
+                    return pwd_context.verify(password, hashed_password)
+                except (ValueError, AttributeError):
+                    # Si el hash no es reconocido o hay un error de atributo, intenta verificarlo con el método anterior
+                    return check_password_hash(hashed_password, password)
+        return False
 
     def get_user_id(self, username):
         sql = "SELECT id FROM usuarisclase WHERE username = %s"

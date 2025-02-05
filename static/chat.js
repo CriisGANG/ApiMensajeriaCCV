@@ -46,49 +46,6 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // Función para enviar un mensaje
-  // sendMessageButton.addEventListener("click", async function () {
-  //   const messageContent = chatInput.value;
-  //   if (messageContent.trim() === "") return; // trim()elimina espacios en blanco del string
-
-  //   // Enviar mensaje a través del WebSocket
-  //   const messageId = Date.now(); // Generar un ID temporal para el mensaje
-  //   socket.send(JSON.stringify({
-  //     id: messageId,
-  //     sender: loggedInUser,
-  //     content: messageContent
-  //   }));
-
-  //   // Enviar mensaje a través de fetch
-  //   await fetch('/send-message', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       receiver_username: receiverUsername,
-  //       content: messageContent
-  //     })
-  //   });
- 
-  //    // Verificar si el mensaje ya fue mostrado
-  //    if (displayedMessageIds.has(messageId)) {
-  //     return; // No agregar mensaje duplicado
-  // }
-
-  //   const messageElement = document.createElement("div");
-  //   messageElement.classList.add("message", "sent");
-  //   //console.log(messageElement)
-  //   messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
-  //   chatMessages.appendChild(messageElement);
-  //   chatInput.value = "";
-
-  //   // Registrar el mensaje en el Set
-  //   displayedMessageIds.add(messageId);
-
-  //   // Actualizar el timestamp del último mensaje enviado
-  //   lastMessageTimestamp.value = new Date().toISOString();
-  // });
-  // Función para enviar un mensaje
   sendMessageButton.addEventListener("click", async function () {
     const messageContent = chatInput.value;
     if (messageContent.trim() === "") return;
@@ -130,9 +87,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const saveProfilePictureButton = document.getElementById("save-profile-picture");
   const profilePictureUrlInput = document.getElementById("profile-picture-url");
 
-  closeButton.addEventListener("click", function () {
-    settingsModal.style.display = "none";
-  });
+  if (settingsButton) {
+    settingsButton.addEventListener("click", function () {
+      settingsModal.style.display = "flex";
+    });
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener("click", function () {
+      settingsModal.style.display = "none";
+    });
+  }
 
   window.addEventListener("click", function (event) {
     if (event.target === settingsModal) {
@@ -140,28 +105,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  saveProfilePictureButton.addEventListener("click", async function () {
-    const profilePictureUrl = profilePictureUrlInput.value;
-    if (!profilePictureUrl) return;
+  if (saveProfilePictureButton) {
+    saveProfilePictureButton.addEventListener("click", async function () {
+      const profilePictureUrl = profilePictureUrlInput.value;
+      if (!profilePictureUrl) return;
 
-    try {
-      const response = await fetch("/update-profile-picture", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profile_picture_url: profilePictureUrl })
-      });
+      try {
+        const response = await fetch("/update-profile-picture", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profile_picture_url: profilePictureUrl })
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        document.querySelector(".profile-picture").src = data.new_profile_picture_url;
-        settingsModal.style.display = "none";
-      } else {
-        console.error("Error al actualizar la foto de perfil");
+        if (response.ok) {
+          const data = await response.json();
+          document.querySelector(".profile-picture").src = data.new_profile_picture_url;
+          settingsModal.style.display = "none";
+        } else {
+          console.error("Error al actualizar la foto de perfil");
+        }
+      } catch (error) {
+        console.error("Error en la petición:", error);
       }
-    } catch (error) {
-      console.error("Error en la petición:", error);
-    }
-  });
+    });
+  }
 
   // Evento para cerrar sesión
   document.getElementById("logout").addEventListener("click", function () {
@@ -169,7 +136,13 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "/";
   });
 
-
   // Ejecutar fetchLatestMessages cada 5 segundos
   setInterval(fetchLatestMessages, 5000);
+
+  const appearanceButton = document.getElementById("appearance-button");
+  const appearanceDropdown = document.getElementById("appearance-dropdown");
+
+  appearanceButton.addEventListener("click", function () {
+    appearanceDropdown.classList.toggle("show");
+  });
 });
