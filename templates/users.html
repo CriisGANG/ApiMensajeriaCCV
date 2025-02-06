@@ -1,30 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Usuarios</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  <script defer src="/static/users.js"></script>
-</head>
-<body>
-  <div class="app-container centered">
-    <div class="sidebar collapsed">
-      <h1>Lista de Usuarios</h1>
-      <button id="refresh-users">Actualizar</button>
-      <ul id="users" class="user-list">
-        <!-- Aquí se generarán los elementos de la lista de usuarios -->
-      </ul>
-      <button id="logout" class="logout-button">Cerrar Sesión</button>
-    </div>
-    <div id="chat-container" class="chat-container">
-      <div id="chat-messages" class="chat-messages"></div>
-      <div class="chat-input-container">
-        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
-        <button id="send-message" class="send-message-button">Enviar</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Usuarios</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script defer src="/static/users.js"></script>
+  </head>
+  <body>
+    <div class="app-container centered">
+      <div class="sidebar collapsed">
+        <h1>Lista de Usuarios</h1>
+        <button id="refresh-users">Actualizar</button>
+        <button id="new-group">Nuevo grupo</button>
+        <ul id="users-groups" class="user-list">
+          <!-- Aquí se generarán los elementos de la lista de usuarios -->
+        </ul>
+        <button id="logout" class="logout-button">Cerrar Sesión</button>
+      </div>
+      <div id="chat-container" class="chat-container">
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+          <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje..." />
+          <button id="send-message" class="send-message-button">Enviar</button>
+        </div>
       </div>
     </div>
-  </div>
-  <script id="users-data" type="application/json">{{ users | tojson }}</script>
-</body>
+    <script id="users-data" type="application/json">{{ users | tojson }}</script>
+    <script id="groups-data" type="application/json">{{ groups | tojson }}</script>
+  </body>
 </html>

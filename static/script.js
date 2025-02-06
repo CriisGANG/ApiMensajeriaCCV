@@ -71,10 +71,10 @@ if (localStorage.getItem("loggedInUser")) {
   });
 }
 
-// Verificar si hay token
-if (!localStorage.getItem("token")) { // Creo que este token es el nombre que tiene en el JSON (?).
-    window.location.href = "login.html";
-}
+// // Verificar si hay token
+// if (!localStorage.getItem("token")) { // Creo que este token es el nombre que tiene en el JSON (?).
+//     window.location.href = "login.html";
+// }
 
 // Lo que hará el código si está logeado.
 document.getElementById("logout").addEventListener("click", () => {

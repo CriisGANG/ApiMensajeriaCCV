@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const loggedInUser = localStorage.getItem("loggedInUser");
   const lastMessageTimestamp = document.getElementById("last-message-timestamp");
   const users = JSON.parse(document.getElementById("users-data").textContent);
+  const groups = JSON.parse(document.getElementById("groups-data").textContent);
   const userList = document.getElementById("users");
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
@@ -16,6 +17,15 @@ document.addEventListener("DOMContentLoaded", function () {
     li.textContent = user.username;
     li.addEventListener("click", function () {
       window.location.href = `/chat/${user.username}`;
+    });
+    userList.appendChild(li);
+  });
+
+  groups.forEach(group => {
+    const li = document.createElement("li");
+    li.textContent = group.name;
+    li.addEventListener("click", function () {
+      window.location.href = `/chatsGrupos/${group.id}`;
     });
     userList.appendChild(li);
   });
@@ -39,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Registrar el mensaje en el Set
       displayedMessageIds.add(message.id);
       console.log(displayedMessageIds);
-      
+
       // Actualizar el timestamp del último mensaje recibido
       lastMessageTimestamp.value = message.created_at;
     }
@@ -55,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Verificar si el mensaje ya fue mostrado antes de enviarlo
     if (displayedMessageIds.has(messageId)) {
-        return; // No agregar mensaje duplicado
+      return; // No agregar mensaje duplicado
     }
 
     // Registrar el mensaje en el Set antes de enviarlo
@@ -87,11 +97,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const saveProfilePictureButton = document.getElementById("save-profile-picture");
   const profilePictureUrlInput = document.getElementById("profile-picture-url");
 
-  if (settingsButton) {
-    settingsButton.addEventListener("click", function () {
-      settingsModal.style.display = "flex";
-    });
-  }
+  // if (settingsButton) {
+  //   settingsButton.addEventListener("click", function () {
+  //     settingsModal.style.display = "flex";
+  //   });
+  // }
 
   if (closeButton) {
     closeButton.addEventListener("click", function () {

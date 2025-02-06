@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // console.log("DOM fully loaded and parsed");
+    console.log("DOM fully loaded and parsed");
 
     const chatInput = document.getElementById("chat-input");
     const sendMessageButtonGroup = document.getElementById("send-message-group");
@@ -35,8 +35,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.getElementById("logout").addEventListener("click", function () {
-        localStorage.removeItem("loggedInUser");
-        window.location.href = "/";
+    document.getElementById("leave").addEventListener("click", async function () {
+        const groupId = window.location.pathname.split("/").pop();
+        const response = await fetch("/leaveGroup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ group_id: groupId })
+        });
+
+        if (response.ok) {
+            window.location.href = "/users";
+        } else {
+            console.error("Error leaving group:", response.statusText);
+        }
     });
 });

@@ -176,3 +176,8 @@ class API_Mensajeria(object):
         ResQuery = self.cursor.fetchone()
         print(ResQuery)
         return ResQuery['is_admin'] if ResQuery else None # La idea es mirar si el is_admin es 0 o 1. Si es 1, entonces el usuario tendrá unas configuraciones extra: para hacer admin a otra persona o expulsar a alguien
+
+    def leaveGroup(self, user_id, group_id):
+        sql = "DELETE FROM group_members WHERE user_id = %s AND group_id = %s"
+        self.cursor.execute(sql, (user_id, group_id))
+        self.db.commit()

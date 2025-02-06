@@ -3,12 +3,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const sidebar = document.querySelector(".sidebar");
   const chatContainer = document.querySelector(".chat-container");
   const users = JSON.parse(document.getElementById("users-data").textContent);
+  const groups = JSON.parse(document.getElementById("groups-data").textContent);
+  const userGroupList = document.getElementById("users-groups");
   const userList = document.getElementById("users");
+  const newGroup = document.getElementById("new-group");
 
   // Inicialmente centrar la lista de usuarios
   appContainer.classList.add("centered");
   sidebar.classList.add("collapsed");
 
+  console.log(groups); // Array con los grupos (id y name)
+  for (let group of groups) {
+    console.log(group.name); // El nombre de cada grupo
+  }
   users.forEach(user => {
     const li = document.createElement("li");
     li.textContent = user.username;
@@ -20,21 +27,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   groups.forEach(group => {
     const li = document.createElement("li");
-    li.classList.add("border-b", "hover:bg-gray-100", "transition", "p-4", "flex", "items-center", "space-x-4");
+  //   li.classList.add("border-b", "hover:bg-gray-100", "transition", "p-4", "flex", "items-center", "space-x-4");
     li.textContent = group.name;
-    li.innerHTML = `
-    <div class="flex-shrink-0">
-      <img class="w-10 h-10 rounded-full" src="https://via.placeholder.com/150" alt="${group.name}">
-    </div>
-    <div>
-      <h3 class="font-semibold">${group.name}</h3>
-      <p class="text-sm text-gray-600">Estado</p>
-    </div>
-  `;
-  li.addEventListener("click", function () {
-    window.location.href = `/chatsGrupos/${group.id}`;
-  });
-  userGroupList.appendChild(li);
+  //   li.innerHTML = `
+  //   <div class="flex-shrink-0">
+  //     <img class="w-10 h-10 rounded-full" src="https://via.placeholder.com/150" alt="${group.name}">
+  //   </div>
+  //   <div>
+  //     <h3 class="font-semibold">${group.name}</h3>
+  //     <p class="text-sm text-gray-600">Estado</p>
+  //   </div>
+  // `;
+    li.addEventListener("click", function () {
+      window.location.href = `/chatsGrupos/${group.id}`;
+    });
+    userGroupList.appendChild(li);
   });
 
   // Añadir evento de clic para los elementos de la lista de usuarios
@@ -51,8 +58,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  document.getElementById("logout").addEventListener("click", function () {
-    localStorage.removeItem("loggedInUser");
-    window.location.href = "/";
-  });
+
+  newGroup.addEventListener("click", function (event) {
+    window.location.href = "/newGroup";
+  })
+
+  // document.getElementById("logout").addEventListener("click", function () {
+  //   localStorage.removeItem("loggedInUser");
+  //   window.location.href = "/";
+  // });
 });

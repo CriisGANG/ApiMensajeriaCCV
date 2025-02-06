@@ -82,17 +82,41 @@ class UpdateProfilePictureRequest(BaseModel):
 
 class UpdateBgPictureRequest(BaseModel):
     bg_picture_url: str
+class NewGroupRequest(BaseModel):
+    groupName: str
+    users: list
 
 # @app.get("/", response_class=JSONResponse)
 # def show_login_page(request: Request):
 #     return templates.TemplateResponse("login.html", {"request": request})
 
-@app.get("/")
-async def serve_login_page(request: Request):
+@app.get("/", response_class=JSONResponse)
+def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+
+
 # Función para verificar el usuario en la base de datos y validar la contraseña
-def authenticate_user(username: str, password: str):
+def authenticate_user(username: str, password: str, request: Request):
+    db.conecta()
+    user = db.verificar_usuario(request.username, request.password)
+    db.desconecta()
+
+    if user:
+        access_token_expires = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": request.username}, expires_delta=access_token_expires
+        )
+        response = JSONResponse(content={"message": "Login exitoso", "username": request.username, "access_token": access_token}, status_code=200)
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        return response
+    else:
+        raise HTTPException(
+            status_code=401, detail="Usuario o contraseña incorrectos"
+        )
+        
+@app.post("/login")
+async def login(request: LoginRequest):
     db.conecta()
     user = db.verificar_usuario(request.username, request.password)
     db.desconecta()
@@ -116,10 +140,18 @@ def usersList(request: Request, current_user: str = Depends(get_current_user)):
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print(f"Username: {logged_in_user}") # Sale virginiajimenez
-    print(f"Username: {logged_in_user_id}") # Sale 14
+    print(f"UserId: {logged_in_user_id}") # Sale 14
     users = db.carregaUsuaris()
+    groups = db.carregaGrups(logged_in_user_id)
+    print(f"Grupos: {groups}") # Muestra todos los grupos, junto su nombre e id.
+
+    # Convert datetime objects to strings
+    for group in groups:
+        for key, value in group.items():
+            if isinstance(value, datetime.datetime):
+                group[key] = value.isoformat()
     db.desconecta()
-    return templates.TemplateResponse("users.html", {"request": request, "users": users})
+    return templates.TemplateResponse("users.html", {"request": request, "users": users, "groups": groups})
 
 
 @app.get("/groups")
@@ -176,6 +208,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
+    groups = db.carregaGrups(logged_in_user_id)
 
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
@@ -190,17 +223,19 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         message['created_at'] = message['created_at'].isoformat()
 
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
+    # print(users) # Hace un print con toda la info de los usuarios.
     user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
     db.desconecta()
-
+    print(groups)
     return templates.TemplateResponse("chat.html", {
         "request": request,
         "conversation": conversation,
         "username": username,
         "users": users,
+        "groups": groups,
         "user_profile_picture_url": user_profile_picture_url,  # Asegúrate de pasar esta variable a la plantilla
         "selected_user_profile_picture_url": selected_user_profile_picture_url,
         "user_bg_picture_url": user_bg_picture_url
@@ -341,6 +376,38 @@ def newGroup(request: Request, current_user: str = Depends(get_current_user)):
     
     return templates.TemplateResponse("newGroup.html", {"request": request, "users": usersList})
 
+# @app.delete("/leaveGroup/{current_user}/{groupId}")
+# @app.delete("/leaveGroup/{current_user}/{groupId}")
+# def leaveGroup(groupId, request: Request, current_user: str = Depends(get_current_user)):
+#     db.conecta()
+#     logged_in_user = current_user
+#     logged_in_user_id = db.get_user_id(logged_in_user)
+#     selectedGroup = db.getGroup(groupId)
+#     print(logged_in_user_id)
+#     print(selectedGroup)
+#     db.leaveGroup(logged_in_user_id, selectedGroup)
+#     db.desconecta()
+#     return templates.TemplateResponse("users.html", {"request": request, "users": usersList})
+
+@app.post("/leaveGroup", response_class=JSONResponse)
+async def leave_group(request: Request, current_user: str = Depends(get_current_user)):
+    data = await request.json()
+    db.conecta()
+    try:
+        user_id = db.get_user_id(current_user)
+        group_id = data.get('group_id')
+
+        if not user_id or not group_id:
+            raise HTTPException(status_code=400, detail="Missing user_id or group_id")
+
+        db.leaveGroup(user_id, group_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.desconecta()
+
+    return JSONResponse(content={"success": True}, status_code=200)
+
 # Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []
 
@@ -383,5 +450,8 @@ async def websocket_chat(websocket: WebSocket, username: str):
             db.desconecta()
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
