@@ -12,10 +12,11 @@ document.addEventListener("DOMContentLoaded", function () {
   sidebar.classList.add("collapsed");
 
   users.forEach(user => {
+    const profilePictureUrl = user.profile_picture_url || '/static/default-profile.png'; // Imagen por defecto
     const li = document.createElement("li");
     li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
     li.innerHTML = `
-      <img src="${user.profile_picture_url}" alt="${user.username}" class="profile-picture rounded-circle mr-2">
+      <img src="${profilePictureUrl}" alt="${user.username}" class="profile-picture rounded-circle mr-2">
       <div class="user-info">
         <span class="user-name">${user.username}</span>
         <span class="user-status">${user.status}</span>
@@ -23,15 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
     li.addEventListener("click", function () {
       window.location.href = `/chat/${user.username}`;
-    });
-    userGroupList.appendChild(li);
-  });
-
-  groups.forEach(group => {
-    const li = document.createElement("li");
-    li.textContent = group.name;
-    li.addEventListener("click", function () {
-      window.location.href = `/chatsGrupos/${group.id}`;
     });
     userGroupList.appendChild(li);
   });
@@ -48,6 +40,15 @@ document.addEventListener("DOMContentLoaded", function () {
       // Aquí puedes añadir el código para cargar el chat del usuario seleccionado
       // ...
     }
+  });
+
+  groups.forEach(group => {
+    const li = document.createElement("li");
+    li.textContent = group.name;
+    li.addEventListener("click", function () {
+      window.location.href = `/chatsGrupos/${group.id}`;
+    });
+    userGroupList.appendChild(li);
   });
 
   newGroup.addEventListener("click", function (event) {

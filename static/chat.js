@@ -12,11 +12,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
 
   // Cargar la lista de usuarios
+  // Limpiar la lista de usuarios antes de agregar nuevos
+  userList.innerHTML = '';
+
+  // Cargar la lista de usuarios
   users.forEach(user => {
+    const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png'; // Imagen por defecto
     const li = document.createElement("li");
     li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
     li.innerHTML = `
-      <img src="${user.profile_picture_url}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
+      <img src="${profilePictureUrl}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
       <div class="user-info">
         <span class="user-name">${user.username}</span>
         <span class="user-status">${user.status}</span>
@@ -39,8 +44,11 @@ document.addEventListener("DOMContentLoaded", function () {
       messageElement.classList.add(
         "message",
         message.sender_username === loggedInUser ? "sent" : "received",
-        message.status === "llegit" ? "read" : message.status === "rebut" ? "received" : "sent"
+        "p-2",
+        "mb-2",
+        "rounded"
       );
+      messageElement.style.textAlign = message.sender_username === loggedInUser ? "right" : "left"; // Alinear a la derecha si es el usuario
       messageElement.innerHTML = `<p><strong>${message.sender_username || "undefined"}</strong>: ${message.content}</p>`;
       chatMessages.appendChild(messageElement);
 
@@ -78,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Crear el elemento del mensaje y agregarlo al chat
     const messageElement = document.createElement("div");
-    messageElement.classList.add("message", "sent");
+    messageElement.classList.add("message", "sent", "p-2", "mb-2", "rounded");
     messageElement.setAttribute("data-id", messageId); // Guardar el ID en el HTML
     messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
     chatMessages.appendChild(messageElement);

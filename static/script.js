@@ -49,12 +49,14 @@ document.getElementById("loginForm").addEventListener("submit", async function (
           window.location.href = "/chat";  // Redirigir a otra página tras el login
       } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
+          errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
       }
 
   } catch (error) {
       // 📌 Captura cualquier error en la petición fetch()
       console.error("Error en la petición:", error);
       errorMessage.textContent = "Error de conexión con el servidor.";
+      errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
   }
 });
 
