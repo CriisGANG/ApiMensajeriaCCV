@@ -15,7 +15,6 @@
         <h1 class="text-light">Chats</h1>
         <ul id="users" class="list-group user-list">
         </ul>
-        <button id="logout" class="btn btn-danger mt-3">Cerrar Sesión</button>
       </div>
       <div id="chat-container" class="col-md-9 col-sm-12 chat-container d-flex flex-column">
         {% if request.path == '/chat' %}
@@ -26,6 +25,7 @@
             <button id="go-to-settings" class="btn btn-light mr-2">Configuración</button>
             <button id="go-to-profile" class="btn btn-light mr-2">Perfil</button>
             <button id="create-group" class="btn btn-light">Crear Grupo</button>
+            <button id="logout" class="btn btn-danger ml-2">Cerrar Sesión</button>
           </div>
         </div>
         <div class="menu-content flex-grow-1 p-3">
@@ -46,11 +46,12 @@
               <button id="high-contrast" class="dropdown-item">Contraste Alto</button>
               <button id="change-bg" class="dropdown-item">Cambiar Fondo</button>
             </div>
+            <button id="logout" class="btn btn-danger ml-2">Cerrar Sesión</button>
           </div>
         </div>
         <div id="chat-messages" class="chat-messages flex-grow-1 p-3" style="background-image: url('{{ user_bg_picture_url }}');">
           {% for message in conversation %}
-            <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %} p-2 mb-2 rounded">
+            <div class="message {% if message.sender_username == username %}received{% else %}sent{% endif %} p-2 mb-2 rounded">
               <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
             </div>
           {% endfor %}
@@ -70,6 +71,7 @@
   </div>
   <input type="hidden" id="last-message-timestamp" value="{% if conversation %}{{ conversation[-1].created_at }}{% endif %}">
   <script id="users-data" type="application/json">{{ users | tojson }}</script>
+  <script id="conversations-data" type="application/json">{{ conversations | tojson }}</script>
 
   <!-- Modal para cambiar la foto de perfil -->
   <div id="settings-modal" class="modal">
@@ -177,11 +179,16 @@
   });
 
   document.getElementById("go-to-profile").addEventListener("click", function() {
-    window.location.href = "/profile";
+    window.location.href = "/perfil.html";
   });
 
   document.getElementById("create-group").addEventListener("click", function() {
     window.location.href = "/newGroup";
+  });
+
+  document.getElementById("logout").addEventListener("click", function() {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "/";
   });
   </script>
 </body>

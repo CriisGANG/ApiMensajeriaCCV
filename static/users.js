@@ -60,6 +60,16 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "/";
   });
 
+  // Conectar al WebSocket para recibir notificaciones de nuevos mensajes
+  const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${localStorage.getItem("loggedInUser")}`);
+
+  socket.onmessage = function (event) {
+    const message = JSON.parse(event.data);
+    if (message.sender_username !== localStorage.getItem("loggedInUser")) {
+      alert("Nuevo mensaje recibido de " + message.sender_username);
+    }
+  };
+
   // document.getElementById("cambiar-a-grupos").addEventListener("click", function () {
   //   window.location.href = "/groups";
   // });
