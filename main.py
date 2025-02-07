@@ -128,9 +128,9 @@ def usersList(request: Request, current_user: str = Depends(get_current_user)):
     return templates.TemplateResponse("users.html", {"request": request, "users": users, "groups": groups})
 
 @app.get("/groups")
-async def groupList(request: Request):
+async def groupList(request: Request, idUser):
     db.conecta()
-    groups = db.carregaGrups()
+    groups = db.carregaGrups(idUser)
     db.desconecta()
 
     # Convert datetime objects to strings
@@ -388,4 +388,27 @@ async def websocket_chat(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
 
+@app.get("/ultimos_mensajes")
+def ultimos_mensajes():
+    try:
+        data = db.carregaUltimsMssg()  
+        usuarios_listados = set()
+        mensajes_filtrados = []
 
+        for mssg in data:
+            sender = mssg["sender_name"]
+            receiver = mssg["receiver_name"]
+
+            # Si el sender o receiver no están en el set, los agregamos y guardamos el mensaje
+            if sender not in usuarios_listados or receiver not in usuarios_listados:
+                mensajes_filtrados.append(mssg)
+                usuarios_listados.add(sender)
+                usuarios_listados.add(receiver)
+
+        return {"mensajes": mensajes_filtrados, "usuarios": list(usuarios_listados)}
+    except Exception as e:
+        return {"error": str(e)}
+        
+      
+    
+   
