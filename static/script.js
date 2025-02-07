@@ -49,24 +49,34 @@ document.getElementById("loginForm").addEventListener("submit", async function (
           window.location.href = "/chat";  // Redirigir a otra página tras el login
       } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
+          errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
       }
 
   } catch (error) {
       // 📌 Captura cualquier error en la petición fetch()
       console.error("Error en la petición:", error);
       errorMessage.textContent = "Error de conexión con el servidor.";
+      errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
   }
 });
 
 // Verificar si el usuario ya está logueado
 if (localStorage.getItem("loggedInUser")) {
   document.body.innerHTML = `
-    <h1>Bienvenido, ${localStorage.getItem("loggedInUser")}!</h1>
-    <button id="logout">Cerrar Sesión</button>
+    <div class="welcome-container">
+      <h1 class="welcome-title">Bienvenido, ${localStorage.getItem("loggedInUser")}!</h1>
+      <p class="welcome-message">Ya has iniciado sesión.</p>
+      <button id="go-to-chat" class="btn btn-primary">Ir al chat</button>
+      <button id="logout" class="btn btn-secondary">Cerrar Sesión</button>
+    </div>
   `;
 
   document.getElementById("logout").addEventListener("click", function () {
       localStorage.removeItem("loggedInUser");
       window.location.reload();
+  });
+
+  document.getElementById("go-to-chat").addEventListener("click", function () {
+      window.location.href = "/chat";
   });
 }
