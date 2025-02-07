@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
@@ -245,8 +245,10 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     loggedInUser = current_user
-    loggedInUser = db.get_user_id(loggedInUser)
+    loggedInUserId = db.get_user_id(loggedInUser)
     selectedGroup = db.getGroup(groupId)
+    esAdmin = db.isAdmin(loggedInUserId, groupId)
+    print(esAdmin)
 
     if not loggedInUser or not selectedGroup:
         db.desconecta()
@@ -260,7 +262,28 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
+    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members, "esadmin": esAdmin})
+
+@app.get("/manageMembers/{group_id}", response_class=HTMLResponse)
+async def manage_members(request: Request, group_id: int, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    group = db.getGroup(group_id)
+    loggedInUser = current_user
+    loggedInUserId = db.get_user_id(loggedInUser)
+    selectedGroup = db.getGroup(group_id)
+    members = db.getGroupMembersExceptYou(group_id, loggedInUserId)
+    all_users = db.carregaUsuaris()  # Fetch all users
+
+    # Add is_admin attribute to each member
+    for member in members:
+        member['is_admin'] = db.isAdmin(member['id'], group_id)
+
+    db.desconecta()
+    
+    if not group:
+        raise HTTPException(status_code=404, detail="Grupo no encontrado")
+    
+    return templates.TemplateResponse("manageMembers.html", {"request": request, "group": group, "members": members, "all_users": all_users})
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest, current_user: str = Depends(get_current_user)):
@@ -372,6 +395,7 @@ def newGroup(request: Request, current_user: str = Depends(get_current_user)):
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print(logged_in_user_id) # Mostrará mi id (14).
+    
     db.desconecta()
     
     return templates.TemplateResponse("newGroup.html", {"request": request, "users": usersList})
@@ -407,6 +431,57 @@ async def leave_group(request: Request, current_user: str = Depends(get_current_
         db.desconecta()
 
     return JSONResponse(content={"success": True}, status_code=200)
+
+@app.post("/manage_member_action")
+async def manage_member_action(request: Request):
+    db.conecta()
+    data = await request.json()
+    user_id = data.get('userId')
+    username = data.get('username')
+    action = data.get('action')
+    group_id = data.get('group_id')
+    
+    print(f"Received action: {action} for User ID: {user_id}, Username: {username}, Group ID: {group_id}") # Log the values
+    
+    if not user_id:
+        user_id = db.get_user_id(username)
+        print(f"Retrieved User ID: {user_id} for Username: {username}") # Log the retrieved user ID
+    
+    if not user_id or not group_id:
+        db.desconecta()
+        return JSONResponse({'status': 'fail', 'message': 'Missing user_id or group_id'}, status_code=400)
+    
+    # Perform the action (e.g., remove member, make admin)
+    if action == 'remove':
+        db.leaveGroup(user_id, group_id)
+        db.desconecta()
+        return JSONResponse({'status': 'success', 'message': 'Member removed'})
+    elif action == 'makeAdmin':
+        db.convertToAdmin(user_id, group_id)
+        db.desconecta()
+        return JSONResponse({'status': 'success', 'message': 'Member promoted to admin'})
+    
+    db.desconecta()
+    return JSONResponse({'status': 'fail', 'message': 'Invalid action'}, status_code=400)
+
+@app.post("/add_user_to_group")
+async def add_user_to_group(request: Request):
+    db.conecta()
+    data = await request.json()
+    user_id = data.get('userId')
+    group_id = data.get('group_id')
+    
+    if not user_id or not group_id:
+        db.desconecta()
+        return JSONResponse({'status': 'fail', 'message': 'Missing user_id or group_id'}, status_code=400)
+    
+    try:
+        db.addUsersToGroup(user_id, group_id, 0)  # 0 indicates the user is not an admin
+        db.desconecta()
+        return JSONResponse({'status': 'success', 'message': 'User added to group'})
+    except Exception as e:
+        db.desconecta()
+        return JSONResponse({'status': 'fail', 'message': str(e)}, status_code=500)
 
 # Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []

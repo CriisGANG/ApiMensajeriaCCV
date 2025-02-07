@@ -114,6 +114,40 @@ h1, h2 {
   background-color: #c9302c;
 }
 
+.exit-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #075e54;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.exit-button:hover {
+  background-color: #064e48;
+}
+
+.add-user-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #075e54;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.add-user-button:hover {
+  background-color: #064e48;
+}
+
 .chat-messages {
   flex-grow: 1;
   overflow-y: auto;
@@ -227,6 +261,7 @@ h1, h2 {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 .chat-header {
@@ -473,4 +508,45 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
 
 .username {
   color: #000000; /* Cambiar el color del nombre de usuario a negro */
+}
+
+.centered-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.popup {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  display: none;
+}
+
+.popup.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+.user-list-item {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+  color: #000000;
+}
+
+.user-list-item:hover {
+  background-color: #f1f1f1;
 }

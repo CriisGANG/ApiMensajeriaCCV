@@ -10,13 +10,16 @@
 <body>
   <div class="app-container">
     <div class="sidebar">
-      <h2>Miembros del Grupo</h2>
+      <h2>Miembros del grupo {{ groupName }}</h2>
       <ul id="group-members" class="group-members-list">
         {% for member in members %}
           <li>{{ member.username }}</li>
         {% endfor %}
       </ul>
       <button id="leave" class="logout-button">Abandonar grupo</button>
+      {% if esadmin == 1 %}
+        <button id="gestionar" class="logout-button">Gestionar Miembros</button>
+      {% endif %}
     </div>
     <div id="chat-container" class="chat-container">
       <h1>Chat del Grupo {{ groupName }}</h1>

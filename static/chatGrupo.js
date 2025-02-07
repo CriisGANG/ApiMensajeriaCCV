@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const chatMessages = document.getElementById("chat-messages-group");
     const receiverUsername = window.location.pathname.split("/").pop();
     const loggedInUser = localStorage.getItem("loggedInUser");
+    const manageMembers = document.getElementById("gestionar");
+    const groupId = window.location.pathname.split("/").pop();
 
     // console.log("Elements:", { chatInput, sendMessageButtonGroup, chatMessages, receiverUsername, loggedInUser });
 
@@ -49,4 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error leaving group:", response.statusText);
         }
     });
+    manageMembers.addEventListener("click", function() {
+        window.location.href = `/manageMembers/${groupId}`;
+    })
 });

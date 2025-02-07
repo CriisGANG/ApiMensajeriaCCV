@@ -119,6 +119,15 @@ class API_Mensajeria(object):
         """
         self.cursor.execute(sql, (groupId,))
         return self.cursor.fetchall()
+    
+    def getGroupMembersExceptYou(self, groupId, userId):
+        sql = """
+        SELECT u.id, u.username FROM usuarisclase u
+        JOIN group_members gm ON u.id = gm.user_id
+        WHERE gm.group_id = %s AND u.id != %s
+        """
+        self.cursor.execute(sql, (groupId, userId))
+        return self.cursor.fetchall()
 
     def actualizar_estado_mensaje(self, message_id, new_status):
         sql = "UPDATE messages SET status = %s WHERE id = %s"

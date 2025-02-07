@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ groupName: groupName, users: Array.from(selectedUsers) })
+        body: JSON.stringify({ action: "create", groupName: groupName, users: Array.from(selectedUsers) }) // Agregado "action: create"
       })
       .then(response => {
         if (!response.ok) {
