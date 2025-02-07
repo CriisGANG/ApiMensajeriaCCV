@@ -28,20 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
     userGroupList.appendChild(li);
   });
 
-  // Añadir evento de clic para los elementos de la lista de usuarios
-  userGroupList.addEventListener("click", function (event) {
-    if (event.target.tagName === "LI") {
-      // Desplazar la lista de usuarios a la izquierda y mostrar el chat
-      appContainer.classList.remove("centered");
-      appContainer.classList.add("shifted");
-      sidebar.classList.remove("collapsed");
-      chatContainer.classList.add("visible");
-
-      // Aquí puedes añadir el código para cargar el chat del usuario seleccionado
-      // ...
-    }
-  });
-
   groups.forEach(group => {
     const li = document.createElement("li");
     li.textContent = group.name;
