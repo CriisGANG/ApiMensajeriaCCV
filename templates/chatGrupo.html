@@ -4,37 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat del Grupo {{ groupName }}</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/styles.css">
   <script defer src="/static/chatGrupo.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <div class="sidebar">
-      <h2>Miembros del grupo {{ groupName }}</h2>
-      <ul id="group-members" class="group-members-list">
-        {% for member in members %}
-          <li>{{ member.username }}</li>
-        {% endfor %}
-      </ul>
-      <button id="leave" class="logout-button">Abandonar grupo</button>
-      {% if esadmin == 1 %}
-        <button id="gestionar" class="logout-button">Gestionar Miembros</button>
-      {% endif %}
-    </div>
-    <div id="chat-container" class="chat-container">
-      <h1>Chat del Grupo {{ groupName }}</h1>
-      <div id="chat-messages-group" class="chat-messages">
-        {% for message in conversation %}
-          <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %}">
-            <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
-          </div>
-        {% endfor %}
+  <div class="container-fluid h-100">
+    <div class="row h-100">
+      <div id="Prueba" class="col-md-3 col-sm-12 sidebar bg-dark text-white p-3">
+        <h1>Miembros del grupo {{ groupName }}</h1>
+        <ul id="group-members" class="list-group user-list">
+          {% for member in members %}
+            <li class="list-group-item">{{ member.username }}</li>
+          {% endfor %}
+        </ul>
+        <button id="leave" class="btn btn-danger mt-3">Abandonar grupo</button>
+        {% if esadmin == 1 %}
+          <button id="gestionar" class="btn btn-secondary mt-3">Gestionar Miembros</button>
+        {% endif %}
       </div>
-      <div class="chat-input-container">
-        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
-        <button id="send-message-group" class="send-message-group-button">Enviar</button>
+      <div id="chat-container" class="col-md-9 col-sm-12 chat-container d-flex flex-column">
+        <div class="chat-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+          <div class="chat-header-info d-flex align-items-center">
+            <h2 class="username">{{ groupName }}</h2>
+          </div>
+          <div class="header-actions d-flex align-items-center position-relative">
+            <button id="appearance-button" class="btn btn-secondary dropdown-toggle">Apariencia</button>
+            <div id="appearance-dropdown" class="appearance-dropdown dropdown-menu dropdown-menu-right">
+              <button id="dark-mode" class="dropdown-item">Modo Oscuro</button>
+              <button id="high-contrast" class="dropdown-item">Contraste Alto</button>
+              <button id="change-bg" class="dropdown-item">Cambiar Fondo</button>
+            </div>
+          </div>
+        </div>
+        <div id="chat-messages-group" class="chat-messages flex-grow-1 p-3" style="background-image: url('{{ user_bg_picture_url }}');">
+          {% for message in conversation %}
+            <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %} p-2 mb-2 rounded">
+              <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="chat-input-container d-flex p-3 bg-light border-top">
+          <input type="text" id="chat-input" class="form-control mr-2" placeholder="Escribe un mensaje...">
+          <button id="send-message-group" class="btn btn-primary">&#9658;</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal para cambiar la imagen de fondo -->
+  <div id="bg-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Cambiar imagen de fondo</h2>
+      <input type="text" id="bg-picture-url" placeholder="Ingresa la URL de la imagen">
+      <button id="save-bg-picture" class="btn btn-primary">Guardar</button>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -53,5 +53,73 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     manageMembers.addEventListener("click", function() {
         window.location.href = `/manageMembers/${groupId}`;
-    })
+    });
+
+    const appearanceButton = document.getElementById("appearance-button");
+    const appearanceDropdown = document.getElementById("appearance-dropdown");
+    const bgModal = document.getElementById("bg-modal");
+    const closeButton = document.querySelector(".close-button");
+    const saveBgPictureButton = document.getElementById("save-bg-picture");
+    const bgPictureUrlInput = document.getElementById("bg-picture-url");
+
+    if (appearanceButton) {
+        appearanceButton.addEventListener("click", function () {
+            appearanceDropdown.classList.toggle("show");
+        });
+    }
+
+    if (document.getElementById("dark-mode")) {
+        document.getElementById("dark-mode").addEventListener("click", function () {
+            document.body.classList.toggle("dark-mode");
+        });
+    }
+
+    if (document.getElementById("high-contrast")) {
+        document.getElementById("high-contrast").addEventListener("click", function () {
+            document.body.classList.toggle("high-contrast");
+        });
+    }
+
+    if (document.getElementById("change-bg")) {
+        document.getElementById("change-bg").addEventListener("click", function () {
+            bgModal.style.display = "block";
+        });
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener("click", function () {
+            bgModal.style.display = "none";
+        });
+    }
+
+    window.addEventListener("click", function (event) {
+        if (event.target === bgModal) {
+            bgModal.style.display = "none";
+        }
+    });
+
+    if (saveBgPictureButton) {
+        saveBgPictureButton.addEventListener("click", async function () {
+            const bgPictureUrl = bgPictureUrlInput.value;
+            if (!bgPictureUrl) return;
+
+            try {
+                const response = await fetch("/update-bg-picture", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ bg_picture_url: bgPictureUrl })
+                });
+
+                if (response.ok) {
+                    alert("Imagen de fondo actualizada exitosamente.");
+                    bgModal.style.display = "none";
+                    location.reload();
+                } else {
+                    console.error("Error al actualizar la imagen de fondo");
+                }
+            } catch (error) {
+                console.error("Error en la petición:", error);
+            }
+        });
+    }
 });

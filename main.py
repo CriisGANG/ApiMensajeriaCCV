@@ -256,13 +256,14 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
     
     conversation = db.cargarConversacionGrupo(selectedGroup['id'])
     members = db.get_group_members(groupId)
+    user_bg_picture_url = db.get_user_bg_picture_url(loggedInUserId)  # Obtener la URL de la imagen de fondo
     
     for message in conversation:
         message['created_at'] = message['created_at'].isoformat()
 
     db.desconecta()
 
-    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members, "esadmin": esAdmin})
+    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members, "esadmin": esAdmin, "user_bg_picture_url": user_bg_picture_url})
 
 @app.get("/manageMembers/{group_id}", response_class=HTMLResponse)
 async def manage_members(request: Request, group_id: int, current_user: str = Depends(get_current_user)):
@@ -337,7 +338,7 @@ async def update_profile_picture(request: Request, data: UpdateProfilePictureReq
     db.actualizar_foto_perfil(user_id, data.profile_picture_url)
     db.desconecta()
 
-    return JSONResponse(content={"message": "Foto de perfil actualizada"}, status_code=200)
+    return JSONResponse(content={"message": "Foto de perfil actualizada", "new_profile_picture_url": data.profile_picture_url}, status_code=200)
 
 @app.post("/update-bg-picture")
 async def update_bg_picture(request: Request, data: UpdateBgPictureRequest, current_user: str = Depends(get_current_user)):
@@ -525,6 +526,12 @@ async def websocket_chat(websocket: WebSocket, username: str):
             db.desconecta()
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
+
+@app.post("/logout")
+async def logout(request: Request):
+    response = JSONResponse(content={"message": "Logout exitoso"}, status_code=200)
+    response.delete_cookie("access_token")
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)

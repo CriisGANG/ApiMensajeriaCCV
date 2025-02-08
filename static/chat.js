@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM Content Loaded");
   const chatInput = document.getElementById("chat-input");
   const sendMessageButton = document.getElementById("send-message");
   const chatMessages = document.getElementById("chat-messages");
@@ -97,11 +98,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const saveProfilePictureButton = document.getElementById("save-profile-picture");
   const profilePictureUrlInput = document.getElementById("profile-picture-url");
 
-  // if (settingsButton) {
-  //   settingsButton.addEventListener("click", function () {
-  //     settingsModal.style.display = "flex";
-  //   });
-  // }
+  // Add event listener to profile picture to open the settings modal
+  const profilePicture = document.getElementById("profile-picture");
+  if (profilePicture) {
+    profilePicture.addEventListener("click", function () {
+      settingsModal.style.display = "block";
+    });
+  }
 
   if (closeButton) {
     closeButton.addEventListener("click", function () {
@@ -129,8 +132,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (response.ok) {
           const data = await response.json();
-          document.querySelector(".profile-picture").src = data.new_profile_picture_url;
+          document.getElementById("profile-picture").src = profilePictureUrl;
           settingsModal.style.display = "none";
+          alert("Foto de perfil actualizada con éxito.");
         } else {
           console.error("Error al actualizar la foto de perfil");
         }
@@ -141,13 +145,19 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Evento para cerrar sesión
-  document.getElementById("logout").addEventListener("click", function () {
-    localStorage.removeItem("loggedInUser");
-    window.location.href = "/";
-  });
+  document.getElementById("logout").addEventListener("click", async function () {
+    const response = await fetch("/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
 
-  // Ejecutar fetchLatestMessages cada 5 segundos
-  setInterval(fetchLatestMessages, 5000);
+    if (response.ok) {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "/";
+    } else {
+      alert("Error al cerrar sesión.");
+    }
+  });
 
   const appearanceButton = document.getElementById("appearance-button");
   const appearanceDropdown = document.getElementById("appearance-dropdown");
@@ -155,4 +165,45 @@ document.addEventListener("DOMContentLoaded", function () {
   appearanceButton.addEventListener("click", function () {
     appearanceDropdown.classList.toggle("show");
   });
+
+  document.getElementById("dark-mode").addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
+  });
+
+  document.getElementById("high-contrast").addEventListener("click", function () {
+    document.body.classList.toggle("high-contrast");
+  });
+
+  document.getElementById("change-bg").addEventListener("click", function () {
+    document.getElementById("bg-modal").style.display = "block";
+  });
+
+  document.getElementById("save-bg-picture").addEventListener("click", async function () {
+    const bgPictureUrl = document.getElementById("bg-picture-url").value;
+    const response = await fetch("/update-bg-picture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bg_picture_url: bgPictureUrl })
+    });
+
+    if (response.ok) {
+      alert("Imagen de fondo actualizada exitosamente.");
+      document.getElementById("bg-modal").style.display = "none";
+      location.reload();
+    } else {
+      alert("Error al actualizar la imagen de fondo.");
+    }
+  });
+
+  window.onclick = function(event) {
+    if (!event.target.matches('#appearance-button')) {
+      var dropdowns = document.getElementsByClassName("appearance-dropdown");
+      for (var i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
 });

@@ -79,5 +79,5 @@ if (localStorage.getItem("loggedInUser")) {
 // Lo que hará el código si está logeado.
 document.getElementById("logout").addEventListener("click", () => {
     localStorage.removeItem("token");
-    window.location.href = "login.html"
+    window.location.href = "/"
 })
