@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil de Usuario</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/profile.js"></script>
+</head>
+<body>
+  <div class="container-fluid h-100">
+    <div class="row h-100">
+      <div class="col-md-3 col-sm-12 sidebar bg-secondary text-white p-3">
+        <h1 class="text-light">Perfil</h1>
+        <button id="go-to-chat" class="btn btn-light mt-3">Ir al Chat</button>
+        <button id="logout" class="btn btn-danger mt-3">Cerrar Sesión</button>
+      </div>
+      <div class="col-md-9 col-sm-12 d-flex flex-column">
+        <div class="profile-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+          <h2 class="username">Personalizar Perfil</h2>
+        </div>
+        <div class="profile-content flex-grow-1 p-3">
+          <div class="form-group">
+            <label for="profile-picture-url">URL de la foto de perfil</label>
+            <input type="text" id="profile-picture-url" class="form-control" placeholder="Ingresa la URL de la imagen">
+          </div>
+          <button id="save-profile-picture" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+  document.getElementById("go-to-chat").addEventListener("click", function() {
+    window.location.href = "/chat";
+  });
+
+  document.getElementById("logout").addEventListener("click", function() {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "/";
+  });
+
+  document.getElementById("save-profile-picture").addEventListener("click", async function() {
+    const profilePictureUrl = document.getElementById("profile-picture-url").value;
+    const response = await fetch("/update-profile-picture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile_picture_url: profilePictureUrl })
+    });
+
+    if (response.ok) {
+      alert("Foto de perfil actualizada exitosamente.");
+      location.reload();
+    } else {
+      alert("Error al actualizar la foto de perfil.");
+    }
+  });
+  </script>
+</body>
+</html>
