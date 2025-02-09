@@ -21,7 +21,7 @@ class API_Mensajeria(object):
         self.db.close()
 
     def carregaUsuaris(self):
-        sql = "SELECT * from usuarisclase"
+        sql = "SELECT id, username, user_profile_picture_url, user_bg_picture_url from usuarisclase"
         self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
@@ -165,17 +165,20 @@ class API_Mensajeria(object):
         self.cursor.execute(sql, (group_id, user_id, is_admin))
         self.db.commit()
         
-    def carregaUltimsMssg(self):
+    def carregaUltimsMssg(self, start:int, limit: int):
+        # start --> desde donde empieza a cargar
+        # limit --> cuántos carga
         self.conecta()
-        sql ="""SELECT sender.username AS sender_name, 
-                receiver.username AS receiver_name,
-                groups.name AS group_name,
-                m.content 
-            FROM messages m 
-            LEFT JOIN users sender ON m.sender_id = sender.id 
-            LEFT JOIN users receiver ON m.receiver_id = receiver.id 
-            LEFT JOIN groups ON m.group_id = groups.id 
-            ORDER BY m.created_at DESC LIMIT 10;"""
+        sql = f"""SELECT sender.username AS sender_name, 
+                    receiver.username AS receiver_name,
+                    groups.name AS group_name,
+                    m.content 
+                FROM messages m 
+                LEFT JOIN users sender ON m.sender_id = sender.id 
+                LEFT JOIN users receiver ON m.receiver_id = receiver.id 
+                LEFT JOIN groups ON m.group_id = groups.id 
+                ORDER BY m.created_at DESC
+                LIMIT {limit} OFFSET {start};"""
         self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
