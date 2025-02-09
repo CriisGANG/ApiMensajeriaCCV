@@ -7,7 +7,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
   const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("error-message");
 
-  // 📌 Verifica si se están obteniendo correctamente los valores del formulario
+  // Verifica si se están obteniendo correctamente los valores del formulario
   console.log("Username:", username);
   console.log("Password:", password);
 
@@ -17,7 +17,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       password: password
   };
 
-  // 📌 Verifica el objeto antes de enviarlo
+  // Verifica el objeto antes de enviarlo
   console.log("Datos a enviar:", loginData);
 
   // Convertir el objeto a JSON
@@ -32,7 +32,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
           body: loginDataJSON
       });
 
-      // 📌 Verifica el estado de la respuesta
+      // Verifica el estado de la respuesta
       console.log("Estado de la respuesta:", response.status);
       console.log("Redirección:", response.redirected);
       console.log("Respuesta OK:", response.ok);
@@ -52,7 +52,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       }
 
   } catch (error) {
-      // 📌 Captura cualquier error en la petición fetch()
+      // Captura cualquier error en la petición fetch()
       console.error("Error en la petición:", error);
       errorMessage.textContent = "Error de conexión con el servidor.";
   }

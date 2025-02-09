@@ -129,7 +129,7 @@ class API_Mensajeria(object):
         self.cursor.execute(sql, (groupId, userId))
         return self.cursor.fetchall()
 
-    def actualizar_estado_mensaje(self, message_id, new_status):
+    def actualizar_estado_mensaje(self, new_status, message_id):
         sql = "UPDATE messages SET status = %s WHERE id = %s"
         self.cursor.execute(sql, (new_status, message_id))
         self.db.commit()

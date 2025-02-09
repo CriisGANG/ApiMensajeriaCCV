@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     manageMembers.addEventListener("click", function() {
         window.location.href = `/manageMembers/${groupId}`;
+        console.log(groupId);
     });
 
     const appearanceButton = document.getElementById("appearance-button");

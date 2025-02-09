@@ -184,11 +184,16 @@ def get_conversation(username: str, request: Request):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    print(f"Id del usuario loggeado: {logged_in_user}. Id del usuario seleccionado: {selected_user_id}")
     
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
+    # for message in conversation:
+    #     if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
+    #         db.actualizar_estado_mensaje(message['id'], 'rebut')
+    #         message['status'] = 'rebut'
     for message in conversation:
         if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
-            db.actualizar_estado_mensaje(message['id'], 'rebut')
+            db.actualizar_estado_mensaje('rebut', message['id'])
             message['status'] = 'rebut'
     
     db.desconecta()
@@ -214,6 +219,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    print(f"Id del usuario loggeado: {logged_in_user_id}. Id del usuario seleccionado: {selected_user_id}") # Da mi id y el del otro usuario.
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
 
     # Add usernames to the conversation data
@@ -228,7 +234,26 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
+
+    
+    # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
+    # for message in conversation:
+    #     if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
+    #         db.actualizar_estado_mensaje(message['id'], 'rebut')
+    #         message['status'] = 'rebut'
+    for message in conversation:
+        if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
+            db.actualizar_estado_mensaje('llegit', message['id'])
+            message['status'] = 'llegit'
+    
     db.desconecta()
+
+    # for message in conversation:
+    #     message['created_at'] = message['created_at'].isoformat()
+    #     if message['receiver_id'] == logged_in_user_id:
+    #         message['status'] = 'llegit'
+    #     else:
+    #         message['status'] = 'enviat'
     print(groups)
     return templates.TemplateResponse("chat.html", {
         "request": request,
