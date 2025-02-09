@@ -164,21 +164,8 @@ class API_Mensajeria(object):
         sql = "INSERT INTO group_members (group_id, user_id, is_admin) VALUES (%s, %s, %s)"
         self.cursor.execute(sql, (group_id, user_id, is_admin))
         self.db.commit()
-        
-    def carregaUltimsMssg(self, start:int, limit: int):
-        # start --> desde donde empieza a cargar
-        # limit --> cuántos carga
-        self.conecta()
-        sql = f"""SELECT sender.username AS sender_name, 
-                    receiver.username AS receiver_name,
-                    groups.name AS group_name,
-                    m.content 
-                FROM messages m 
-                LEFT JOIN users sender ON m.sender_id = sender.id 
-                LEFT JOIN users receiver ON m.receiver_id = receiver.id 
-                LEFT JOIN groups ON m.group_id = groups.id 
-                ORDER BY m.created_at DESC
-                LIMIT {limit} OFFSET {start};"""
-        self.cursor.execute(sql)
-        ResQuery = self.cursor.fetchall()
-        return ResQuery
+
+    def get_message_by_id(self, message_id):
+        sql = "SELECT * FROM messages WHERE id = %s"
+        self.cursor.execute(sql, (message_id,))
+        return self.cursor.fetchone()
