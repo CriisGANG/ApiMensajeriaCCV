@@ -15,12 +15,22 @@ document.addEventListener("DOMContentLoaded", async function () {
   try {
     const usersResponse = await fetch('http://127.0.0.1:8000/api/get-users');
     if (!usersResponse.ok) {
+      if (usersResponse.status === 401) {
+        alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "/login.html";
+      }
       throw new Error('Network response was not ok');
     }
     users = await usersResponse.json();
 
     const conversationsResponse = await fetch(`http://127.0.0.1:8000/api/get-chat-data?username=${loggedInUser}`);
     if (!conversationsResponse.ok) {
+      if (conversationsResponse.status === 401) {
+        alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "/login.html";
+      }
       throw new Error('Network response was not ok');
     }
     conversations = await conversationsResponse.json();
@@ -214,7 +224,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Redirigir al usuario a la página de inicio de sesión si recibe un error 401
         alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
         localStorage.removeItem("loggedInUser");
-        window.location.href = "/";
+        window.location.href = "/login.html";
       }
     } catch (error) {
       console.error("Error al obtener los últimos mensajes:", error);

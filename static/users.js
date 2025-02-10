@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         const response = await fetch("http://127.0.0.1:8000/users");
 
         if (!response.ok) {
+            if (response.status === 401) {
+                alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+                localStorage.removeItem("loggedInUser");
+                window.location.href = "/login.html";
+            }
             throw new Error(`Error al obtener los datos: ${response.status}`);
         }
 
