@@ -503,6 +503,22 @@ def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
         "last_message_timestamp": last_message_timestamp
     }, status_code=200)
 
+@app.get("/api/get-chat-data", response_class=JSONResponse)
+def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    selected_user_id = db.get_user_id(username)
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
+    last_message_timestamp = conversation[-1]['created_at'].isoformat() if conversation else None
+    db.desconecta()
+    return JSONResponse(content={
+        "username": username,
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,
+        "conversation": conversation,
+        "last_message_timestamp": last_message_timestamp
+    }, status_code=200)
+
 @app.get("/api/get-latest-messages", response_class=JSONResponse)
 def get_latest_messages(since: str, current_user: str = Depends(get_current_user)):
     db.conecta()
