@@ -453,6 +453,17 @@ async def listen_for_new_messages(websocket: WebSocket, background_tasks: Backgr
     background_tasks.add_task(check_for_new_messages)
     return JSONResponse(content={"message": "Listening for new messages"}, status_code=200)
 
+@app.get("/api/get-profile-picture-url", response_class=JSONResponse)
+def get_profile_picture_url(current_user: str = Depends(get_current_user)):
+    db.conecta()
+    user_id = db.get_user_id(current_user)
+    profile_picture_url = db.get_user_profile_picture_url(user_id)
+    db.desconecta()
+    if profile_picture_url:
+        return JSONResponse(content={"profile_picture_url": profile_picture_url}, status_code=200)
+    else:
+        return JSONResponse(content={"error": "Profile picture URL not found"}, status_code=404)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)  # Añadir reload=True para recargar automáticamente
