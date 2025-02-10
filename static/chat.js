@@ -1,21 +1,36 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const chatInput = document.getElementById("chat-input");
   const sendMessageButton = document.getElementById("send-message");
   const chatMessages = document.getElementById("chat-messages");
   const receiverUsername = window.location.pathname.split("/").pop();
   const loggedInUser = localStorage.getItem("loggedInUser");
   const lastMessageTimestamp = document.getElementById("last-message-timestamp");
-  const users = JSON.parse(document.getElementById("users-data").textContent);
-  const conversations = JSON.parse(document.getElementById("conversations-data").textContent);
   const userList = document.getElementById("users");
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
 
-  // Cargar la lista de usuarios
-  // Limpiar la lista de usuarios antes de agregar nuevos
-  userList.innerHTML = '';
+  // Fetch users and conversations data
+  let users = [];
+  let conversations = {};
+  try {
+    const usersResponse = await fetch('http://127.0.0.1:8000/api/get-users');
+    if (!usersResponse.ok) {
+      throw new Error('Network response was not ok');
+    }
+    users = await usersResponse.json();
+
+    const conversationsResponse = await fetch(`http://127.0.0.1:8000/api/get-chat-data?username=${loggedInUser}`);
+    if (!conversationsResponse.ok) {
+      throw new Error('Network response was not ok');
+    }
+    conversations = await conversationsResponse.json();
+  } catch (error) {
+    console.error('Error fetching users or conversations data:', error);
+  }
 
   // Cargar la lista de usuarios
+  userList.innerHTML = ''; // Limpiar la lista de usuarios antes de agregar nuevos
+
   users.forEach(user => {
     const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png'; // Imagen por defecto
     const lastMessage = conversations[user.username] && conversations[user.username].length > 0
