@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie
 from fastapi.responses import JSONResponse, HTMLResponse
+=======
+from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie, BackgroundTasks
+from fastapi.responses import JSONResponse
+>>>>>>> development
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
@@ -10,6 +15,7 @@ import datetime
 from fastapi import WebSocket, WebSocketDisconnect
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+import asyncio  # Añadir esta línea
 
 app = FastAPI()
 
@@ -25,7 +31,7 @@ db = database.API_Mensajeria()
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # Cambiar a 24 horas (1440 minutos)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -34,7 +40,7 @@ def create_access_token(data: dict, expires_delta: datetime.timedelta = None):
     if expires_delta:
         expire = datetime.datetime.utcnow() + expires_delta
     else:
-        expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+        expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -169,13 +175,13 @@ async def groupList(request: Request):
     return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
 
 @app.get("/conversation/{username}", response_class=JSONResponse)
+<<<<<<< HEAD
 def get_conversation(username: str, request: Request):
+=======
+def get_conversation(username: str, request: Request, current_user: str = Depends(get_current_user), since: str = None):
+>>>>>>> development
     db.conecta()
-    logged_in_user = request.cookies.get("loggedInUser")
-    if not logged_in_user:
-        db.desconecta()
-        raise HTTPException(status_code=401, detail="Usuario no autenticado")
-
+    logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
 
@@ -183,9 +189,12 @@ def get_conversation(username: str, request: Request):
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+<<<<<<< HEAD
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
     print(f"Id del usuario loggeado: {logged_in_user}. Id del usuario seleccionado: {selected_user_id}")
     
+=======
+>>>>>>> development
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
     # for message in conversation:
     #     if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
@@ -234,6 +243,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
+<<<<<<< HEAD
 
     
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
@@ -246,6 +256,17 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
             db.actualizar_estado_mensaje('llegit', message['id'])
             message['status'] = 'llegit'
     
+=======
+    conversations = {}
+    for user in users:
+        user_id = db.get_user_id(user['username'])
+        if user_id:
+            conv = db.cargar_conversacion(logged_in_user_id, user_id)
+            for msg in conv:
+                msg['created_at'] = msg['created_at'].isoformat()
+            conversations[user['username']] = conv
+
+>>>>>>> development
     db.desconecta()
 
     # for message in conversation:
@@ -263,7 +284,42 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         "groups": groups,
         "user_profile_picture_url": user_profile_picture_url,  # Asegúrate de pasar esta variable a la plantilla
         "selected_user_profile_picture_url": selected_user_profile_picture_url,
-        "user_bg_picture_url": user_bg_picture_url
+        "user_bg_picture_url": user_bg_picture_url,
+        "conversations": conversations
+    })
+
+@app.get("/chat", response_class=JSONResponse)
+def chat_page(request: Request, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user = current_user
+    logged_in_user_id = db.get_user_id(logged_in_user)
+
+    if not logged_in_user_id:
+        db.desconecta()
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    users = db.carregaUsuaris()  # Cargar la lista de usuarios
+    user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
+    user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
+
+    conversations = {}
+    for user in users:
+        user_id = db.get_user_id(user['username'])
+        if user_id:
+            conv = db.cargar_conversacion(logged_in_user_id, user_id)
+            for msg in conv:
+                msg['created_at'] = msg['created_at'].isoformat()
+            conversations[user['username']] = conv
+
+    db.desconecta()
+
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "username": logged_in_user,
+        "users": users,
+        "user_profile_picture_url": user_profile_picture_url,
+        "user_bg_picture_url": user_bg_picture_url,
+        "conversations": conversations
     })
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
@@ -516,7 +572,7 @@ active_connections = []
 async def websocket_chat(websocket: WebSocket, username: str):
     global active_connections  # Declarar la variable como global
     await websocket.accept()
-    active_connections.append({"websocket": websocket, "sent_message_ids": set()})
+    active_connections.append({"websocket": websocket, "username": username, "sent_message_ids": set()})
 
     try:
         while True:
@@ -544,7 +600,7 @@ async def websocket_chat(websocket: WebSocket, username: str):
 
                 # Enviar mensaje a todos los clientes conectados
                 for connection in active_connections:
-                    if message_id not in connection["sent_message_ids"]:
+                    if connection["username"] == username or connection["username"] == sender_username:
                         await connection["websocket"].send_json(message)
                         connection["sent_message_ids"].add(message_id)
 
@@ -552,6 +608,7 @@ async def websocket_chat(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
 
+<<<<<<< HEAD
 @app.post("/logout")
 async def logout(request: Request):
     response = JSONResponse(content={"message": "Logout exitoso"}, status_code=200)
@@ -560,5 +617,35 @@ async def logout(request: Request):
 
 if __name__ == '__main__':
     app.run(debug=True)
+=======
+@app.post("/listen-for-new-messages")
+async def listen_for_new_messages(websocket: WebSocket, background_tasks: BackgroundTasks, current_user: str = Depends(get_current_user)):
+    await websocket.accept()
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    last_message_id = db.get_last_message_id()
+    db.desconecta()
+
+    async def check_for_new_messages():
+        while True:
+            db.conecta()
+            new_last_message_id = db.get_last_message_id()
+            if new_last_message_id != last_message_id:
+                # Obtener el nuevo mensaje
+                new_message = db.get_message_by_id(new_last_message_id)
+                if new_message and new_message['receiver_id'] == logged_in_user_id:
+                    # Enviar notificación al usuario
+                    await websocket.send_json(new_message)
+                last_message_id = new_last_message_id
+            db.desconecta()
+            await asyncio.sleep(5)  # Esperar 5 segundos antes de verificar nuevamente
+
+    background_tasks.add_task(check_for_new_messages)
+    return JSONResponse(content={"message": "Listening for new messages"}, status_code=200)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)  # Añadir reload=True para recargar automáticamente
+>>>>>>> development
 
 

@@ -8,14 +8,30 @@ document.addEventListener("DOMContentLoaded", function () {
   const lastMessageTimestamp = document.getElementById("last-message-timestamp");
   const users = JSON.parse(document.getElementById("users-data").textContent);
   const groups = JSON.parse(document.getElementById("groups-data").textContent);
+  const conversations = JSON.parse(document.getElementById("conversations-data").textContent);
   const userList = document.getElementById("users");
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
 
   // Cargar la lista de usuarios
+  // Limpiar la lista de usuarios antes de agregar nuevos
+  userList.innerHTML = '';
+
+  // Cargar la lista de usuarios
   users.forEach(user => {
+    const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png'; // Imagen por defecto
+    const lastMessage = conversations[user.username] && conversations[user.username].length > 0
+      ? conversations[user.username].slice(-1)[0].content
+      : 'No hay mensajes';
     const li = document.createElement("li");
-    li.textContent = user.username;
+    li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
+    li.innerHTML = `
+      <img src="${profilePictureUrl}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
+      <div class="user-info">
+        <span class="user-name">${user.username}</span>
+        <span class="user-status">${lastMessage}</span>
+      </div>
+    `;
     li.addEventListener("click", function () {
       window.location.href = `/chat/${user.username}`;
     });
@@ -32,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Conectar al WebSocket
-  const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${receiverUsername}`);
+  const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${loggedInUser}`);
 
   // Cuando recibe un mensaje del servidor, lo muestra en el chat
   socket.onmessage = function (event) {
@@ -41,9 +57,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const messageElement = document.createElement("div");
       messageElement.classList.add(
         "message",
-        message.sender_username === loggedInUser ? "sent" : "received",
-        message.status === "llegit" ? "read" : message.status === "rebut" ? "received" : "sent"
+        message.sender_username === loggedInUser ? "received" : "sent",
+        "p-2",
+        "mb-2",
+        "rounded"
       );
+      messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
       messageElement.innerHTML = `<p><strong>${message.sender_username || "undefined"}</strong>: ${message.content}</p>`;
       chatMessages.appendChild(messageElement);
 
@@ -53,6 +72,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Actualizar el timestamp del último mensaje recibido
       lastMessageTimestamp.value = message.created_at;
+
+      // Mostrar alerta de nuevo mensaje
+      if (message.sender_username !== loggedInUser) {
+        alert("Nuevo mensaje recibido de " + message.sender_username);
+      }
     }
   };
 
@@ -81,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Crear el elemento del mensaje y agregarlo al chat
     const messageElement = document.createElement("div");
-    messageElement.classList.add("message", "sent");
+    messageElement.classList.add("message", "received", "p-2", "mb-2", "rounded");
     messageElement.setAttribute("data-id", messageId); // Guardar el ID en el HTML
     messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
     chatMessages.appendChild(messageElement);
@@ -158,6 +182,53 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Error al cerrar sesión.");
     }
   });
+  // Función para obtener los últimos mensajes
+  async function fetchLatestMessages() {
+    try {
+      const response = await fetch(`/conversation/${receiverUsername}?since=${lastMessageTimestamp.value}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${document.cookie.split('=')[1]}` // Añadir el token de autenticación en el encabezado
+        }
+      });
+      if (response.ok) {
+        const newMessages = await response.json();
+        newMessages.forEach(message => {
+          if (!displayedMessageIds.has(message.id)) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add(
+              "message",
+              message.sender_username === loggedInUser ? "received" : "sent",
+              "p-2",
+              "mb-2",
+              "rounded"
+            );
+            messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
+            messageElement.innerHTML = `<p><strong>${message.sender_username || "undefined"}</strong>: ${message.content}</p>`;
+            chatMessages.appendChild(messageElement);
+
+            // Registrar el mensaje en el Set
+            displayedMessageIds.add(message.id);
+            console.log(displayedMessageIds);
+            
+            // Actualizar el timestamp del último mensaje recibido
+            lastMessageTimestamp.value = message.created_at;
+          }
+        });
+      } else if (response.status === 401) {
+        // Redirigir al usuario a la página de inicio de sesión si recibe un error 401
+        alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "/";
+      }
+    } catch (error) {
+      console.error("Error al obtener los últimos mensajes:", error);
+    }
+  }
+
+  // Ejecutar fetchLatestMessages cada 5 segundos
+  setInterval(fetchLatestMessages, 5000);
 
   const appearanceButton = document.getElementById("appearance-button");
   const appearanceDropdown = document.getElementById("appearance-dropdown");

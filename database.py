@@ -190,3 +190,8 @@ class API_Mensajeria(object):
         sql = "DELETE FROM group_members WHERE user_id = %s AND group_id = %s"
         self.cursor.execute(sql, (user_id, group_id))
         self.db.commit()
+
+    def get_message_by_id(self, message_id):
+        sql = "SELECT * FROM messages WHERE id = %s"
+        self.cursor.execute(sql, (message_id,))
+        return self.cursor.fetchone()
