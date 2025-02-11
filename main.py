@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie
 from fastapi.responses import JSONResponse, HTMLResponse
-=======
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie, BackgroundTasks
 from fastapi.responses import JSONResponse
->>>>>>> development
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
@@ -175,11 +172,7 @@ async def groupList(request: Request):
     return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
 
 @app.get("/conversation/{username}", response_class=JSONResponse)
-<<<<<<< HEAD
-def get_conversation(username: str, request: Request):
-=======
 def get_conversation(username: str, request: Request, current_user: str = Depends(get_current_user), since: str = None):
->>>>>>> development
     db.conecta()
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
@@ -189,12 +182,9 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-<<<<<<< HEAD
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
     print(f"Id del usuario loggeado: {logged_in_user}. Id del usuario seleccionado: {selected_user_id}")
     
-=======
->>>>>>> development
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
     # for message in conversation:
     #     if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
@@ -243,20 +233,6 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
-<<<<<<< HEAD
-
-    
-    # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
-    # for message in conversation:
-    #     if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
-    #         db.actualizar_estado_mensaje(message['id'], 'rebut')
-    #         message['status'] = 'rebut'
-    for message in conversation:
-        if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
-            db.actualizar_estado_mensaje('llegit', message['id'])
-            message['status'] = 'llegit'
-    
-=======
     conversations = {}
     for user in users:
         user_id = db.get_user_id(user['username'])
@@ -266,7 +242,6 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
                 msg['created_at'] = msg['created_at'].isoformat()
             conversations[user['username']] = conv
 
->>>>>>> development
     db.desconecta()
 
     # for message in conversation:
@@ -608,7 +583,6 @@ async def websocket_chat(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
 
-<<<<<<< HEAD
 @app.post("/logout")
 async def logout(request: Request):
     response = JSONResponse(content={"message": "Logout exitoso"}, status_code=200)
@@ -617,7 +591,6 @@ async def logout(request: Request):
 
 if __name__ == '__main__':
     app.run(debug=True)
-=======
 @app.post("/listen-for-new-messages")
 async def listen_for_new_messages(websocket: WebSocket, background_tasks: BackgroundTasks, current_user: str = Depends(get_current_user)):
     await websocket.accept()
@@ -646,6 +619,5 @@ async def listen_for_new_messages(websocket: WebSocket, background_tasks: Backgr
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)  # Añadir reload=True para recargar automáticamente
->>>>>>> development
 
 
