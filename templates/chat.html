@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script defer src="/static/chat.js"></script>
+</head>
+<body>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div id="Prueba" class="col-md-3 col-sm-12 sidebar bg-secondary text-white p-3">
+                <h1 class="text-light">Chats</h1>
+                <ul id="users" class="list-group user-list"></ul>
+            </div>
+            <div id="chat-container" class="col-md-9 col-sm-12 chat-container d-flex flex-column">
+                <div class="menu-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+                    <h2 class="username">Menú Principal</h2>
+                    <div>
+                        <button id="go-to-chat" class="btn btn-light mr-2">Ir al Chat</button>
+                        <button id="go-to-settings" class="btn btn-light mr-2">Configuración</button>
+                        <button id="go-to-profile" class="btn btn-light mr-2">Perfil</button>
+                        <button id="create-group" class="btn btn-light">Crear Grupo</button>
+                        <button id="logout" class="btn btn-danger ml-2">Cerrar Sesión</button>
+                    </div>
+                </div>
+                <div class="menu-content flex-grow-1 p-3">
+                    <!-- Contenido adicional si es necesario -->
+                </div>
+                <div class="chat-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+                    <div class="chat-header-info d-flex align-items-center">
+                        <img src="" alt="Foto de perfil" class="profile-picture rounded-circle mr-2" id="selected-user-profile-picture">
+                        <h2 class="username" id="chat-username"></h2>
+                    </div>
+                    <div class="header-actions d-flex align-items-center position-relative">
+                        <img src="" alt="Foto de perfil" class="profile-picture rounded-circle mr-2" id="user-profile-picture">
+                        <button id="appearance-button" class="btn btn-secondary dropdown-toggle">Apariencia</button>
+                        <div id="appearance-dropdown" class="appearance-dropdown dropdown-menu dropdown-menu-right">
+                            <button id="dark-mode" class="dropdown-item">Modo Oscuro</button>
+                            <button id="high-contrast" class="dropdown-item">Contraste Alto</button>
+                            <button id="change-bg" class="dropdown-item">Cambiar Fondo</button>
+                        </div>
+                        <button id="logout" class="btn btn-danger ml-2">Cerrar Sesión</button>
+                    </div>
+                </div>
+                <div id="chat-messages" class="chat-messages flex-grow-1 p-3" style="background-image: url('{{ user_bg_picture_url }}');"></div>
+                <div class="chat-input-container d-flex p-3 bg-light border-top">
+                    <input type="text" id="chat-input" class="form-control mr-2" placeholder="Escribe un mensaje...">
+                    <button id="send-message" class="btn btn-primary">&#9658;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="last-message-timestamp">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+
+    </script>
+</body>
+</html>

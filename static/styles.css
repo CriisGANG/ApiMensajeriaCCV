@@ -683,23 +683,19 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   display: block;
 }
 
-/** pagina users2.html **/
-
-
-
+/* users2.html*/
 .header-page{
-max-height: 25vh;
-
-}
-
-/** chat2.html**/
-#card-t-chats{
-  color: white;
+  max-height: 25vh;
 }
 
 .card-header{
   max-height: 80px;
 }
+ul#users {
+  max-height: 65vh;
+}
+
+.config-logo
 
 /*** MODO OSCURO **/
 
@@ -736,7 +732,6 @@ max-height: 25vh;
   color: #ffffff;
   border: 1px solid #333;
 }
- /*cuerpo de la tarjeta*/
 .dark-mode .card-body{
   background-color: #000000;
   color: white;
@@ -792,4 +787,3 @@ max-height: 25vh;
 .dark-mode input[type="text"]::placeholder {
   color: #bbb;
 }
-

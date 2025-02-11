@@ -25,7 +25,6 @@ class API_Mensajeria(object):
         self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
-
     def carregaGrups(self, idUser):
         # sql = "SELECT * FROM Groups"
         sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
