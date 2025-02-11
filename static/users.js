@@ -38,8 +38,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       // ...
     }
   });
-        // Hacer la llamada al backend
-        const response = await fetch("http://127.0.0.1:8000/users");
 
         if (!response.ok) {
             if (response.status === 401) {

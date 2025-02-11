@@ -27,10 +27,10 @@ class API_Mensajeria(object):
         return ResQuery
 
     def carregaGrups(self, idUser):
-        # sql = "SELECT * FROM Groups"
         sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
-        self.cursor.execute(sql, (idUser))
+        self.cursor.execute(sql, (idUser,))
         ResQuery = self.cursor.fetchall()
+        print("Grupos cargados:", ResQuery)  # Añadir esta línea para depuración
         return ResQuery
 
     def verificar_usuario(self, username, password):
@@ -51,6 +51,7 @@ class API_Mensajeria(object):
         sql = "SELECT id FROM usuarisclase WHERE username = %s"
         self.cursor.execute(sql, (username,))
         user = self.cursor.fetchone()
+        print("get_user_id:", user)  # Añadir esta línea para depuración
         return user['id'] if user else None
 
     def get_username(self, user_id):

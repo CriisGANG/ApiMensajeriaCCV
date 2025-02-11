@@ -615,7 +615,7 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   border-color: #545b62;
 }
 
-.user-item {
+.user-item, .group-item {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -628,28 +628,28 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   margin-bottom: 10px;
 }
 
-.user-item:hover {
+.user-item:hover, .group-item:hover {
   background-color: #f1f1f1;
 }
 
-.user-item img.profile-picture {
+.user-item img.profile-picture, .group-item img.profile-picture {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   margin-right: 10px;
 }
 
-.user-info {
+.user-info, .group-info {
   display: flex;
   flex-direction: column;
 }
 
-.user-name {
+.user-name, .group-name {
   font-weight: bold;
   color: #264653;
 }
 
-.user-status {
+.user-status, .group-status {
   font-size: 0.9rem;
   color: #6c757d;
 }

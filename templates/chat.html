@@ -13,7 +13,7 @@
         <div class="row h-100">
             <div id="Prueba" class="col-md-3 col-sm-12 sidebar bg-secondary text-white p-3">
                 <h1 class="text-light">Chats</h1>
-                <ul id="users" class="list-group user-list"></ul>
+                <ul id="chat-list" class="list-group chat-list"></ul>
             </div>
             <div id="chat-container" class="col-md-9 col-sm-12 chat-container d-flex flex-column">
                 <div class="menu-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
@@ -70,7 +70,7 @@
             const userProfilePicture = document.getElementById("user-profile-picture");
             const chatMessages = document.getElementById("chat-messages");
             const lastMessageTimestamp = document.getElementById("last-message-timestamp");
-            const userList = document.getElementById("users");
+            const chatList = document.getElementById("chat-list");
 
             // Fetch user data
             try {
@@ -106,7 +106,7 @@
                 console.error('Error fetching chat data:', error);
             }
 
-            // Fetch users data
+            // Fetch users and groups data
             try {
                 const usersResponse = await fetch('http://127.0.0.1:8000/api/get-users');
                 if (!usersResponse.ok) {
@@ -128,10 +128,33 @@
                     li.addEventListener("click", function () {
                         window.location.href = `http://127.0.0.1:8000/chat/${user.username}`;
                     });
-                    userList.appendChild(li);
+                    chatList.appendChild(li);
+                });
+
+                const groupsResponse = await fetch('http://127.0.0.1:8000/api/get-groups');
+                if (!groupsResponse.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const groupsData = await groupsResponse.json();
+                console.log("Grupos recibidos:", groupsData);  // Añadir esta línea para depuración
+
+                // Load groups list
+                groupsData.forEach(group => {
+                    const li = document.createElement("li");
+                    li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");  // Usar las mismas clases que los usuarios
+                    li.innerHTML = `
+                        <img src="/static/default-group.png" alt="Icono de grupo" class="profile-picture rounded-circle mr-2">  <!-- Usar un icono de grupo -->
+                        <div class="user-info">
+                            <span class="user-name">${group.name}</span>
+                        </div>
+                    `;
+                    li.addEventListener("click", function () {
+                        window.location.href = `http://127.0.0.1:8000/chatsGrupos/${group.id}`;
+                    });
+                    chatList.appendChild(li);
                 });
             } catch (error) {
-                console.error('Error fetching users data:', error);
+                console.error('Error fetching users or groups data:', error);
             }
 
             // Event listeners for buttons

@@ -192,6 +192,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
+    groups = db.carregaGrups(selected_user_id)
 
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
@@ -226,6 +227,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         "conversation": conversation,
         "username": username,
         "users": users,
+        "groups": groups,
         "user_profile_picture_url": user_profile_picture_url,  # Asegúrate de pasar esta variable a la plantilla
         "selected_user_profile_picture_url": selected_user_profile_picture_url,
         "user_bg_picture_url": user_bg_picture_url,
@@ -243,6 +245,7 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
+    groups = db.carregaGrups(logged_in_user_id)  # Cargar la lista de grupos
     user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
@@ -261,6 +264,7 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
         "request": request,
         "username": logged_in_user,
         "users": users,
+        "groups": groups,
         "user_profile_picture_url": user_profile_picture_url,
         "user_bg_picture_url": user_bg_picture_url,
         "conversations": conversations
@@ -509,6 +513,7 @@ def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
     logged_in_user_id = db.get_user_id(current_user)
     selected_user_id = db.get_user_id(username)
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    # conversationGroup = db.cargarConversacionGrupo()
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
     last_message_timestamp = conversation[-1]['created_at'].isoformat() if conversation else None
     db.desconecta()
@@ -533,6 +538,16 @@ def get_users(current_user: str = Depends(get_current_user)):
     users = db.carregaUsuaris()
     db.desconecta()
     return JSONResponse(content=users, status_code=200)
+
+@app.get("/api/get-groups", response_class=JSONResponse)
+def get_groups(current_user: str = Depends(get_current_user)):
+    db.conecta()
+    user_id = db.get_user_id(current_user)
+    print("User ID:", user_id)  # Añadir esta línea para depuración
+    groups = db.carregaGrups(user_id)
+    db.desconecta()
+    print("Grupos devueltos:", groups)  # Añadir esta línea para depuración
+    return JSONResponse(content=groups, status_code=200)
 
 if __name__ == "__main__":
     import uvicorn
