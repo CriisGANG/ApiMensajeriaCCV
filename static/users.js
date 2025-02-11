@@ -1,21 +1,23 @@
 document.addEventListener("DOMContentLoaded", async function () {
     console.log("JavaScript cargado correctamente.");
-
-    const userList = document.getElementById("users-groups");
+    const config = document.getElementById("config-logo");
+    const userList = document.getElementById("users");
 
     try {
         console.log("Cargando usuarios...");
 
         // Hacer la llamada al backend
         const response = await fetch("http://127.0.0.1:8000/users");
-
+        console.log("Respuesta recibida:", response);
         if (!response.ok) {
             if (response.status === 401) {
                 alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
                 localStorage.removeItem("loggedInUser");
                 window.location.href = "/login.html";
+            }else{
+                throw new Error(`Error al obtener los datos: ${response.status}`);
             }
-            throw new Error(`Error al obtener los datos: ${response.status}`);
+           
         }
 
         const datajson = await response.json();
@@ -27,6 +29,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     } catch (error) {
         console.error("Hubo un problema al obtener los datos:", error);
     }
+
+    config.addEventListener("click", function () {
+        window.location.href = `configuracion`;})
 
     function paintUsers(users) {
         userList.innerHTML = ""; // Limpia la lista antes de añadir nuevos usuarios
