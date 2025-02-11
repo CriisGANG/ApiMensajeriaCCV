@@ -23,7 +23,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
       if (response.ok) {
           localStorage.setItem("loggedInUser", responsejson.username);
-          window.location.href = "http://127.0.0.1:8000/chat";  // Redirigir a otra página tras el login
+          window.location.href = "http://127.0.0.1:8000/users_page";  // Redirigir a otra página tras el login
       } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
           errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
@@ -53,6 +53,6 @@ if (localStorage.getItem("loggedInUser")) {
   });
 
   document.getElementById("go-to-chat").addEventListener("click", function () {
-      window.location.href = "http://127.0.0.1:8000/chat";
+      window.location.href = "http://127.0.0.1:8000/users_page";
   });
 }

@@ -129,19 +129,18 @@ def get_users(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
+    print("Pepe")
 
     users = db.carregaUsuaris() or []
     groups = db.carregaGrups(logged_in_user_id) or []
-
     db.desconecta()
-
     return {"users": users, "groups": groups}  # Solo devuelve JSON
 
 # RUTAS HTML
 
 @app.get("/users_page")
 def users_page(request: Request):
-    return templates.TemplateResponse("users.html", {"request": request})
+    return templates.TemplateResponse("users2.html", {"request": request})
 
 @app.get("/groups")
 async def groupList(request: Request):
@@ -222,7 +221,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {
+    return templates.TemplateResponse("chat2.html", {
         "request": request,
         "conversation": conversation,
         "username": username,
@@ -260,7 +259,7 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {
+    return templates.TemplateResponse("chat2.html", {
         "request": request,
         "username": logged_in_user,
         "users": users,
@@ -483,13 +482,6 @@ def get_profile_picture_url(current_user: str = Depends(get_current_user)):
     else:
         return JSONResponse(content={"error": "Profile picture URL not found"}, status_code=404)
 
-@app.get("/api/get-user-data", response_class=JSONResponse)
-def get_user_data(current_user: str = Depends(get_current_user)):
-    db.conecta()
-    user_id = db.get_user_id(current_user)
-    user_profile_picture_url = db.get_user_profile_picture_url(user_id)
-    db.desconecta()
-    return JSONResponse(content={"user_profile_picture_url": user_profile_picture_url}, status_code=200)
 
 @app.get("/api/get-chat-data", response_class=JSONResponse)
 def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
@@ -548,6 +540,9 @@ def get_groups(current_user: str = Depends(get_current_user)):
     db.desconecta()
     print("Grupos devueltos:", groups)  # Añadir esta línea para depuración
     return JSONResponse(content=groups, status_code=200)
+@app.get("/configuracion")
+def users_page(request: Request):
+    return templates.TemplateResponse("configuracion.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn
