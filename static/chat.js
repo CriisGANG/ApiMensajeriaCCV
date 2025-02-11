@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       
 
       userData.users.forEach(user => {console.log(user.username);});
-      
+
       userProfilePicture.src = userData.users.user_profile_picture_url;
   } catch (error) {
       console.error('Error fetching user data:', error);
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       console.error('Error fetching users data:', error);
   }
   config.addEventListener("click", function () {
-    window.location.href = `configuracion`;})
+    window.location.href = `/configuracion`;})
 
   // Event listeners for buttons
   atras.addEventListener("click", function () {
