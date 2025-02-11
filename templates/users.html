@@ -7,28 +7,27 @@
   <title>Lista de Usuarios</title>
   
   <link rel="stylesheet" href="/static/styles.css">
-  <script defer src="/static/users.js"></script>
-  
+  <script defer src="/static/users.js">
+
+    console.log("HOLA")
+  </script>
+
 </head>
 <body>
+  
   <div class="app-container centered">
+    
     <div class="sidebar collapsed">
+      
       <h1>Lista de Usuarios</h1>
-      <button id="bto_update">Actualizar</button>
+      <!-- <button id="bto_update">Actualizar</button> -->
       <ul id="users" class="user-list">
         <!-- Aquí se generarán los elementos de la lista de usuarios -->
       </ul>
       <button id="logout" class="logout-button">Cerrar Sesión</button>
     </div>
-    <div id="chat-container" class="chat-container">
-      <div id="chat-messages" class="chat-messages"></div>
-      <div class="chat-input-container">
-        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe un mensaje...">
-        <button id="send-message" class="send-message-button">Enviar</button>
-      </div>
-    </div>
+
   </div>
-  <script id="users-data" type="application/json">{{ users | tojson }}</script>
 </body>
 </html>
 

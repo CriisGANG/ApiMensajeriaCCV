@@ -46,7 +46,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
           alert(`Inicio de sesión exitoso. Bienvenido, ${responsejson.username}!`);
           localStorage.setItem("loggedInUser", responsejson.username);
           // No es necesario establecer manualmente la cookie HttpOnly desde el cliente
-          window.location.href = "/users";  // Redirigir a otra página tras el login
+          window.location.href = "/users_page";  // Redirigir a otra página tras el login
       } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
           errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
@@ -77,6 +77,6 @@ if (localStorage.getItem("loggedInUser")) {
   });
 
   document.getElementById("go-to-chat").addEventListener("click", function () {
-      window.location.href = "/chat";
+      window.location.href = "/users";
   });
 }
