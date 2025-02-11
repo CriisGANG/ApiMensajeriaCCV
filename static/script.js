@@ -1,59 +1,35 @@
 document.getElementById("loginForm").addEventListener("submit", async function (event) {
   event.preventDefault();
 
-  console.log("Dentro del login");
-
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("error-message");
 
-  // 📌 Verifica si se están obteniendo correctamente los valores del formulario
-  console.log("Username:", username);
-  console.log("Password:", password);
-
-  // Crear objeto con los datos del usuario
   const loginData = {
       username: username,
       password: password
   };
 
-  // 📌 Verifica el objeto antes de enviarlo
-  console.log("Datos a enviar:", loginData);
-
-  // Convertir el objeto a JSON
   const loginDataJSON = JSON.stringify(loginData);
-  console.log("JSON enviado:", loginDataJSON); // para ver que el JSON está bien formado
 
   try {
-      // Enviar los datos al backend en formato JSON
-      const response = await fetch("/login", {
+      const response = await fetch("http://127.0.0.1:8000/login", {  // Cambiar la URL para apuntar al puerto 8000
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: loginDataJSON
       });
 
-      // 📌 Verifica el estado de la respuesta
-      console.log("Estado de la respuesta:", response.status);
-      console.log("Redirección:", response.redirected);
-      console.log("Respuesta OK:", response.ok);
-
-      // Intentar leer la respuesta en JSON
       const responsejson = await response.json();
-      console.log("Respuesta del servidor JSON:", responsejson);
 
-      // 📌 Mueve la validación dentro del try
       if (response.ok) {
-          alert(`Inicio de sesión exitoso. Bienvenido, ${responsejson.username}!`);
           localStorage.setItem("loggedInUser", responsejson.username);
-          // No es necesario establecer manualmente la cookie HttpOnly desde el cliente
-          window.location.href = "/users";  // Redirigir a otra página tras el login
+          window.location.href = "http://127.0.0.1:8000/chat";  // Redirigir a otra página tras el login
       } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
           errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
       }
 
   } catch (error) {
-      // 📌 Captura cualquier error en la petición fetch()
       console.error("Error en la petición:", error);
       errorMessage.textContent = "Error de conexión con el servidor.";
       errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
@@ -77,6 +53,6 @@ if (localStorage.getItem("loggedInUser")) {
   });
 
   document.getElementById("go-to-chat").addEventListener("click", function () {
-      window.location.href = "/chat";
+      window.location.href = "http://127.0.0.1:8000/chat";
   });
 }
