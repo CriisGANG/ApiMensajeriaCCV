@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const lastMessageTimestamp = document.getElementById("last-message-timestamp");
   const userList = document.getElementById("users");
   const config = document.getElementById("config-logo");
+  const atras = document.getElementById("atras");
 
 
   // Fetch user data
@@ -27,8 +28,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       const userData = await userResponse.json();
       console.log("userData", userData);
       console.log(userData.users.user_profile_picture_url);
+      console.log("Hola",userData.users.username);
       
 
+      userData.users.forEach(user => {console.log(user.username);});
+      
       userProfilePicture.src = userData.users.user_profile_picture_url;
   } catch (error) {
       console.error('Error fetching user data:', error);
@@ -83,8 +87,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   } catch (error) {
       console.error('Error fetching users data:', error);
   }
+  config.addEventListener("click", function () {
+    window.location.href = `configuracion`;})
 
   // Event listeners for buttons
+  atras.addEventListener("click", function () {
+    window.location.href = "http://127.0.0.1:8000/users_page";
+});
   document.getElementById("go-to-chat").addEventListener("click", function () {
       window.location.href = "http://127.0.0.1:8000/chat";
   });
