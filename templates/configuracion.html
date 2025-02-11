@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes de WhatsApp</title>
+    <link rel="stylesheet" href="/static/bootstrap.css"></head>
+    <link href="/static/configuracion.css" rel="stylesheet">
+    <script defer src="/static/configuracion.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="settings-container text-center">
+            <h3>Ajustes de WhatsApp</h3>
+            <div class="mb-3">
+                <img src="" alt="Imagen de perfil" class="profile-img">
+                <div>
+                    <!-- Button trigger modal -->
+                <button id="btn-imagen" type="button" class="btn btn-custom mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Cambiar Imagen
+                </button>
+                
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        Insertar enlace de la imagen a continuación: 
+                        <input type="text" class="form-control" id="input-imagen">
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-custom w-100">Créditos</button>
+            </div>
+            <div>
+                <button class="btn btn-warning w-100">Cambiar Contraseña</button>
+            </div>
+            <div>
+                <button class="btn btn-danger w-100">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script></body>
+</html>

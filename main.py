@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse  # Añadir HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware  # Añadir CORSMiddleware
 import database
 import datetime
 from fastapi import WebSocket, WebSocketDisconnect
@@ -11,6 +12,21 @@ from passlib.context import CryptContext
 import asyncio  # Añadir esta línea
 
 app = FastAPI()
+
+# Habilitar CORS
+origins = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    # Añadir otros orígenes si es necesario
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Montar la carpeta "static" para servir archivos como JavaScript, CSS, imágenes, etc.
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -85,7 +101,7 @@ class UpdateBgPictureRequest(BaseModel):
     bg_picture_url: str
 
 
-@app.get("/", response_class=JSONResponse)
+@app.get("/", response_class=HTMLResponse)
 def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
@@ -109,24 +125,22 @@ async def login(request: LoginRequest):
         )
 
 @app.get("/users", response_class=JSONResponse)
-def usersList(request: Request, current_user: str = Depends(get_current_user)):
+def get_users(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
-    print(f"Username: {logged_in_user}") # Sale virginiajimenez
-    print(f"Username: {logged_in_user_id}") # Sale 14
-    users = db.carregaUsuaris()
-    groups = db.carregaGrups(logged_in_user_id)
-    print(f"Grupos: {groups}")
+    print("Pepe")
+
+    users = db.carregaUsuaris() or []
+    groups = db.carregaGrups(logged_in_user_id) or []
     db.desconecta()
+    return {"users": users, "groups": groups}  # Solo devuelve JSON
 
-    # Convert datetime objects to strings
-    for group in groups:
-        for key, value in group.items():
-            if isinstance(value, datetime.datetime):
-                group[key] = value.isoformat()
+# RUTAS HTML
 
-    return templates.TemplateResponse("users.html", {"request": request, "users": users, "groups": groups})
+@app.get("/users_page")
+def users_page(request: Request):
+    return templates.TemplateResponse("users2.html", {"request": request})
 
 @app.get("/groups")
 async def groupList(request: Request):
@@ -171,7 +185,7 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
 
     return JSONResponse(content=conversation, status_code=200)
 
-@app.get("/chat/{username}", response_class=JSONResponse)
+@app.get("/chat/{username}", response_class=HTMLResponse)
 def chat_page(username: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     logged_in_user = current_user
@@ -206,7 +220,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {
+    return templates.TemplateResponse("chat2.html", {
         "request": request,
         "conversation": conversation,
         "username": username,
@@ -217,7 +231,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         "conversations": conversations
     })
 
-@app.get("/chat", response_class=JSONResponse)
+@app.get("/chat", response_class=HTMLResponse)
 def chat_page(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     logged_in_user = current_user
@@ -242,7 +256,7 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat.html", {
+    return templates.TemplateResponse("chat2.html", {
         "request": request,
         "username": logged_in_user,
         "users": users,
@@ -251,7 +265,7 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
         "conversations": conversations
     })
 
-@app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
+@app.get("/chatsGrupos/{groupId}", response_class=HTMLResponse)
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     loggedInUser = current_user
@@ -452,6 +466,69 @@ async def listen_for_new_messages(websocket: WebSocket, background_tasks: Backgr
 
     background_tasks.add_task(check_for_new_messages)
     return JSONResponse(content={"message": "Listening for new messages"}, status_code=200)
+
+@app.get("/api/get-profile-picture-url", response_class=JSONResponse)
+def get_profile_picture_url(current_user: str = Depends(get_current_user)):
+    db.conecta()
+    user_id = db.get_user_id(current_user)
+    profile_picture_url = db.get_user_profile_picture_url(user_id)
+    db.desconecta()
+    if profile_picture_url:
+        return JSONResponse(content={"profile_picture_url": profile_picture_url}, status_code=200)
+    else:
+        return JSONResponse(content={"error": "Profile picture URL not found"}, status_code=404)
+
+
+@app.get("/api/get-chat-data", response_class=JSONResponse)
+def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    selected_user_id = db.get_user_id(username)
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
+    last_message_timestamp = conversation[-1]['created_at'].isoformat() if conversation else None
+    db.desconecta()
+    return JSONResponse(content={
+        "username": username,
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,
+        "conversation": conversation,
+        "last_message_timestamp": last_message_timestamp
+    }, status_code=200)
+
+@app.get("/api/get-chat-data", response_class=JSONResponse)
+def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    selected_user_id = db.get_user_id(username)
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
+    last_message_timestamp = conversation[-1]['created_at'].isoformat() if conversation else None
+    db.desconecta()
+    return JSONResponse(content={
+        "username": username,
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,
+        "conversation": conversation,
+        "last_message_timestamp": last_message_timestamp
+    }, status_code=200)
+
+@app.get("/api/get-latest-messages", response_class=JSONResponse)
+def get_latest_messages(since: str, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    conversation = db.cargar_conversacion(logged_in_user_id, None, since)
+    db.desconecta()
+    return JSONResponse(content=conversation, status_code=200)
+
+@app.get("/api/get-users", response_class=JSONResponse)
+def get_users(current_user: str = Depends(get_current_user)):
+    db.conecta()
+    users = db.carregaUsuaris()
+    db.desconecta()
+    return JSONResponse(content=users, status_code=200)
+
+@app.get("/configuracion")
+def users_page(request: Request):
+    return templates.TemplateResponse("configuracion.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

@@ -674,3 +674,108 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
 .error-visible {
   display: block;
 }
+
+/* users2.html*/
+.header-page{
+  max-height: 25vh;
+}
+
+.card-header{
+  max-height: 80px;
+}
+ul#users {
+  max-height: 65vh;
+}
+
+.config-logo
+
+/*** MODO OSCURO **/
+
+/* Modo oscuro mejorado */
+.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark-mode .btn-dark{
+  background-image:  #21867a;
+}
+
+.btn-dark:hover{
+  filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.5));
+
+}
+
+/* Ajuste para la barra de navegación */
+.dark-mode .nav-pills .nav-link {
+  color: #ffffff !important;
+  background-color: #2a2a2a !important;
+  border-radius: 5px;
+}
+
+.dark-mode .nav-pills .nav-link:hover {
+  background-color: #3a3a3a !important;
+}
+
+/* tarjeta */
+.dark-mode .card {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border: 1px solid #333;
+}
+.dark-mode .card-body{
+  background-color: #000000;
+  color: white;
+}
+/* cabecera de la tarjeta */
+.dark-mode .card-header {
+  background-color: #252525;
+  color: white;
+  border-bottom: 1px solid #444;
+}
+
+/* Botones */
+.dark-mode .btn {
+  background: #2a9d8f;
+  color: white;
+  border: none;
+}
+
+.dark-mode .btn:hover {
+  background-color: #21867a;
+}
+
+.dark-mode .logout-button{
+  background-color: #2A9D8F;
+  color: white;
+}
+
+/* lista de usuarios */
+.dark-mode .user-list {
+  background-color: #252525;
+  border: 1px solid #444;
+}
+
+/* ítems de la lista */
+.dark-mode .user-list li {
+  background-color: #2a2a2a;
+  color: white;
+  padding: 10px;
+  border-bottom: 1px solid #444;
+}
+
+.dark-mode .user-list li:hover {
+  background-color: #3a3a3a;
+}
+
+/* input */
+.dark-mode input[type="text"] {
+  background-color: #1e1e1e;
+  color: white;
+  border: 1px solid #444;
+}
+
+.dark-mode input[type="text"]::placeholder {
+  color: #bbb;
+}

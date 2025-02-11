@@ -1,49 +1,60 @@
+document.addEventListener("DOMContentLoaded", async function () {
+    console.log("JavaScript cargado correctamente.");
+    const config = document.getElementById("config-logo");
+    const userList = document.getElementById("users");
 
-document.addEventListener("DOMContentLoaded", function () {
-  const appContainer = document.querySelector(".app-container");
-  const sidebar = document.querySelector(".sidebar");
-  const chatContainer = document.querySelector(".chat-container");
-  const users = JSON.parse(document.getElementById("users-data").textContent);
-  const userList = document.getElementById("users");
+    try {
+        console.log("Cargando usuarios...");
 
-  users.forEach(user => {
-    const profilePictureUrl = user.profile_picture_url || '/static/default-profile.png'; // Imagen por defecto
-    const li = document.createElement("li");
-    li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
-    li.innerHTML = `
-      <img src="${profilePictureUrl}" alt="${user.username}" class="profile-picture rounded-circle mr-2">
-      <div class="user-info">
-        <span class="user-name">${user.username}</span>
-        <span class="user-status">${user.status}</span>
-      </div>
-    `;
-    li.addEventListener("click", function () {
-      window.location.href = `/chat/${user.username}`;
-    });
-    userList.appendChild(li);
-  });
+        // Hacer la llamada al backend
+        const response = await fetch("http://127.0.0.1:8000/users");
+        console.log("Respuesta recibida:", response);
+        if (!response.ok) {
+            if (response.status === 401) {
+                alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+                localStorage.removeItem("loggedInUser");
+                window.location.href = "/login.html";
+            }else{
+                throw new Error(`Error al obtener los datos: ${response.status}`);
+            }
+           
+        }
 
-  newGroup.addEventListener("click", function (event) {
-    window.location.href = "/newGroup";
-  })
+        const datajson = await response.json();
+        console.log("Datos recibidos:", datajson);
 
-  document.getElementById("logout").addEventListener("click", function () {
-    localStorage.removeItem("loggedInUser");
-    window.location.href = "/";
-  });
+        // Pintar los usuarios en la lista
+        paintUsers(datajson.users);
 
-  // Conectar al WebSocket para recibir notificaciones de nuevos mensajes
-  const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${localStorage.getItem("loggedInUser")}`);
-
-  socket.onmessage = function (event) {
-    const message = JSON.parse(event.data);
-    if (message.sender_username !== localStorage.getItem("loggedInUser")) {
-      alert("Nuevo mensaje recibido de " + message.sender_username);
+    } catch (error) {
+        console.error("Hubo un problema al obtener los datos:", error);
     }
-  };
 
-  // document.getElementById("cambiar-a-grupos").addEventListener("click", function () {
-  //   window.location.href = "/groups";
-  // });
+    config.addEventListener("click", function () {
+        window.location.href = `configuracion`;})
+
+    function paintUsers(users) {
+        userList.innerHTML = ""; // Limpia la lista antes de añadir nuevos usuarios
+
+        users.forEach(user => {
+            const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png';
+            const li = document.createElement("li");
+            li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
+            li.innerHTML = `
+                <img src="${profilePictureUrl}" alt="${user.username}" class="profile-picture rounded-circle mr-2" width="40">
+                <span class="user-name">${user.username}</span>
+            `;
+            li.addEventListener("click", function () {
+                window.location.href = `/chat/${user.username}`;
+            });
+            userList.appendChild(li);
+        });
+    }
+
+    // Evento para cerrar sesión
+    document.getElementById("logout").addEventListener("click", function () {
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "/";
+    });
 });
 
