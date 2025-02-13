@@ -1,5 +1,7 @@
-document.addEventListener("DOMContentLoaded", async function () {
-    console.log("JavaScript cargado correctamente.");
+async function loginOk(e){
+    
+    e.preventDefault()
+    
     const config = document.getElementById("config-logo");
     const userList = document.getElementById("users");
 
@@ -11,9 +13,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.log("Respuesta recibida:", response);
         if (!response.ok) {
             if (response.status === 401) {
-                alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
                 localStorage.removeItem("loggedInUser");
-                window.location.href = "/login.html";
+                window.location.href = "/";
             }else{
                 throw new Error(`Error al obtener los datos: ${response.status}`);
             }
@@ -29,9 +30,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     } catch (error) {
         console.error("Hubo un problema al obtener los datos:", error);
     }
-
-    config.addEventListener("click", function () {
-        window.location.href = `configuracion`;})
+}
+    
 
     function paintUsers(users) {
         userList.innerHTML = ""; // Limpia la lista antes de añadir nuevos usuarios
@@ -51,12 +51,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    // Evento para cerrar sesión
-    document.getElementById("logout").addEventListener("click", function () {
-        localStorage.removeItem("loggedInUser");
-        window.location.href = "/";
-    });
-});
 
         users.forEach(user => {
             const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png';
@@ -78,3 +72,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         localStorage.removeItem("loggedInUser");
         window.location.href = "/";
     });
+
+    config.addEventListener("click", function () {
+        window.location.href = `configuracion`;})
+
+    document.addEventListener("submit", (e) => { loginOk(e)})

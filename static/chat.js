@@ -133,22 +133,22 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
   // Fetch latest messages every 5 seconds
-  setInterval(async function () {
-      try {
-          const response = await fetch(`http://127.0.0.1:8000/api/get-latest-messages?since=${lastMessageTimestamp.value}`);
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-          const newMessages = await response.json();
-          newMessages.forEach(message => {
-              const messageElement = document.createElement("div");
-              messageElement.classList.add("message", message.sender_username === loggedInUser ? "received" : "sent", "p-2", "mb-2", "rounded");
-              messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
-              chatMessages.appendChild(messageElement);
-              lastMessageTimestamp.value = message.created_at;
-          });
-      } catch (error) {
-          console.error('Error fetching latest messages:', error);
-      }
-  }, 5000);
+//   setInterval(async function () {
+//       try {
+//           const response = await fetch(`http://127.0.0.1:8000/api/get-latest-messages?since=${lastMessageTimestamp.value}`);
+//           if (!response.ok) {
+//               throw new Error('Network response was not ok');
+//           }
+//           const newMessages = await response.json();
+//           newMessages.forEach(message => {
+//               const messageElement = document.createElement("div");
+//               messageElement.classList.add("message", message.sender_username === loggedInUser ? "received" : "sent", "p-2", "mb-2", "rounded");
+//               messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
+//               chatMessages.appendChild(messageElement);
+//               lastMessageTimestamp.value = message.created_at;
+//           });
+//       } catch (error) {
+//           console.error('Error fetching latest messages:', error);
+//       }
+//   }, 5000);
 });

@@ -1,6 +1,10 @@
+
+import {show, hidden} from "../static/index.js"
+
 document.getElementById("loginForm").addEventListener("submit", async function (event) {
   event.preventDefault();
 
+  const p_users = document.getElementById("p-users");
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("error-message");
@@ -23,8 +27,8 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
       if (response.ok) {
           localStorage.setItem("loggedInUser", responsejson.username);
-          window.location.href = "http://127.0.0.1:8000/users_page";  // Redirigir a otra página tras el login
-      } else {
+          show(p_users)
+        } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
           errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
       }

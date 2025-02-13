@@ -1,15 +1,14 @@
 :root {
-  --red:  #e76f51; /*--bg-color*/
-  --orange:  #f4a261; /*--txt-color*/
-  --yellow:  #e9c46a; 
-  --green:   #2a9d8f;
-  --teal:    #264653;
+  --border:  #e76f51; /*--bg-color*/
+  --bg-secondary:  #f4a261; /*--txt-color*/
+  --bg-color:  #e9c46a; 
+  --icons:   #2a9d8f;
+  --headers:    #264653;
 }
 
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #E9C46A; /* Fondo principal */
   margin: 0;
   padding: 0;
   display: flex;
@@ -787,3 +786,10 @@ ul#users {
 .dark-mode input[type="text"]::placeholder {
   color: #bbb;
 }
+
+
+/*INDEX.HTML*/
+
+.show {
+     display: block;
+     } 
