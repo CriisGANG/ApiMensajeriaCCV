@@ -1,9 +1,5 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const loggedInUser = localStorage.getItem("loggedInUser");
-  if (!loggedInUser) {
-      window.location.href = "http://127.0.0.1:8000/";
-      return;
-  }
   const chatUsername = document.getElementById("chat-username");
   const selectedUserProfilePicture = document.getElementById("selected-user-profile-picture");
   const userProfilePicture = document.getElementById("user-profile-picture");
