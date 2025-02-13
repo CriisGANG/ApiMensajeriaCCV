@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("load", async function () {
     console.log("JavaScript cargado correctamente.");
     const config = document.getElementById("config-logo");
     const userList = document.getElementById("users");
@@ -7,18 +7,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.log("Cargando usuarios...");
 
         // Hacer la llamada al backend
-        const response = await fetch("http://127.0.0.1:8000/users");
-        console.log("Respuesta recibida:", response);
-        if (!response.ok) {
-            if (response.status === 401) {
-                alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
-                localStorage.removeItem("loggedInUser");
-                window.location.href = "/login.html";
-            }else{
-                throw new Error(`Error al obtener los datos: ${response.status}`);
-            }
-           
-        }
+
 
         const datajson = await response.json();
         console.log("Datos recibidos:", datajson);
