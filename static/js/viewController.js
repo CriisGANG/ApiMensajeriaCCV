@@ -1,4 +1,7 @@
 
+/**
+ * Control de las pantallas
+ */
 const pantallas = [{key:"chats", value: "p-chats"},{key:"users", value: "p-users"}, {key:"login", value: "p-login"}]
 
 

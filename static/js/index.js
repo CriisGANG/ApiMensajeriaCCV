@@ -1,3 +1,7 @@
+/**
+ * Punto de entrada de la aplicación
+ */
+
 import { callUsers } from "./httpFetch.js";
 import { getCookieValue } from "./utils.js";
 import {show} from "./viewController.js";
@@ -6,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
 
  
-  //punto de entrada de la aplicación, si hay token, intentamos ir a chats, sino al login
+  // si hay token, intentamos ir a chats, sino al login
   if(!getCookieValue('access_token')){
     
     show("login");

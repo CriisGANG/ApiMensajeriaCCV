@@ -1,4 +1,6 @@
-/** unicamente hace peticiones fetch, no interactua con el html */
+/** 
+ * Peticiones al backend (endpoints)
+ * unicamente hace peticiones fetch, no interactua con el html */
 const apiEndpoint = "http://127.0.0.1:8000"
 
 /**

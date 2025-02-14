@@ -1,3 +1,7 @@
+/**
+ * Todas las subscripciones a eventos de escucha
+ */
+
 import { login } from "./httpFetch.js";
 import { show } from "./viewController.js";
 

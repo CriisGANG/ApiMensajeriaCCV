@@ -1,3 +1,6 @@
+/**
+ * Funciones útiles (y esas que no sabes donde poner)
+ */
 function getCookieValue(name) {
     const cookies = document.cookie.split('; '); // Separa las cookies
     for (const cookie of cookies) {
