@@ -60,6 +60,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_current_user(request: Request):
+    print(request.cookies)
     token = request.cookies.get("access_token")
     if token is None:
         raise HTTPException(
@@ -118,16 +119,22 @@ async def login(request: LoginRequest):
             data={"sub": request.username}, expires_delta=access_token_expires
         )
         response = JSONResponse(content={"message": "Login exitoso", "username": request.username, "access_token": access_token}, status_code=200)
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="access_token", value=access_token, httponly=False)
         return response
     else:
         raise HTTPException(
             status_code=401, detail="Usuario o contraseña incorrectos"
         )
 
+@app.post("/logout")
+async def logout(response: Request):
+    response.delete_cookie("access_token")
+    return {"message": "Sesión cerrada, cookie eliminada"}
+
 @app.get("/users", response_class=JSONResponse)
 def get_users(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
+    print(current_user)
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print("Pepe")
@@ -138,10 +145,6 @@ def get_users(request: Request, current_user: str = Depends(get_current_user)):
     return {"users": users, "groups": groups}  # Solo devuelve JSON
 
 # RUTAS HTML
-
-@app.get("/users_page")
-def users_page(request: Request):
-    return templates.TemplateResponse("users2.html", {"request": request})
 
 @app.get("/groups")
 async def groupList(request: Request, idUser):
