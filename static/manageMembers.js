@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // console.log("DOM Content Loaded");
     const usersList = document.getElementsByClassName("users");
     const exitButton = document.getElementById("exitButton");
     const addUserButton = document.getElementById("addUserButton");
@@ -10,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const userSelect = document.getElementById("userSelect");
     const removeMemberButton = document.getElementById("removeMemberButton");
     const makeAdminButton = document.getElementById("makeAdminButton");
+    const demoteMemberButton = document.getElementById("demoteMemberButton");
     const manageMemberTitle = document.getElementById("manageMemberTitle");
 
     exitButton.addEventListener("click", function () {
@@ -47,8 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/add_user_to_group', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ userId: userId, group_id: groupId })
         })
@@ -85,8 +84,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (isAdmin) {
                 makeAdminButton.style.display = "none";
+                demoteMemberButton.style.display = "block";
+                demoteMemberButton.onclick = function () {
+                    sendMemberAction(userId, username, groupId, "demote", user);
+                    manageMemberModal.style.display = "none";
+                };
             } else {
                 makeAdminButton.style.display = "block";
+                demoteMemberButton.style.display = "none";
                 makeAdminButton.onclick = function () {
                     sendMemberAction(userId, username, groupId, "makeAdmin", user);
                     manageMemberModal.style.display = "none";
@@ -97,12 +102,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function sendMemberAction(userId, username, groupId, action, userElement) {
-    console.log(`Sending action: ${action} for User ID: ${userId}, Username: ${username}, Group ID: ${groupId}`); // Log the values
+    console.log(`Sending action: ${action} for User ID: ${userId}, Username: ${username}, Group ID: ${groupId}`);
     fetch('/manage_member_action', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({ userId: userId, username: username, group_id: groupId, action: action })
     })
@@ -113,7 +117,13 @@ function sendMemberAction(userId, username, groupId, action, userElement) {
                 if (action === 'remove') {
                     userElement.remove(); // Remove the user from the list
                 } else if (action === 'makeAdmin') {
-                    alert(`${userElement.textContent} has been promoted to admin.`);
+                    alert(`${userElement.textContent} ha sido promovido a administrador.`);
+                    userElement.setAttribute("data-is-admin", "1"); // Update the data-is-admin attribute
+                    makeAdminButton.style.display = "none"; // Hide the makeAdminButton
+                } else if (action === 'demote') {
+                    alert(`${userElement.textContent} ha sido degradado a miembro.`);
+                    userElement.setAttribute("data-is-admin", "0"); // Update the data-is-admin attribute
+                    demoteMemberButton.style.display = "none"; // Hide the demoteMemberButton
                 }
             } else {
                 alert(`Failed to perform action: ${data.message}`);
@@ -123,19 +133,4 @@ function sendMemberAction(userId, username, groupId, action, userElement) {
             console.error('Error:', error);
             alert('An error occurred while performing the action.');
         });
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }

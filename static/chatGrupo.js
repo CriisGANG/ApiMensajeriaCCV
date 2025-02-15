@@ -8,22 +8,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const loggedInUser = localStorage.getItem("loggedInUser");
     const manageMembers = document.getElementById("gestionar");
     const groupId = window.location.pathname.split("/").pop();
-
-    // console.log("Elements:", { chatInput, sendMessageButtonGroup, chatMessages, receiverUsername, loggedInUser });
+    const exitButton = document.getElementById("exit");
 
     sendMessageButtonGroup.addEventListener("click", async function () {
         const messageContent = chatInput.value;
         if (messageContent.trim() === "") return;
-
-        // console.log("Sending message:", messageContent);
 
         const response = await fetch("/send-message-group", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ receiver_username: receiverUsername, content: messageContent })
         });
-
-        // console.log("Response status:", response.status);
 
         if (response.ok) {
             const message = await response.json();
@@ -46,15 +41,38 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (response.ok) {
-            window.location.href = "/users";
+            window.location.href = "/users_page";
         } else {
             console.error("Error leaving group:", response.statusText);
         }
     });
-    manageMembers.addEventListener("click", function() {
-        window.location.href = `/manageMembers/${groupId}`;
-        console.log(groupId);
-    });
+    if (manageMembers) {
+        manageMembers.addEventListener("click", function() {
+            window.location.href = `/manageMembers/${groupId}`;
+            console.log(groupId);
+        });
+    }
+
+    const deleteGroupButton = document.getElementById("borrar-grupo");
+    if (deleteGroupButton) {
+        deleteGroupButton.addEventListener("click", async function () {
+            const groupId = window.location.pathname.split("/").pop();
+            const response = await fetch("/deleteGroup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ group_id: groupId })
+            });
+
+            if (response.ok) {
+                alert("Grupo borrado exitosamente.");
+                window.location.href = "/users_page";
+            } else {
+                const errorData = await response.json();
+                console.error("Error borrando el grupo:", errorData.detail);
+                alert(`Error borrando el grupo: ${errorData.detail}`);
+            }
+        });
+    }
 
     const appearanceButton = document.getElementById("appearance-button");
     const appearanceDropdown = document.getElementById("appearance-dropdown");
@@ -121,6 +139,20 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch (error) {
                 console.error("Error en la petición:", error);
             }
+        });
+    }
+
+    const logoutButton = document.getElementById("logout");
+    if (logoutButton) {
+        logoutButton.addEventListener("click", function () {
+            localStorage.removeItem("loggedInUser");
+            window.location.href = "/";
+        });
+    }
+
+    if (exitButton) {
+        exitButton.addEventListener("click", function () {
+            window.location.href = "/users_page";
         });
     }
 });

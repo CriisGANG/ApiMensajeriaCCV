@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ action: "create", groupName: groupName, users: Array.from(selectedUsers) }) // Agregado "action: create"
+        body: JSON.stringify({ groupName: groupName, users: Array.from(selectedUsers) })
       })
       .then(response => {
         if (!response.ok) {
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(data => {
         console.log(data.message);
-        window.location.href = "/users_page"; // Redirect to the user list
+        window.location.href = "/users"; // Redirect to the user list
       })
       .catch(error => {
         console.error("Error:", error);

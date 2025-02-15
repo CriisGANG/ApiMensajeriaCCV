@@ -1,6 +1,12 @@
+
+
+
 document.getElementById("loginForm").addEventListener("submit", async function (event) {
   event.preventDefault();
 
+  const p_users = document.getElementById("p-users");
+  const p_chats =document.getElementById("p-chats");
+  const p_login =document.getElementById("p-login");
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const errorMessage = document.getElementById("error-message");
@@ -23,8 +29,8 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
       if (response.ok) {
           localStorage.setItem("loggedInUser", responsejson.username);
-          window.location.href = "http://127.0.0.1:8000/users_page";  // Redirigir a otra página tras el login
-      } else {
+          hidden(p_users, p_chats, p_login);
+        } else {
           errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
           errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
       }
@@ -36,35 +42,15 @@ document.getElementById("loginForm").addEventListener("submit", async function (
   }
 });
 
-// Verificar si el usuario ya está logueado
-if (localStorage.getItem("loggedInUser")) {
-  document.body.innerHTML = `
-    <div class="welcome-container">
-      <h1 class="welcome-title">Bienvenido, ${localStorage.getItem("loggedInUser")}!</h1>
-      <p class="welcome-message">Ya has iniciado sesión.</p>
-      <button id="go-to-chat" class="btn btn-primary">Ir al chat</button>
-      <button id="logout" class="btn btn-secondary">Cerrar Sesión</button>
-    </div>
-  `;
+/* funciones*/
 
-  document.getElementById("logout").addEventListener("click", function () {
-      localStorage.removeItem("loggedInUser");
-      window.location.reload();
-  });
-}
 
-// // Verificar si hay token
-// if (!localStorage.getItem("token")) { // Creo que este token es el nombre que tiene en el JSON (?).
-//     window.location.href = "login.html";
-// }
 
-// Lo que hará el código si está logeado.
-document.getElementById("logout").addEventListener("click", () => {
-    localStorage.removeItem("token");
-    window.location.href = "/"
-})
 
-  document.getElementById("go-to-chat").addEventListener("click", function () {
-      window.location.href = "http://127.0.0.1:8000/users_page";
-  });
+/*** add event listeners */
 
+/*LOGOUT*/
+  // document.getElementById("logout").addEventListener("click", function () {
+  //     localStorage.removeItem("loggedInUser");
+  //     window.location.reload();
+  // });

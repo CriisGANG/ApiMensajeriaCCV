@@ -25,12 +25,11 @@ class API_Mensajeria(object):
         self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
-
     def carregaGrups(self, idUser):
+        # sql = "SELECT * FROM Groups"
         sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
-        self.cursor.execute(sql, (idUser,))
+        self.cursor.execute(sql, (idUser))
         ResQuery = self.cursor.fetchall()
-        print("Grupos cargados:", ResQuery)  # Añadir esta línea para depuración
         return ResQuery
 
     def verificar_usuario(self, username, password):
@@ -51,7 +50,6 @@ class API_Mensajeria(object):
         sql = "SELECT id FROM usuarisclase WHERE username = %s"
         self.cursor.execute(sql, (username,))
         user = self.cursor.fetchone()
-        print("get_user_id:", user)  # Añadir esta línea para depuración
         return user['id'] if user else None
 
     def get_username(self, user_id):
@@ -120,17 +118,8 @@ class API_Mensajeria(object):
         """
         self.cursor.execute(sql, (groupId,))
         return self.cursor.fetchall()
-    
-    def getGroupMembersExceptYou(self, groupId, userId):
-        sql = """
-        SELECT u.id, u.username FROM usuarisclase u
-        JOIN group_members gm ON u.id = gm.user_id
-        WHERE gm.group_id = %s AND u.id != %s
-        """
-        self.cursor.execute(sql, (groupId, userId))
-        return self.cursor.fetchall()
 
-    def actualizar_estado_mensaje(self, new_status, message_id):
+    def actualizar_estado_mensaje(self, message_id, new_status):
         sql = "UPDATE messages SET status = %s WHERE id = %s"
         self.cursor.execute(sql, (new_status, message_id))
         self.db.commit()
@@ -174,76 +163,8 @@ class API_Mensajeria(object):
         sql = "INSERT INTO group_members (group_id, user_id, is_admin) VALUES (%s, %s, %s)"
         self.cursor.execute(sql, (group_id, user_id, is_admin))
         self.db.commit()
-        
-    def convertToAdmin(self, user_id, group_id):
-        sql = "UPDATE group_members SET is_admin = 1 WHERE user_id = %s AND group_id = %s"
-        self.cursor.execute(sql, (user_id, group_id))
-        self.db.commit()
-        
-    def isAdmin(self, user_id, group_id):
-        sql = "SELECT is_admin FROM group_members WHERE user_id =%s AND group_id =%s"
-        self.cursor.execute(sql, (user_id, group_id))
-        ResQuery = self.cursor.fetchone()
-        print(ResQuery)
-        return ResQuery['is_admin'] if ResQuery else None # La idea es mirar si el is_admin es 0 o 1. Si es 1, entonces el usuario tendrá unas configuraciones extra: para hacer admin a otra persona o expulsar a alguien
-
-    def leaveGroup(self, user_id, group_id):
-        sql = "DELETE FROM group_members WHERE user_id = %s AND group_id = %s"
-        self.cursor.execute(sql, (user_id, group_id))
-        self.db.commit()
 
     def get_message_by_id(self, message_id):
         sql = "SELECT * FROM messages WHERE id = %s"
         self.cursor.execute(sql, (message_id,))
         return self.cursor.fetchone()
-    
-    def isAdmin(self, user_id, group_id):
-        sql = "SELECT is_admin FROM group_members WHERE user_id =%s AND group_id =%s"
-        self.cursor.execute(sql, (user_id, group_id))
-        ResQuery = self.cursor.fetchone()
-        print(ResQuery)
-        return ResQuery['is_admin'] if ResQuery else None # La idea es mirar si el is_admin es 0 o 1. Si es 1, entonces el usuario tendrá unas configuraciones extra: para hacer admin a otra persona o expulsar a alguien
-
-    def getGroupMembersExceptYou(self, groupId, userId):
-        sql = """
-        SELECT u.id, u.username FROM usuarisclase u
-        JOIN group_members gm ON u.id = gm.user_id
-        WHERE gm.group_id = %s AND u.id != %s
-        """
-        self.cursor.execute(sql, (groupId, userId))
-        return self.cursor.fetchall()
-    
-    def leaveGroup(self, user_id, group_id):
-        sql = "DELETE FROM group_members WHERE user_id = %s AND group_id = %s"
-        self.cursor.execute(sql, (user_id, group_id))
-        self.db.commit()
-        
-    def convertToAdmin(self, user_id, group_id):
-        sql = "UPDATE group_members SET is_admin = 1 WHERE user_id = %s AND group_id = %s"
-        self.cursor.execute(sql, (user_id, group_id))
-        self.db.commit()
-        
-    def isOwner(self, admin_id, group_id):
-        sql = "SELECT COUNT(*) as isOwner FROM Groups WHERE admin_id = %s AND id = %s"
-        self.cursor.execute(sql, (admin_id, group_id))
-        ResQuery = self.cursor.fetchone()
-        return ResQuery
-
-    def delete_group(self, group_id):
-        sql = "DELETE FROM groups WHERE id = %s"
-        self.cursor.execute(sql, (group_id,))
-        self.db.commit()
-
-    def getUsersNotInGroup(self, group_id):
-        sql = """
-        SELECT u.id, u.username FROM usuarisclase u
-        WHERE u.id NOT IN (SELECT gm.user_id FROM group_members gm WHERE gm.group_id = %s)
-        """
-        self.cursor.execute(sql, (group_id,))
-        ResQuery = self.cursor.fetchall()
-        return ResQuery
-
-    def demoteToMember(self, user_id, group_id):
-        sql = "UPDATE group_members SET is_admin = 0 WHERE user_id = %s AND group_id = %s"
-        self.cursor.execute(sql, (user_id, group_id))
-        self.db.commit()

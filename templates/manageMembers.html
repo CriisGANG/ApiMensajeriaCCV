@@ -25,7 +25,7 @@
         <span class="close-button">&times;</span>
         <h2>Añadir Usuario</h2>
         <select id="userSelect">
-          {% for user in all_users %}
+          {% for user in users %}
             <option value="{{ user.id }}">{{ user.username }}</option>
           {% endfor %}
         </select>
@@ -39,7 +39,8 @@
         <span class="close-button">&times;</span>
         <h2 id="manageMemberTitle"></h2>
         <button id="removeMemberButton" class="save-button">Eliminar del grupo</button>
-        <button id="makeAdminButton" class="save-button">Convertir en administrador</button>
+        <button id="makeAdminButton" class="save-button" style="display: none;">Convertir en administrador</button>
+        <button id="demoteMemberButton" class="save-button" style="display: none;">Degradar a Miembro</button>
       </div>
     </div>
   </body>

@@ -1,96 +1,78 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const appContainer = document.querySelector(".app-container");
-  const sidebar = document.querySelector(".sidebar");
-  const chatContainer = document.querySelector(".chat-container");
-  const users = JSON.parse(document.getElementById("users-data").textContent);
-  const groups = JSON.parse(document.getElementById("groups-data").textContent);
-  const userGroupList = document.getElementById("users-groups");
-  const userList = document.getElementById("users");
-  const newGroup = document.getElementById("new-group");
+document.addEventListener("DOMContentLoaded", async function () {
+    console.log("JavaScript cargado correctamente.");
+    const config = document.getElementById("config-logo");
+    const userGroupList = document.getElementById("user-group-list");
+    const newGroup = document.getElementById("new-group-icon");
 
-  // Inicialmente centrar la lista de usuarios
-  appContainer.classList.add("centered");
-  sidebar.classList.add("collapsed");
+    try {
+        console.log("Cargando usuarios y grupos...");
 
-  console.log(groups); // Array con los grupos (id y name)
-  for (let group of groups) {
-    console.log(group.name); // El nombre de cada grupo
-  }
-  users.forEach(user => {
-    const profilePictureUrl = user.profile_picture_url || '/static/default-profile.png'; // Imagen por defecto
-    const li = document.createElement("li");
-    li.textContent = user.username;
-    li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
-    li.innerHTML = `
-      <img src="${profilePictureUrl}" alt="${user.username}" class="profile-picture rounded-circle mr-2">
-      <div class="user-info">
-        <span class="user-name">${user.username}</span>
-        <span class="user-status">${user.status}</span>
-      </div>
-    `;
-    li.addEventListener("click", function () {
-      window.location.href = `/chat/${user.username}`;
-    });
-    userGroupList.appendChild(li);
-  });
+        // Hacer la llamada al backend
+        const response = await fetch("http://127.0.0.1:8000/users");
+        console.log("Respuesta recibida:", response);
+        if (!response.ok) {
+            if (response.status === 401) {
+                alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+                localStorage.removeItem("loggedInUser");
+                window.location.href = "/login.html";
+            } else {
+                throw new Error(`Error al obtener los datos: ${response.status}`);
+            }
+        }
 
-  groups.forEach(group => {
-    const li = document.createElement("li");
-  //   li.classList.add("border-b", "hover:bg-gray-100", "transition", "p-4", "flex", "items-center", "space-x-4");
-    li.textContent = group.name;
-  //   li.innerHTML = `
-  //   <div class="flex-shrink-0">
-  //     <img class="w-10 h-10 rounded-full" src="https://via.placeholder.com/150" alt="${group.name}">
-  //   </div>
-  //   <div>
-  //     <h3 class="font-semibold">${group.name}</h3>
-  //     <p class="text-sm text-gray-600">Estado</p>
-  //   </div>
-  // `;
-    li.addEventListener("click", function () {
-      window.location.href = `/chatsGrupos/${group.id}`;
-    });
-    userGroupList.appendChild(li);
-  });
+        const datajson = await response.json();
+        console.log("Datos recibidos:", datajson);
 
-  // Añadir evento de clic para los elementos de la lista de usuarios
-  userGroupList.addEventListener("click", function (event) {
-    if (event.target.tagName === "li") {
-      // Desplazar la lista de usuarios a la izquierda y mostrar el chat
-      appContainer.classList.remove("centered");
-      appContainer.classList.add("shifted");
-      sidebar.classList.remove("collapsed");
-      chatContainer.classList.add("visible");
+        // Pintar los usuarios y grupos en la lista
+        paintUserGroups(datajson.users, datajson.groups);
 
-      // Aquí puedes añadir el código para cargar el chat del usuario seleccionado
-      // ...
+    } catch (error) {
+        console.error("Hubo un problema al obtener los datos:", error);
     }
-  });
 
+    config.addEventListener("click", function () {
+        window.location.href = `/configuracion`;
+    });
 
-  newGroup.addEventListener("click", function (event) {
-    window.location.href = "/newGroup";
-  })
+    newGroup.addEventListener("click", function() {
+        window.location.href = `/newGroup`;
+        // alert("prueba");
+    })
 
-  // document.getElementById("logout").addEventListener("click", function () {
-  //   localStorage.removeItem("loggedInUser");
-  //   window.location.href = "/";
-  document.getElementById("logout").addEventListener("click", function () {
-    localStorage.removeItem("loggedInUser");
-    window.location.href = "/";
-  });
+    function paintUserGroups(users, groups) {
+        userGroupList.innerHTML = ""; // Limpia la lista antes de añadir nuevos elementos
 
-  // Conectar al WebSocket para recibir notificaciones de nuevos mensajes
-  const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${localStorage.getItem("loggedInUser")}`);
+        users.forEach(user => {
+            const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png';
+            const li = document.createElement("li");
+            li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
+            li.innerHTML = `
+                <img src="${profilePictureUrl}" alt="${user.username}" class="profile-picture rounded-circle mr-2" width="40">
+                <span class="user-name">${user.username}</span>
+            `;
+            li.addEventListener("click", function () {
+                window.location.href = `/chat/${user.username}`;
+            });
+            userGroupList.appendChild(li);
+        });
 
-  socket.onmessage = function (event) {
-    const message = JSON.parse(event.data);
-    if (message.sender_username !== localStorage.getItem("loggedInUser")) {
-      alert("Nuevo mensaje recibido de " + message.sender_username);
+        groups.forEach(group => {
+            const li = document.createElement("li");
+            li.classList.add("list-group-item", "group-item", "d-flex", "align-items-center");
+            li.innerHTML = `
+                <img src="/static/default-group.png" alt="${group.name}" class="profile-picture rounded-circle mr-2" width="40">
+                <span class="group-name">${group.name}</span>
+            `;
+            li.addEventListener("click", function () {
+                window.location.href = `/chatsGrupos/${group.id}`;
+            });
+            userGroupList.appendChild(li);
+        });
     }
-  };
 
-  // document.getElementById("cambiar-a-grupos").addEventListener("click", function () {
-  //   window.location.href = "/groups";
-  // });
+    // Evento para cerrar sesión
+    document.getElementById("logout").addEventListener("click", function () {
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "/";
+    });
 });

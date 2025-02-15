@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Usuarios</title>
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/chat.js"></script>
+  <script defer src="/static/jquery.js"></script>
+  <link rel="stylesheet" href="/static/bootstrap.css"></head>
+<body>
+<div class="container-fluid text-center">
+    <div class="row full-height">
+        <div class="col-12 d-flex ">
+            <div class="card text-center col-12 col-md-4 d-none d-md-block mx-1">
+                <div class="card-header">
+                <h2 id="card-t-chats" class="card-header text-center ">
+                  Chats
+                </h2>
+            </div>
+                <div class="card-body">
+                    <!-- <button id="bto_update">Actualizar</button> -->
+                    <ul id="users" class="user-list">
+                        <!-- Aquí se generarán los elementos de la lista de usuarios -->
+                    </ul>
+                    <button id="logout" class="logout-button">Cerrar Sesión</button>
+                </div>
+            </div>
+            <div class="card text-center col-12 col-md-8 mx-1">
+                <div class="card-header text-center">
+                    <ul class="nav nav-pills card-header-pills justify-content-between ">
+                      <li class="nav-item mx-3">
+                        <svg id= "atras" class= "atras justify-content-start btn-dark" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="auto" x="0" y="0" viewBox="0 0 219.151 219.151" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M109.576 219.151c60.419 0 109.573-49.156 109.573-109.576C219.149 49.156 169.995 0 109.576 0S.002 49.156.002 109.575c0 60.42 49.155 109.576 109.574 109.576zm0-204.151c52.148 0 94.573 42.426 94.574 94.575 0 52.149-42.425 94.575-94.574 94.576-52.148-.001-94.573-42.427-94.573-94.577C15.003 57.427 57.428 15 109.576 15z" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path><path d="M94.861 156.507a7.502 7.502 0 0 0 10.606 0 7.499 7.499 0 0 0-.001-10.608l-28.82-28.819 83.457-.008a7.5 7.5 0 0 0-.001-15l-83.46.008 28.827-28.825a7.5 7.5 0 0 0-10.607-10.608l-41.629 41.628a7.495 7.495 0 0 0-2.197 5.303 7.51 7.51 0 0 0 2.198 5.305l41.627 41.624z" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
+                      </li>
+                      <span id="grupo" class="d-flex">
+                        <li class="nav-item mx-3">
+                          <svg id="toggle-dark-mode" class="btn-dark" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="auto" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path fill-rule="evenodd" d="M256 0C114.84 0 0 114.84 0 256s114.839 256 256 256 256-114.84 256-256S397.159 0 256 0zm24.734 398.5c-88.348 0-160.235-71.885-160.235-160.233A160.754 160.754 0 0 1 202.326 98.5a178.72 178.72 0 0 0-14.415 70.446c0 98.685 80.282 178.969 178.971 178.969a179.951 179.951 0 0 0 33.618-3.149A159.349 159.349 0 0 1 280.734 398.5z" fill="#21867a" opacity="1" data-original="#000000" class=""></path></g></svg>
+                        </li>
+                        <li class="nav-item">
+                          <svg class="btn-dark" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"  width="50" height="auto" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M256 0C114.61 0 0 114.61 0 256s114.61 256 256 256c141.38 0 256-114.61 256-256S397.39 0 256 0zm129.36 263.78h-10.54v107.33c0 11.32-9.18 20.51-20.51 20.51h-58.76V322.3c0-10.92-4.43-20.81-11.59-27.97-7.15-7.15-17.04-11.58-27.96-11.58-21.84 0-39.55 17.7-39.55 39.55v69.32h-58.76c-11.33 0-20.51-9.19-20.51-20.51V263.78h-10.54c-19.24 0-27.98-24.04-13.23-36.4l116.24-97.42c15.25-12.77 37.45-12.77 52.7 0l116.24 97.42c14.75 12.36 6.01 36.4-13.23 36.4z" data-name="01.Home" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
+                        </li> 
+                        <li class="nav-item mx-3">
+                          <svg class="btn-dark" id= "config-logo" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="auto" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M437.02 74.98C388.668 26.63 324.379 0 256 0S123.332 26.629 74.98 74.98C26.63 123.332 0 187.621 0 256s26.629 132.668 74.98 181.02C123.332 485.37 187.621 512 256 512s132.668-26.629 181.02-74.98C485.37 388.668 512 324.379 512 256s-26.629-132.668-74.98-181.02zM111.105 429.297c8.454-72.735 70.989-128.89 144.895-128.89 38.96 0 75.598 15.179 103.156 42.734 23.281 23.285 37.965 53.687 41.742 86.152C361.641 462.172 311.094 482 256 482s-105.637-19.824-144.895-52.703zM256 269.507c-42.871 0-77.754-34.882-77.754-77.753C178.246 148.879 213.13 114 256 114s77.754 34.879 77.754 77.754c0 42.871-34.883 77.754-77.754 77.754zm170.719 134.427a175.9 175.9 0 0 0-46.352-82.004c-18.437-18.438-40.25-32.27-64.039-40.938 28.598-19.394 47.426-52.16 47.426-89.238C363.754 132.34 315.414 84 256 84s-107.754 48.34-107.754 107.754c0 37.098 18.844 69.875 47.465 89.266-21.887 7.976-42.14 20.308-59.566 36.542-25.235 23.5-42.758 53.465-50.883 86.348C50.852 364.242 30 312.512 30 256 30 131.383 131.383 30 256 30s226 101.383 226 226c0 56.523-20.86 108.266-55.281 147.934zm0 0" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
+                        </li>
+                      </span>
+                      
+                    </ul>
+                </div>
+                <div class="card-body">
+                  
+                    <div id="chat-messages" class="chat-messages flex-grow-1 p-1" style="background-image: url('{{ user_bg_picture_url }}');">
+                      <div class="chat-input-container d-flex p-3 bg-light border-top">
+                        <input type="text" id="chat-input" class="form-control mr-2" placeholder="Escribe un mensaje...">
+                        <button id="send-message" class="btn btn-primary">&#9658;</button>
+                      </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
+
