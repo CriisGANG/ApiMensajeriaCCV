@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(data => {
         console.log(data.message);
-        window.location.href = "/users_page"; // Redirect to the user list
+        window.location.href = "/users"; // Redirect to the user list
       })
       .catch(error => {
         console.error("Error:", error);

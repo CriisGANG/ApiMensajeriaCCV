@@ -10,6 +10,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import asyncio  # Añadir esta línea
+import uvicorn
 
 app = FastAPI()
 
@@ -59,8 +60,9 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_current_user(request: Request):
+    print(request.cookies)
     token = request.cookies.get("access_token")
-    if (token is None):
+    if token is None:
         raise HTTPException(
             status_code=401,
             detail="No se proporcionó un token de autenticación",
@@ -103,7 +105,7 @@ class UpdateBgPictureRequest(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 def show_login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/login")
 async def login(request: LoginRequest):
@@ -117,16 +119,22 @@ async def login(request: LoginRequest):
             data={"sub": request.username}, expires_delta=access_token_expires
         )
         response = JSONResponse(content={"message": "Login exitoso", "username": request.username, "access_token": access_token}, status_code=200)
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="access_token", value=access_token, httponly=False)
         return response
     else:
         raise HTTPException(
             status_code=401, detail="Usuario o contraseña incorrectos"
         )
 
+@app.post("/logout")
+async def logout(response: Request):
+    response.delete_cookie("access_token")
+    return {"message": "Sesión cerrada, cookie eliminada"}
+
 @app.get("/users", response_class=JSONResponse)
 def get_users(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
+    print(current_user)
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print("Pepe")
@@ -134,30 +142,14 @@ def get_users(request: Request, current_user: str = Depends(get_current_user)):
     users = db.carregaUsuaris() or []
     groups = db.carregaGrups(logged_in_user_id) or []
     db.desconecta()
-
-    # Eliminar usuarios duplicados
-    unique_users = {user['username']: user for user in users}.values()
-    # Eliminar grupos duplicados
-    unique_groups = {group['id']: group for group in groups}.values()
-
-    return {"users": list(unique_users), "groups": list(unique_groups)}  # Solo devuelve JSON
+    return {"users": users, "groups": groups}  # Solo devuelve JSON
 
 # RUTAS HTML
 
-@app.get("/users_page")
-def users_page(request: Request, current_user: str = Depends(get_current_user)):
-    db.conecta()
-    logged_in_user = current_user
-    logged_in_user_id = db.get_user_id(logged_in_user)
-    users = db.carregaUsuaris() or []
-    groups = db.carregaGrups(logged_in_user_id) or []
-    db.desconecta()
-    return templates.TemplateResponse("users2.html", {"request": request, "users": users, "groups": groups})
-
 @app.get("/groups")
-async def groupList(request: Request):
+async def groupList(request: Request, idUser):
     db.conecta()
-    groups = db.carregaGrups()
+    groups = db.carregaGrups(idUser)
     db.desconecta()
 
     # Convert datetime objects to strings
@@ -203,7 +195,6 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     selected_user_id = db.get_user_id(username)
-    groups = db.carregaGrups(selected_user_id)
 
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
@@ -238,7 +229,6 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         "conversation": conversation,
         "username": username,
         "users": users,
-        "groups": groups,
         "user_profile_picture_url": user_profile_picture_url,  # Asegúrate de pasar esta variable a la plantilla
         "selected_user_profile_picture_url": selected_user_profile_picture_url,
         "user_bg_picture_url": user_bg_picture_url,
@@ -256,7 +246,6 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
-    groups = db.carregaGrups(logged_in_user_id)  # Cargar la lista de grupos
     user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
 
@@ -275,7 +264,6 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
         "request": request,
         "username": logged_in_user,
         "users": users,
-        "groups": groups,
         "user_profile_picture_url": user_profile_picture_url,
         "user_bg_picture_url": user_bg_picture_url,
         "conversations": conversations
@@ -287,10 +275,6 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
     loggedInUser = current_user
     loggedInUser = db.get_user_id(loggedInUser)
     selectedGroup = db.getGroup(groupId)
-    esAdmin = db.isAdmin(loggedInUser, groupId)
-    isOwner = db.isOwner(loggedInUser, groupId)['isOwner']
-    print(loggedInUser)
-    print(esAdmin)
 
     if not loggedInUser or not selectedGroup:
         db.desconecta()
@@ -304,73 +288,7 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members, "esadmin": esAdmin, "isOwner": isOwner})
-
-@app.post("/deleteGroup", response_class=JSONResponse)
-async def delete_group(request: Request, current_user: str = Depends(get_current_user)):
-    data = await request.json()
-    group_id = data.get("group_id")
-    
-    if not group_id:
-        raise HTTPException(status_code=400, detail="Faltan datos necesarios")
-
-    db.conecta()
-    try:
-        logged_in_user_id = db.get_user_id(current_user)
-        is_owner = db.isOwner(logged_in_user_id, group_id)
-        if not is_owner or is_owner['isOwner'] == 0:
-            raise HTTPException(status_code=403, detail="No tienes permisos para borrar este grupo")
-        
-        group = db.getGroup(group_id)
-        if not group:
-            raise HTTPException(status_code=404, detail="Grupo no encontrado")
-
-        db.delete_group(group_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        db.desconecta()
-
-    return JSONResponse(content={"status": "success", "message": "Grupo borrado exitosamente"}, status_code=200)
-
-@app.get("/manageMembers/{group_id}", response_class=HTMLResponse)
-async def manage_members(request: Request, group_id: int, current_user: str = Depends(get_current_user)):
-    db.conecta()
-    group = db.getGroup(group_id)
-    loggedInUser = current_user
-    loggedInUserId = db.get_user_id(loggedInUser)
-    members = db.getGroupMembersExceptYou(group_id, loggedInUserId)
-    usersNotInGroup = db.getUsersNotInGroup(group_id)
-
-    # Add is_admin attribute to each member
-    for member in members:
-        member['is_admin'] = db.isAdmin(member['id'], group_id)
-
-    db.desconecta()
-    
-    if not group:
-        raise HTTPException(status_code=404, detail="Grupo no encontrado")
-    
-    return templates.TemplateResponse("manageMembers.html", {"request": request, "group": group, "members": members, "users": usersNotInGroup})
-
-@app.post("/leaveGroup", response_class=JSONResponse)
-async def leave_group(request: Request, current_user: str = Depends(get_current_user)):
-    data = await request.json()
-    db.conecta()
-    try:
-        user_id = db.get_user_id(current_user)
-        group_id = data.get('group_id')
-
-        if not user_id or not group_id:
-            raise HTTPException(status_code=400, detail="Missing user_id or group_id")
-
-        db.leaveGroup(user_id, group_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        db.desconecta()
-
-    return JSONResponse(content={"success": True}, status_code=200)
+    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest, current_user: str = Depends(get_current_user)):
@@ -439,12 +357,12 @@ async def update_bg_picture(request: Request, data: UpdateBgPictureRequest, curr
 
     return JSONResponse(content={"message": "Imagen de fondo actualizada"}, status_code=200)
 
-@app.get("/ultimas_conversaciones", response_class=JSONResponse)
-async def ultimas_conversaciones():
-    db.conecta()
-    lista_usuarios = db.carregaUsuaris()
-    print(lista_usuarios)
-    db.desconecta()
+# @app.get("/ultimas_conversaciones", response_class=JSONResponse)
+# async def ultimas_conversaciones():
+#     db.conecta()
+#     lista_usuarios = db.carregaUsuaris()
+#     print(lista_usuarios)
+#     db.desconecta()
     
 
 @app.post("/newGroup", response_class=JSONResponse)
@@ -484,7 +402,6 @@ def newGroup(request: Request, current_user: str = Depends(get_current_user)):
     db.desconecta()
     
     return templates.TemplateResponse("newGroup.html", {"request": request, "users": usersList})
-
 
 # Lista para almacenar las conexiones WebSocket activas y los IDs de mensajes enviados
 active_connections = []
@@ -529,28 +446,7 @@ async def websocket_chat(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
 
-@app.websocket("/ws/manageMembers/{group_id}")
-async def websocket_manage_members(websocket: WebSocket, group_id: int):
-    await websocket.accept()
-    active_connections.append({"websocket": websocket, "group_id": group_id})
 
-    try:
-        while True:
-            data = await websocket.receive_json()
-            action = data.get("action")
-            user_id = data.get("user_id")
-            username = data.get("username")
-
-            # Notificar a todos los clientes conectados sobre el cambio
-            for connection in active_connections:
-                if connection["group_id"] == group_id:
-                    await connection["websocket"].send_json({
-                        "action": action,
-                        "user_id": user_id,
-                        "username": username
-                    })
-    except WebSocketDisconnect:
-        active_connections.remove({"websocket": websocket, "group_id": group_id})
 
 @app.post("/listen-for-new-messages")
 async def listen_for_new_messages(websocket: WebSocket, background_tasks: BackgroundTasks, current_user: str = Depends(get_current_user)):
@@ -588,33 +484,37 @@ def get_profile_picture_url(current_user: str = Depends(get_current_user)):
     else:
         return JSONResponse(content={"error": "Profile picture URL not found"}, status_code=404)
 
+@app.get("/api/get-chat-data", response_class=JSONResponse)
+def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    selected_user_id = db.get_user_id(username)
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
+    last_message_timestamp = conversation[-1]['created_at'].isoformat() if conversation else None
+    db.desconecta()
+    return JSONResponse(content={
+        "username": username,
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,
+        "conversation": conversation,
+        "last_message_timestamp": last_message_timestamp
+    }, status_code=200)
 
 @app.get("/api/get-chat-data", response_class=JSONResponse)
 def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
-    try:
-        db.conecta()
-        logged_in_user_id = db.get_user_id(current_user)
-        selected_user_id = db.get_user_id(username)
-        conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
-        
-        # Convertir objetos datetime a cadenas
-        for message in conversation:
-            if isinstance(message['created_at'], datetime.datetime):
-                message['created_at'] = message['created_at'].isoformat()
-        
-        selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
-        last_message_timestamp = conversation[-1]['created_at'] if conversation else None
-        db.desconecta()
-        return JSONResponse(content={
-            "username": username,
-            "selected_user_profile_picture_url": selected_user_profile_picture_url,
-            "conversation": conversation,
-            "last_message_timestamp": last_message_timestamp
-        }, status_code=200)
-    except Exception as e:
-        db.desconecta()
-        print(f"Error fetching chat data: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    db.conecta()
+    logged_in_user_id = db.get_user_id(current_user)
+    selected_user_id = db.get_user_id(username)
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
+    selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)
+    last_message_timestamp = conversation[-1]['created_at'].isoformat() if conversation else None
+    db.desconecta()
+    return JSONResponse(content={
+        "username": username,
+        "selected_user_profile_picture_url": selected_user_profile_picture_url,
+        "conversation": conversation,
+        "last_message_timestamp": last_message_timestamp
+    }, status_code=200)
 
 @app.get("/api/get-latest-messages", response_class=JSONResponse)
 def get_latest_messages(since: str, current_user: str = Depends(get_current_user)):
@@ -631,63 +531,10 @@ def get_users(current_user: str = Depends(get_current_user)):
     db.desconecta()
     return JSONResponse(content=users, status_code=200)
 
-@app.get("/api/get-groups", response_class=JSONResponse)
-def get_groups(current_user: str = Depends(get_current_user)):
-    try:
-        db.conecta()
-        user_id = db.get_user_id(current_user)
-        print("User ID:", user_id)  # Añadir esta línea para depuración
-        groups = db.carregaGrups(user_id)
-        db.desconecta()
-        print("Grupos devueltos:", groups)  # Añadir esta línea para depuración
-        return JSONResponse(content=groups, status_code=200)
-    except Exception as e:
-        db.desconecta()
-        print(f"Error fetching groups: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
 @app.get("/configuracion")
 def users_page(request: Request):
     return templates.TemplateResponse("configuracion.html", {"request": request})
 
-@app.post("/add_user_to_group", response_class=JSONResponse)
-async def add_user_to_group(request: Request, current_user: str = Depends(get_current_user)):
-    data = await request.json()
-    user_id = data.get("userId")
-    group_id = data.get("group_id")
-    
-    if not user_id or not group_id:
-        raise HTTPException(status_code=400, detail="Faltan datos necesarios")
-
-    db.conecta()
-    db.addUsersToGroup(user_id, group_id, 0)
-    db.desconecta()
-
-    return JSONResponse(content={"status": "success", "message": "Usuario añadido al grupo"}, status_code=200)
-
-@app.post("/manage_member_action", response_class=JSONResponse)
-async def manage_member_action(request: Request, current_user: str = Depends(get_current_user)):
-    data = await request.json()
-    user_id = data.get("userId")
-    group_id = data.get("group_id")
-    action = data.get("action")
-
-    if not user_id or not group_id or not action:
-        raise HTTPException(status_code=400, detail="Faltan datos necesarios")
-
-    db.conecta()
-    if action == "remove":
-        db.leaveGroup(user_id, group_id)
-    elif action == "makeAdmin":
-        db.convertToAdmin(user_id, group_id)
-    elif action == "demote":
-        db.demoteToMember(user_id, group_id)
-    db.desconecta()
-
-    return JSONResponse(content={"status": "success", "message": f"Acción '{action}' realizada con éxito"}, status_code=200)
-
 if __name__ == "__main__":
-    import uvicorn
+    
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)  # Añadir reload=True para recargar automáticamente
-
-

@@ -1,80 +1,98 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat del Grupo {{ groupName }}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/feather-icons"></script>
-  <script defer src="/static/chatGrupo.js"></script>
-</head>
-<body class="bg-gray-100 font-sans">
-  <div class="container mx-auto p-4 max-w-6xl">
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-      <!-- Header -->
-      <header class="bg-gray-200 p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">Chat del Grupo {{ groupName }}</h1>
-        <div id="datetime" class="text-lg"></div>
-        <div class="flex items-center space-x-4">
-          <i data-feather="settings" class="w-6 h-6"></i>
-          <i data-feather="user" class="w-6 h-6"></i>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat del Grupo {{ groupName }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script defer src="/static/chatGrupo.js"></script>
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4 max-w-6xl">
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Header -->
+        <header class="bg-gray-200 p-4 flex justify-between items-center">
+          <h1 class="text-xl font-bold">Chat del Grupo {{ groupName }}</h1>
+          <div id="datetime" class="text-lg"></div>
+          <div class="flex items-center space-x-4">
+            <i data-feather="settings" class="w-6 h-6"></i>
+            <i data-feather="user" class="w-6 h-6"></i>
+          </div>
+        </header>
+
+        <!-- Main content -->
+        <div class="flex h-[calc(100vh-8rem)]">
+          <!-- Contacts sidebar -->
+          <aside class="w-1/4 bg-gray-50 border-r overflow-y-auto">
+            <div class="p-4 border-b">
+              <input type="text" placeholder="Buscar contacto..." class="w-full p-2 rounded border" />
+            </div>
+            <ul id="group-members" class="group-members-list">
+              {% for member in members %}
+                <li>{{ member.username }}</li>
+              {% endfor %}
+              {% if esadmin == 1 %}
+                <button id="gestionar" class="w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600 transition mt-3">Gestionar Miembros</button>
+              {% endif %}
+              {% if isOwner == 1 %}
+                <button hidden id="leave" class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-red-600 transition mt-3">Abandonar grupo</button>
+                <button id="borrar-grupo" class="w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600 transition mt-3">Borrar Grupo</button>
+              {% else %}
+                <button id="leave" class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-red-600 transition mt-3">Abandonar grupo</button>
+              {% endif %}
+              <button id="exit" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition mt-3">Atrás</button>
+            </ul>
+            <div class="p-4">
+              <button id="logout" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">Cerrar sesión</button>
+            </div>
+          </aside>
+
+          <!-- Chat area -->
+          <main class="flex-1 flex flex-col">
+            <div class="flex-1 p-4" id="chat-messages-group">
+              {% for message in conversation %}
+                <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}
+                    
+                    
+                    sent
+
+
+                  {% else %}
+                    
+                    
+                    received
+
+
+                  {% endif %}">
+                  <p>
+                    <strong>{{ message.sender_username }}</strong>: {{ message.content }}
+                  </p>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="p-4 bg-gray-100 flex items-center space-x-2">
+              <button class="p-2 bg-gray-200 rounded-full"><i data-feather="camera" class="w-6 h-6"></i></button>
+              <input type="text" id="chat-input" placeholder="Escribe un mensaje..." class="flex-1 p-2 rounded border" />
+              <button id="send-message-group" class="p-2 bg-gray-200 rounded-full"><i data-feather="mic" class="w-6 h-6"></i></button>
+            </div>
+          </main>
         </div>
-      </header>
-
-      <!-- Main content -->
-      <div class="flex h-[calc(100vh-8rem)]">
-        <!-- Contacts sidebar -->
-        <aside class="w-1/4 bg-gray-50 border-r overflow-y-auto">
-          <div class="p-4 border-b">
-            <input type="text" placeholder="Buscar contacto..." class="w-full p-2 rounded border">
-          </div>
-          <ul id="group-members" class="group-members-list">
-            {% for member in members %}
-              <li>{{ member.username }}</li>
-            {% endfor %}
-          </ul>
-          <div class="p-4">
-            <button id="logout" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">
-              Cerrar sesión
-            </button>
-          </div>
-        </aside>
-
-        <!-- Chat area -->
-        <main class="flex-1 flex flex-col">
-          <div class="flex-1 p-4" id="chat-messages-group">
-            {% for message in conversation %}
-              <div class="message {% if message.sender_id == request.cookies.get('loggedInUser') %}sent{% else %}received{% endif %}">
-                <p><strong>{{ message.sender_username }}</strong>: {{ message.content }}</p>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="p-4 bg-gray-100 flex items-center space-x-2">
-            <button class="p-2 bg-gray-200 rounded-full">
-              <i data-feather="camera" class="w-6 h-6"></i>
-            </button>
-            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." class="flex-1 p-2 rounded border">
-            <button id="send-message-group" class="p-2 bg-gray-200 rounded-full">
-              <i data-feather="mic" class="w-6 h-6"></i>
-            </button>
-          </div>
-        </main>
       </div>
     </div>
-  </div>
-  <script>
-    // Initialize Feather icons
-    feather.replace();
-
-    // Update datetime
-    function updateDateTime() {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-      document.getElementById('datetime').textContent = now.toLocaleDateString('es-ES', options);
-    }
-
-    updateDateTime();
-    setInterval(updateDateTime, 60000); // Update every minute
-  </script>
-</body>
+    <script>
+      // Initialize Feather icons
+      feather.replace()
+      
+      // Update datetime
+      function updateDateTime() {
+        const now = new Date()
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+        document.getElementById('datetime').textContent = now.toLocaleDateString('es-ES', options)
+      }
+      
+      updateDateTime()
+      setInterval(updateDateTime, 60000) // Update every minute
+    </script>
+  </body>
 </html>

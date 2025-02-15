@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestionar miembros de {{ group.name }}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script defer src="/static/manageMembers.js"></script>
+  </head>
+  <body>
+    <div class="centered-container" data-group-id="{{ group.id }}">
+      <h1>Miembros de {{ group.name }}</h1>
+      <ul class="user-list">
+        {% for member in members %}
+          <li class="users" data-username="{{ member.username }}" data-id="{{ member.id }}" data-is-admin="{{ member.is_admin }}">{{ member.username }}</li>
+        {% endfor %}
+      </ul>
+      <button id="exitButton" class="exit-button">Atrás</button>
+      <button id="addUserButton" class="add-user-button">Añadir Usuario</button>
+    </div>
+
+    <!-- Modal for adding new users -->
+    <div id="addUserModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Añadir Usuario</h2>
+        <select id="userSelect">
+          {% for user in users %}
+            <option value="{{ user.id }}">{{ user.username }}</option>
+          {% endfor %}
+        </select>
+        <button id="addUserToGroupButton" class="save-button">Añadir</button>
+      </div>
+    </div>
+
+    <!-- Modal for managing members -->
+    <div id="manageMemberModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 id="manageMemberTitle"></h2>
+        <button id="removeMemberButton" class="save-button">Eliminar del grupo</button>
+        <button id="makeAdminButton" class="save-button" style="display: none;">Convertir en administrador</button>
+        <button id="demoteMemberButton" class="save-button" style="display: none;">Degradar a Miembro</button>
+      </div>
+    </div>
+  </body>
+</html>
