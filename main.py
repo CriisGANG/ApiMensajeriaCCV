@@ -1,5 +1,3 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie
-from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie, BackgroundTasks
 from fastapi.responses import JSONResponse, HTMLResponse  # Añadir HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -91,45 +89,22 @@ class LoginRequest(BaseModel):
 class MessageRequest(BaseModel):
     receiver_username: str
     content: str
+    
+class NewGroupRequest(BaseModel):
+    groupName: str
+    users: list
 
 class UpdateProfilePictureRequest(BaseModel):
     profile_picture_url: str
 
 class UpdateBgPictureRequest(BaseModel):
     bg_picture_url: str
-class NewGroupRequest(BaseModel):
-    groupName: str
-    users: list
 
-# @app.get("/", response_class=JSONResponse)
-# def show_login_page(request: Request):
-#     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/", response_class=HTMLResponse)
 def show_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-
-
-# Función para verificar el usuario en la base de datos y validar la contraseña
-def authenticate_user(username: str, password: str, request: Request):
-    db.conecta()
-    user = db.verificar_usuario(request.username, request.password)
-    db.desconecta()
-
-    if user:
-        access_token_expires = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": request.username}, expires_delta=access_token_expires
-        )
-        response = JSONResponse(content={"message": "Login exitoso", "username": request.username, "access_token": access_token}, status_code=200)
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
-        return response
-    else:
-        raise HTTPException(
-            status_code=401, detail="Usuario o contraseña incorrectos"
-        )
-        
 @app.post("/login")
 async def login(request: LoginRequest):
     db.conecta()
@@ -179,7 +154,6 @@ def users_page(request: Request, current_user: str = Depends(get_current_user)):
     db.desconecta()
     return templates.TemplateResponse("users2.html", {"request": request, "users": users, "groups": groups})
 
-
 @app.get("/groups")
 async def groupList(request: Request):
     db.conecta()
@@ -204,18 +178,12 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
     if not logged_in_user_id or not selected_user_id:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id, since)
 
-    conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
-    print(f"Id del usuario loggeado: {logged_in_user}. Id del usuario seleccionado: {selected_user_id}")
-    
     # Actualizar el estado de los mensajes a "rebut" si el receptor es el usuario logueado
-    # for message in conversation:
-    #     if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
-    #         db.actualizar_estado_mensaje(message['id'], 'rebut')
-    #         message['status'] = 'rebut'
     for message in conversation:
         if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
-            db.actualizar_estado_mensaje('rebut', message['id'])
+            db.actualizar_estado_mensaje(message['id'], 'rebut')
             message['status'] = 'rebut'
     
     db.desconecta()
@@ -241,7 +209,6 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    print(f"Id del usuario loggeado: {logged_in_user_id}. Id del usuario seleccionado: {selected_user_id}") # Da mi id y el del otro usuario.
     conversation = db.cargar_conversacion(logged_in_user_id, selected_user_id)
 
     # Add usernames to the conversation data
@@ -251,7 +218,6 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
         message['created_at'] = message['created_at'].isoformat()
 
     users = db.carregaUsuaris()  # Cargar la lista de usuarios
-    # print(users) # Hace un print con toda la info de los usuarios.
     user_profile_picture_url = db.get_user_profile_picture_url(logged_in_user_id)  # Obtener la URL de la foto de perfil
     selected_user_profile_picture_url = db.get_user_profile_picture_url(selected_user_id)  # Obtener la URL de la foto de perfil del usuario seleccionado
     user_bg_picture_url = db.get_user_bg_picture_url(logged_in_user_id)  # Obtener la URL de la imagen de fondo
@@ -319,7 +285,7 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     loggedInUser = current_user
-    loggedInUserId = db.get_user_id(loggedInUser)
+    loggedInUser = db.get_user_id(loggedInUser)
     selectedGroup = db.getGroup(groupId)
     esAdmin = db.isAdmin(loggedInUser, groupId)
     isOwner = db.isOwner(loggedInUser, groupId)['isOwner']
@@ -332,7 +298,6 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
     
     conversation = db.cargarConversacionGrupo(selectedGroup['id'])
     members = db.get_group_members(groupId)
-    user_bg_picture_url = db.get_user_bg_picture_url(loggedInUserId)  # Obtener la URL de la imagen de fondo
     
     for message in conversation:
         message['created_at'] = message['created_at'].isoformat()
@@ -454,12 +419,11 @@ async def update_profile_picture(request: Request, data: UpdateProfilePictureReq
     if not logged_in_user:
         db.desconecta()
         raise HTTPException(status_code=401, detail="Usuario no autenticado")
-
     user_id = db.get_user_id(logged_in_user)
     db.actualizar_foto_perfil(user_id, data.profile_picture_url)
     db.desconecta()
 
-    return JSONResponse(content={"message": "Foto de perfil actualizada", "new_profile_picture_url": data.profile_picture_url}, status_code=200)
+    return JSONResponse(content={"message": "Foto de perfil actualizada"}, status_code=200)
 
 @app.post("/update-bg-picture")
 async def update_bg_picture(request: Request, data: UpdateBgPictureRequest, current_user: str = Depends(get_current_user)):
@@ -517,7 +481,6 @@ def newGroup(request: Request, current_user: str = Depends(get_current_user)):
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print(logged_in_user_id) # Mostrará mi id (14).
-    
     db.desconecta()
     
     return templates.TemplateResponse("newGroup.html", {"request": request, "users": usersList})
