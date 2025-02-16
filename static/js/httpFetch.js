@@ -8,11 +8,9 @@ const apiEndpoint = "http://127.0.0.1:8000"
 */
 
 
-
-
 async function login(username, password) {
 
-let options = {
+  let options = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -22,7 +20,7 @@ let options = {
 
 
   return globalFetch("/login", options)
-  
+
 
 }
 
@@ -32,9 +30,53 @@ let options = {
  * HTTP GET
 */
 
+
+async function getConversacion(receiverUsername, lastMessageTimestamp) {
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  };
+
+  let url = `/conversation/${receiverUsername}?since=${lastMessageTimestamp}`;
+
+  return globalFetch(url, options);
+}
+
+async function currentUser() {
+
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  return globalFetch("/current_user", options)
+}
+async function getUser(idUser) {
+
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  return await globalFetch("/get-user/" + idUser, options)
+}
+
+
 async function callUsers() {
 
-  return globalFetch("/users")
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  return await globalFetch("/users", options)
 }
 
 async function callGroups() {
@@ -50,29 +92,28 @@ async function callGroups() {
   }
 }
 
-async function callConverUsers(username) {
-
-  try {
-    const data = await fetch(apiEndpoint + "/chat/" + username);
-    const datajson = await data.json();
-    console.log("CONVERSACIONES USUARIOS", datajson);
-
-  } catch (error) {
-    console.log(error);
-
+async function conversacionesUserId() {
+  const ruta = "/conversacionesUserId"
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
   }
+  return await globalFetch(ruta, options)
 }
 
 async function callConverGroups(groupId) {
 
-  try {
-    const data = await fetch(apiEndpoint + "/chat/" + groupId);
-    const datajson = await data.json();
-    console.log("CONVERSACIONES GRUPOS", datajson);
-
-  } catch (error) {
-    console.log(error);
+  const ruta = "/chat/" + groupId
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
   }
+
+  return await globalFetch(ruta, options);
 }
 
 /**
@@ -86,6 +127,8 @@ async function callConverGroups(groupId) {
 
 async function globalFetch(ruta, options) {
 
+  console.log("ruta: ", ruta);
+  console.log("options", options);
 
 
   try {
@@ -106,13 +149,12 @@ async function globalFetch(ruta, options) {
   } catch (eData) {
     console.log("ERROR", eData);
 
-    if (eData.status === 401) {
-      throw new Error("error");
+    throw eData;
 
-    }
+
 
   }
 
 }
 
-export { login, callUsers, callGroups, callConverUsers, callConverGroups };
+export { login, currentUser, callUsers, callGroups, conversacionesUserId, callConverGroups, getUser, getConversacion };

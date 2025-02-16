@@ -1,24 +1,15 @@
 /**
- * Punto de entrada de la aplicación
+ * Punto de entrada de la aplicación. Lo que hace la app a nivel global: ¿qué hace?
  */
 
-import { callUsers } from "./httpFetch.js";
-import { getCookieValue } from "./utils.js";
+
 import {show} from "./viewController.js";
+
 
 document.addEventListener("DOMContentLoaded", function () {
   
+  show("login");
 
- 
-  // si hay token, intentamos ir a chats, sino al login
-  if(!getCookieValue('access_token')){
-    
-    show("login");
-  }else{
-    show("chats");
-    const users = callUsers()
-    console.log(users);
-  }
 
   
 

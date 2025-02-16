@@ -2,22 +2,32 @@
 /**
  * Control de las pantallas
  */
-const pantallas = [{key:"chats", value: "p-chats"},{key:"users", value: "p-users"}, {key:"login", value: "p-login"}]
+
+import { initLogin } from "./login.js";
+import { initUsers } from "./users.js";
+import { initChats } from "./chats.js";
+
+const pantallas = [
+    { key: "chats", value: "p-chats", onInit: initChats },
+    { key: "users", value: "p-users", onInit: initUsers },
+    { key: "login", value: "p-login", onInit: initLogin }]
 
 
-function show(target){
+function show(target) {
 
     pantallas.forEach(pantalla => {
-        if(pantalla.key === target){
+        if (pantalla.key === target) {
             document.getElementById(pantalla.value).style.display = 'block';
-        }else{
+            // Función que EJECUTA (inicia) cada componente 
+            //llamador de iniciadores, ejecuta una función anónima.
+            pantalla.onInit()
+        } else {
             document.getElementById(pantalla.value).style.display = 'none';
 
         }
-    }); 
+    });
 
-    
 }
 
-export {show}
+export { show }
 

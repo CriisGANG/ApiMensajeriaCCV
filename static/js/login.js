@@ -1,41 +1,32 @@
-document.getElementById("loginForm").addEventListener("submit", async function (event) {
-  event.preventDefault();
+/**
+ * LOGIN: llamará al viewController para iniciar el u
+ */
 
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
-  const errorMessage = document.getElementById("error-message");
+import { login, currentUser, callUsers } from "./httpFetch.js";
+import { show } from "./viewController.js";
 
-  const loginData = {
-      username: username,
-      password: password
-  };
+/*función que inicia todo lo que queramos hacer con login (como un constructor). Se ejecutará
+cada vez que se haga un show en viewController de login. */
 
-  const loginDataJSON = JSON.stringify(loginData);
+async function initLogin(){
+    try {
+      //el que llama al fetch, es el que trata el error que pueda haber en la peticion http
+      if(await currentUser()){
+          show("chats")
+      } 
+      //callUsers()
+     
+    } catch (error) {
+      console.log("ERROR Login: ", error);
 
-  try {
-      const response = await fetch("http://127.0.0.1:8000/login", {  // Cambiar la URL para apuntar al puerto 8000
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: loginDataJSON
-      });
+    } 
+}
 
-      const responsejson = await response.json();
+function registrar(){
 
-      if (response.ok) {
-          localStorage.setItem("loggedInUser", responsejson.username);
-            } else {
-          errorMessage.textContent = responsejson.detail; // Mostrar mensaje de error
-          errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
-      }
+}
 
-  } catch (error) {
-      console.error("Error en la petición:", error);
-      errorMessage.textContent = "Error de conexión con el servidor.";
-      errorMessage.classList.add("error-visible"); // Añadir clase para mostrar el mensaje de error
-  }
-});
-
-// Verificar si el usuario ya está logueado
+  // Verificar si el usuario ya está logueado
 if (localStorage.getItem("loggedInUser")) {
   document.body.innerHTML = `
     <div class="welcome-container">
@@ -45,13 +36,21 @@ if (localStorage.getItem("loggedInUser")) {
       <button id="logout" class="btn btn-secondary">Cerrar Sesión</button>
     </div>
   `;
+}
+
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    await login(username, password);
+    show("chats",initLogin())
+  
+  });
 
   document.getElementById("logout").addEventListener("click", function () {
-      localStorage.removeItem("loggedInUser");
-      window.location.reload();
-  });
+    localStorage.removeItem("loggedInUser");
+    window.location.reload();
+});
 
-  document.getElementById("go-to-chat").addEventListener("click", function () {
-      window.location.href = "http://127.0.0.1:8000/users_page";
-  });
-}
+export {initLogin};

@@ -12,7 +12,14 @@ function getCookieValue(name) {
     return null;
   }
 
+function truncateString(str) {
+    if (str != undefined && str.length > 20) {
+        return str.substring(0, 20) + '...';
+    } else {
+        return str;
+    }
+}
 
 
 
-export {getCookieValue}
+export {getCookieValue, truncateString}

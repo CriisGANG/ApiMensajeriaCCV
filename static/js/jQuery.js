@@ -1,4 +1,5 @@
-$(document).ready(function(){
+//Ready caller
+$(function() {
     // Verificar si ya está activado el modo oscuro en localStorage
     if (localStorage.getItem("dark-mode") === "enabled") {
         $("body").addClass("dark-mode");
@@ -14,5 +15,5 @@ $(document).ready(function(){
             localStorage.setItem("dark-mode", "disabled");
         }
     });
-        
-      });
+});   
+     
