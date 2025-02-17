@@ -129,18 +129,18 @@ h1, h2 {
 }
 
 .message.sent {
-  background-color: #F4A261;
+  background-color: #d1e7dd; /* Color para mensajes enviados */
+  text-align: right;
   align-self: flex-end;
   margin-left: auto; /* Alinear a la derecha */
-  text-align: right; /* Alinear el texto a la derecha */
 }
 
 .message.received {
-  background-color: #ffffff;
+  background-color: #f8d7da; /* Color para mensajes recibidos */
+  text-align: left;
   border: 1px solid #ddd;
   align-self: flex-start;
   margin-right: auto; /* Alinear a la izquierda */
-  text-align: left; /* Alinear el texto a la izquierda */
 }
 
 .message p {

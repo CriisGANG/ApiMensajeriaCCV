@@ -105,7 +105,6 @@ async function pintarMensajes(conversationUsername, timestamp) {
   receiverUsername = conversationUsername; // Asignar el nombre de usuario del receptor
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
-  let loggedInUser = true;
   if (chatMessages.hasChildNodes()) {
     while (chatMessages.firstChild) {
       chatMessages.removeChild(chatMessages.firstChild);
@@ -116,42 +115,31 @@ async function pintarMensajes(conversationUsername, timestamp) {
     try {
       if (!displayedMessageIds.has(message.id)) {
         const messageElement = document.createElement("div");
+        const isSent = message.sender_username === loggedInUser;
         messageElement.classList.add(
           "message",
-          message.sender_username === loggedInUser ? "received" : "sent",
+          isSent ? "sent" : "received",
           "p-2",
           "mb-2",
           "rounded"
         );
-        console.log("here");
         
-        messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
-        messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
+        messageElement.style.textAlign = isSent ? "right" : "left"; // Alinear a la derecha si es enviado
+        messageElement.innerHTML = `<p><strong>${message.sender_username}</strong>: ${message.content}</p>`;
 
         chatMessages.appendChild(messageElement);
 
         // Registrar el mensaje en el Set
         displayedMessageIds.add(message.id);
-        //console.log(displayedMessageIds);
-
-        // Actualizar el timestamp del último mensaje recibido
-        //lastMessageTimestamp.value = message.created_at;
       }
-
-
     } catch (error) {
       console.error("Error al obtener los últimos mensajes:", error);
     }
   });
 
-  console.log("Por aquí");
-
   if (screenMinorLg) {
-
-    showActualDIV("mensajes")
-
+    showActualDIV("mensajes");
   }
-
 }
 
 document.getElementById("send-message").addEventListener("click", async function () {
