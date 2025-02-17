@@ -1,4 +1,4 @@
-import { conversacionesUserId, getConversacion, getUser } from "./httpFetch.js";
+import { conversacionesUserId, getConversacion, getUser, currentUser } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
 import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
 
@@ -94,9 +94,15 @@ async function pintarUsuarios(idElementHTML) {
 
 }
 
+let loggedInUser = await currentUser(); // Definir loggedInUser
+let receiverUsername = ""; // Inicializar receiverUsername vacío
+const displayedMessageIds = new Set(); // Mover la declaración aquí para que sea accesible
+
 async function pintarMensajes(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
-  let newMessages = await getConversacion(conversationUsername, timestamp)
+  let newMessages = await getConversacion(conversationUsername, timestamp);
+
+  receiverUsername = conversationUsername; // Asignar el nombre de usuario del receptor
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
   let loggedInUser = true;
@@ -148,9 +154,42 @@ async function pintarMensajes(conversationUsername, timestamp) {
 
 }
 
+document.getElementById("send-message").addEventListener("click", async function () {
+  const chatInput = document.getElementById("chat-input");
+  const messageContent = chatInput.value;
+  if (messageContent.trim() === "") return;
 
+  // Generar un ID único basado en timestamp + username
+  const messageId = `${Date.now()}-${loggedInUser}`;
 
+  // Verificar si el mensaje ya fue mostrado antes de enviarlo
+  if (displayedMessageIds.has(messageId)) {
+      return; // No agregar mensaje duplicado
+  }
 
+  // Registrar el mensaje en el Set antes de enviarlo
+  displayedMessageIds.add(messageId);
+
+  // Enviar mensaje a través de fetch
+  await fetch('/send-message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ receiver_username: receiverUsername, content: messageContent })
+  });
+
+  // Crear el elemento del mensaje y agregarlo al chat
+  const messageElement = document.createElement("div");
+  messageElement.classList.add("message", "received", "p-2", "mb-2", "rounded");
+  messageElement.setAttribute("data-id", messageId); // Guardar el ID en el HTML
+  messageElement.innerHTML = `<p><strong>${loggedInUser}</strong>: ${messageContent}</p>`;
+  document.getElementById("chat-messages").appendChild(messageElement);
+
+  // Limpiar el input de mensaje
+  chatInput.value = "";
+
+  // Actualizar el timestamp del último mensaje enviado
+  lastMessageTimestamp.value = new Date().toISOString();
+});
 
 document.getElementById("redirect_users").addEventListener("click", () => {
   console.log("redireccionando a usuarios...");
@@ -162,7 +201,7 @@ document.getElementById("atras").addEventListener("click", () => {
   showActualDIV("conversaciones");
 })
 
-
+// SOCORRO
 
 
 export { initChats };
