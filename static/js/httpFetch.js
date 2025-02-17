@@ -84,10 +84,10 @@ async function callGroups() {
   try {
     const data = await fetch(apiEndpoint + "/groups");
     const datajson = await data.json();
-    console.log("GRUPS", datajson);
+    //console.log("GRUPS", datajson);
 
   } catch (error) {
-    console.log(error);
+    //console.log(error);
 
   }
 }
@@ -127,16 +127,16 @@ async function callConverGroups(groupId) {
 
 async function globalFetch(ruta, options) {
 
-  console.log("ruta: ", ruta);
-  console.log("options", options);
+  //console.log("ruta: ", ruta);
+  //console.log("options", options);
 
 
   try {
 
-    console.log("Petición: " + ruta);
+    //console.log("Petición: " + ruta);
     const data = await fetch(apiEndpoint + ruta, options);
     const datajson = await data.json();
-    console.log("Respuesta: ", datajson);
+    //console.log("Respuesta: ", datajson);
 
 
     if (!data.ok) {
@@ -147,7 +147,7 @@ async function globalFetch(ruta, options) {
     return datajson
 
   } catch (eData) {
-    console.log("ERROR", eData);
+    //console.log("ERROR", eData);
 
     throw eData;
 

@@ -17,7 +17,7 @@ async function initLogin(){
       //callUsers()
      
     } catch (error) {
-      console.log("ERROR Login: ", error);
+      //console.log("ERROR Login: ", error);
 
     } 
 }
@@ -51,6 +51,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   document.getElementById("logout").addEventListener("click", function () {
     localStorage.removeItem("loggedInUser");
     window.location.reload();
-});
+  });
 
 export {initLogin};

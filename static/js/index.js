@@ -11,8 +11,18 @@ document.addEventListener("DOMContentLoaded", function () {
   show("login");
 
 
+
+  // Tooltip initialization
+  $(document).ready(function() {
+    $('.icon-trigger').tooltip({
+        title: 'Nuevo Chat',
+        placement: 'top'
+    });
+});
   
 
+
+  //console.log("HOla", document.getElementById("redirect_users"));
   
   
   // document.getElementById("go-to-chat").addEventListener("click", function() {

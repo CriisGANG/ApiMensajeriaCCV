@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const groups = JSON.parse(document.getElementById("groups-data").textContent);
     const groupList = document.getElementById("groups");
-    console.log(groups);
+    //console.log(groups);
   
     groups.forEach(group => {
       const li = document.createElement("li");

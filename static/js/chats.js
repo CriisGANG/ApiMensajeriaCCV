@@ -1,10 +1,38 @@
 import { conversacionesUserId, getConversacion, getUser } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
+import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
 
-function initChats() {
-  console.log("Chats");
-  pintarUsuarios("users", pintarMensajes)
+let screenMinorLg = false
+let ACTUAL_DIV = "conversaciones";
+
+function showActualDIV(div = undefined) {
+  if (div) {
+    ACTUAL_DIV = div
+  }
+  if (screenMinorLg) {
+    showDIV(ACTUAL_DIV)
+  }
 }
+function initChats() {
+  //console.log("Chats");
+  pintarUsuarios("users", pintarMensajes);
+  screenMinorLg = window.innerWidth < 993
+  initDivs()
+
+  if (screenMinorLg) {
+    showActualDIV("conversaciones")
+  }
+}
+
+window.addEventListener('resize', () => {
+  console.log('mostrando:'+ACTUAL_DIV);
+  screenMinorLg = window.innerWidth < 993
+  if(screenMinorLg){
+    showActualDIV(ACTUAL_DIV)
+  }else{
+    showAllDIVs()
+  }
+});
 
 async function getUsers(conversaciones) {
   // Filtrar y mapear las conversaciones a promesas de obtener datos de usuario
@@ -15,7 +43,7 @@ async function getUsers(conversaciones) {
   try {
     // `users` será un array de los resultados de cada llamada a `getUser`
     let users = await Promise.all(userPromises);
-    console.log(users);  // Imprime o verifica el array de usuarios
+    //console.log(users);  // Imprime o verifica el array de usuarios
     users.map((conversacion) => {
       conversacion.last_message_content = truncateString(conversacion.last_message_content)
     })
@@ -34,18 +62,18 @@ async function pintarUsuarios(idElementHTML) {
   let users = await getUsers(conversaciones)
 
 
-  console.log("users")
-  console.log(users)
+  //console.log("users")
+  //console.log(users)
 
   if (userList.hasChildNodes()) {
     while (userList.firstChild) {
       userList.removeChild(userList.firstChild);
     }
   } // Limpia la lista antes de añadir nuevos usuarios
-  console.log(users)
+  //console.log(users)
 
   users.forEach(user => {
-    console.log(user)
+    //console.log(user)
     const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png';
     const li = document.createElement("li");
     const img = document.createElement("img")
@@ -63,7 +91,6 @@ async function pintarUsuarios(idElementHTML) {
     });
     userList.appendChild(li);
   });
-
 
 }
 
@@ -90,25 +117,50 @@ async function pintarMensajes(conversationUsername, timestamp) {
           "mb-2",
           "rounded"
         );
+        console.log("here");
+        
         messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
-        messageElement.innerHTML = "<p><strong>"+message.sender_username +"</strong>:" +message.content+"</p>";
+        messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
 
         chatMessages.appendChild(messageElement);
 
         // Registrar el mensaje en el Set
         displayedMessageIds.add(message.id);
-        console.log(displayedMessageIds);
+        //console.log(displayedMessageIds);
 
         // Actualizar el timestamp del último mensaje recibido
         //lastMessageTimestamp.value = message.created_at;
       }
+
+
     } catch (error) {
       console.error("Error al obtener los últimos mensajes:", error);
     }
   });
 
+  console.log("Por aquí");
+
+  if (screenMinorLg) {
+
+    showActualDIV("mensajes")
+
+  }
 
 }
+
+
+
+
+
+document.getElementById("redirect_users").addEventListener("click", () => {
+  console.log("redireccionando a usuarios...");
+  showActualDIV("conversaciones");
+})
+
+document.getElementById("atras").addEventListener("click", () => {
+  console.log("Atrás!");
+  showActualDIV("conversaciones");
+})
 
 
 

@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // console.log("DOM fully loaded and parsed");
+    // //console.log("DOM fully loaded and parsed");
 
     const chatInput = document.getElementById("chat-input");
     const sendMessageButtonGroup = document.getElementById("send-message-group");
@@ -7,13 +7,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const receiverUsername = window.location.pathname.split("/").pop();
     const loggedInUser = localStorage.getItem("loggedInUser");
 
-    // console.log("Elements:", { chatInput, sendMessageButtonGroup, chatMessages, receiverUsername, loggedInUser });
+    // //console.log("Elements:", { chatInput, sendMessageButtonGroup, chatMessages, receiverUsername, loggedInUser });
 
     sendMessageButtonGroup.addEventListener("click", async function () {
         const messageContent = chatInput.value;
         if (messageContent.trim() === "") return;
 
-        // console.log("Sending message:", messageContent);
+        // //console.log("Sending message:", messageContent);
 
         const response = await fetch("/send-message-group", {
             method: "POST",
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify({ receiver_username: receiverUsername, content: messageContent })
         });
 
-        // console.log("Response status:", response.status);
+        // //console.log("Response status:", response.status);
 
         if (response.ok) {
             const message = await response.json();

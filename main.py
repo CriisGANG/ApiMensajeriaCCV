@@ -200,7 +200,8 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
             message['status'] = 'llegit'
         else:
             message['status'] = 'enviat'
-
+    print("conversation")
+    print(conversation)
     return JSONResponse(content=conversation, status_code=200)
 
 @app.get("/chat/{username}", response_class=HTMLResponse)

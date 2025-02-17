@@ -80,8 +80,7 @@ h1, h2 {
 }
 
 .user-list {
-  max-height: 65vh; /* Ajustar la altura máxima de la lista de usuarios */
-  overflow-y: auto; /* Permitir desplazamiento vertical */
+  height: 70vh; /* Ajustar la altura máxima de la lista de usuarios */
 }
 
 .user-list li, .group-list li, .group-members-list li {
@@ -101,28 +100,22 @@ h1, h2 {
 
 .logout-button {
   display: block;
-  width: 100%;
-  padding: 10px;
   background-color: #E76F51;
   color: #ffffff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  text-align: center;
-  margin-top: 20px;
 }
 
 .logout-button:hover {
   background-color: #c9302c;
 }
 
-.chat-messages {
-  
+#chat-messages {
+  height: 70vh;
   overflow-y: auto;
   padding: 20px;
-  background-image: url('{{ user_bg_picture_url }}');
   background-size: cover;
-  max-height: calc(100vh - 200px); /* Limitar la altura máxima */
   background-color: #ffffff;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -682,7 +675,8 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
   display: block;
 }
 
-/* users2.html*/
+/* USER PAGE*/
+
 .header-page{
   max-height: 25vh;
 }
@@ -690,9 +684,7 @@ body.high-contrast .appearance-dropdown .dropdown-item:hover {
 .card-header{
   max-height: 80px;
 }
-ul#users {
-  max-height: 65vh;
-}
+
 
 .config-logo
 
@@ -740,6 +732,12 @@ ul#users {
   background-color: #252525;
   color: white;
   border-bottom: 1px solid #444;
+}
+
+.card-body{
+  height: 70vh;
+    overflow: auto;
+
 }
 
 /* Botones */
@@ -797,3 +795,5 @@ display: block;
 .hidden{
   display: none;
 }
+
+

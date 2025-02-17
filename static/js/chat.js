@@ -13,21 +13,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Fetch user data
   
     try {
-      console.log("pepo");
+      //console.log("pepo");
   
         const userResponse = await fetch('http://127.0.0.1:8000/users');
-        console.log("userResponse", userResponse);
+        //console.log("userResponse", userResponse);
   
         if (!userResponse.ok) {
             throw new Error('Network response was not ok');
         }
         const userData = await userResponse.json();
-        console.log("userData", userData);
-        console.log(userData.users.user_profile_picture_url);
-        console.log("Hola",userData.users.username);
+        //console.log("userData", userData);
+        //console.log(userData.users.user_profile_picture_url);
+        //console.log("Hola",userData.users.username);
         
   
-        userData.users.forEach(user => {console.log(user.username);});
+        userData.users.forEach(user => {//console.log(user.username);});
   
         userProfilePicture.src = userData.users.user_profile_picture_url;
     } catch (error) {

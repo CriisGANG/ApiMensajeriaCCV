@@ -100,10 +100,19 @@ class API_Mensajeria(object):
         
         
         sql = """
-            SELECT *
-            FROM messages 
-            JOIN usuarisclase ON usuarisclase.id = messages.sender_id OR usuarisclase.id = messages.receiver_id
-            WHERE messages.sender_id = %s AND messages.receiver_id = %s OR messages.sender_id = %s AND messages.receiver_id = %s
+            SELECT 
+            messages.*,
+            sender.username AS sender_username,
+            receiver.username AS receiver_username
+        FROM 
+            messages
+        JOIN 
+            usuarisclase sender ON sender.id = messages.sender_id
+        JOIN 
+            usuarisclase receiver ON receiver.id = messages.receiver_id
+        WHERE 
+            (messages.sender_id = %s AND messages.receiver_id = %s)
+            OR (messages.sender_id = %s AND messages.receiver_id = %s)
         """
         params = [logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id]
         if since:
