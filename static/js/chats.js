@@ -1,4 +1,4 @@
-import { conversacionesUserId, getConversacion, getUser } from "./httpFetch.js";
+import { conversacionesUserId, fetchMessages, currentUser,getConversacion, getUser, getUserId } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
 import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
 
@@ -43,6 +43,8 @@ async function getUsers(conversaciones) {
   try {
     // `users` será un array de los resultados de cada llamada a `getUser`
     let users = await Promise.all(userPromises);
+    
+    
     //console.log(users);  // Imprime o verifica el array de usuarios
     users.map((conversacion) => {
       conversacion.last_message_content = truncateString(conversacion.last_message_content)
@@ -62,8 +64,8 @@ async function pintarUsuarios(idElementHTML) {
   let users = await getUsers(conversaciones)
 
 
-  //console.log("users")
-  //console.log(users)
+  console.log("users")
+  console.log(users)
 
   if (userList.hasChildNodes()) {
     while (userList.firstChild) {
@@ -76,7 +78,11 @@ async function pintarUsuarios(idElementHTML) {
     //console.log(user)
     const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png';
     const li = document.createElement("li");
-    const img = document.createElement("img")
+    const img = document.createElement("img");
+    const link = document.createElement('a');
+    console.log("USER_ID", user.id);
+    
+    link.href = `/conversation/${user.id}`;  // Configurar el enlace al endpoint deseado
     li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
     li.innerHTML = `
             <img src="${user.user_profile_picture_url || '/static/default-profile.png'}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
@@ -87,8 +93,9 @@ async function pintarUsuarios(idElementHTML) {
               </div>
         `;
     li.addEventListener("click", function () {
-      pintarMensajes(user.username, user.last_interaction)
+      pintarMensajes(user.id, user.last_interaction)
     });
+    li.appendChild(link);
     userList.appendChild(li);
   });
 
@@ -96,7 +103,12 @@ async function pintarUsuarios(idElementHTML) {
 
 async function pintarMensajes(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
-  let newMessages = await getConversacion(conversationUsername, timestamp)
+  const name = await currentUser()
+  console.log("USER-DATA", name);
+  const id_user = await getUserId(name)
+  console.log(id_user);
+  
+  let newMessages = await fetchMessages(conversationUsername, id_user.user_id)
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
   let loggedInUser = true;
@@ -146,6 +158,24 @@ async function pintarMensajes(conversationUsername, timestamp) {
 
   }
 
+}
+
+function displayMessages(currentUserId) {
+  const chatMessages = document.getElementById("chat-messages");  
+  chatMessages.innerHTML = ''; // Limpiar contenedor actual
+ let messages = fetchMessages(currentUserId)
+  messages.forEach(message => {
+      const messageDiv = document.createElement('div');
+      const alignmentClass = message.sender_id === currentUserId ? 'right' : 'left';
+      
+      messageDiv.classList.add('message', alignmentClass);
+      messageDiv.innerHTML = `
+          <p>${message.sender_id === currentUserId ? 'You' : 'User ' + message.sender_id}: ${message.content}</p>
+          <small>${new Date(message.created_at).toLocaleString()}</small>
+      `;
+
+      container.appendChild(messageDiv);
+  });
 }
 
 

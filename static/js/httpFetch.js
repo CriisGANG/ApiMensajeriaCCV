@@ -30,6 +30,41 @@ async function login(username, password) {
  * HTTP GET
 */
 
+async function getUserId(username) {
+  let url = "/getUserId/" + username
+
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  const response = await fetch(url, options);
+  const data = await response.json();
+  console.log("ID_USERRRRR ", data);
+  
+  return data;
+}
+
+
+
+async function fetchMessages(userId, currentUserId) {
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  let url = `/conversacion/${userId}/${currentUserId}`;
+  const response = await fetch(url, options);
+  console.log(response);
+  
+  const data = await response.json();
+  console.log("mensajes: ", data);
+  
+  return data;
+}
 
 async function getConversacion(receiverUsername, lastMessageTimestamp) {
   let options = {
@@ -157,4 +192,4 @@ async function globalFetch(ruta, options) {
 
 }
 
-export { login, currentUser, callUsers, callGroups, conversacionesUserId, callConverGroups, getUser, getConversacion };
+export { login, currentUser, getUserId,callUsers, callGroups, conversacionesUserId, callConverGroups, getUser, getConversacion, fetchMessages };

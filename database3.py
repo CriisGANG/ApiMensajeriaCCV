@@ -73,10 +73,9 @@ class API_Mensajeria(object):
         return False
 
     def get_user_id(self, username):
-        sql = "SELECT id FROM usuarisclase WHERE username = %s ;"
+        sql = "SELECT id FROM usuarisclase WHERE username = %s"
         self.cursor.execute(sql, (username,))
         user = self.cursor.fetchone()
-        print("PEPEEEEE", user)
         return user['id'] if user else None
 
     def get_username(self, user_id):
@@ -98,45 +97,33 @@ class API_Mensajeria(object):
         return group['id'] if group else None
 
     def cargar_conversacion(self, logged_in_user_id, selected_user_id, since=None):
-        self.conecta()
+        
+        
         sql = """
-        SELECT messages.*, sender.username AS sender_username, receiver.username AS receiver_username 
-        FROM messages JOIN usuarisclase sender ON sender.id = messages.sender_id 
-        JOIN usuarisclase receiver ON receiver.id = messages.receiver_id 
-        WHERE (messages.sender_id = %s AND messages.receiver_id = %s) OR (messages.sender_id = %s AND messages.receiver_id = %s) ORDER BY messages.created_at;
+            SELECT 
+            messages.*,
+            sender.username AS sender_username,
+            receiver.username AS receiver_username
+        FROM 
+            messages
+        JOIN 
+            usuarisclase sender ON sender.id = messages.sender_id
+        JOIN 
+            usuarisclase receiver ON receiver.id = messages.receiver_id
+        WHERE 
+            (messages.sender_id = %s AND messages.receiver_id = %s)
+            OR (messages.sender_id = %s AND messages.receiver_id = %s)
         """
-        self.cursor.execute(sql, (logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id))
-        result = self.cursor.fetchall()
-        self.cursor.close()
-        self.desconecta()
-        return result
-    
-    
-        # sql = """
-        #     SELECT 
-        #     messages.*,
-        #     sender.username AS sender_username,
-        #     receiver.username AS receiver_username
-        # FROM 
-        #     messages
-        # JOIN 
-        #     usuarisclase sender ON sender.id = messages.sender_id
-        # JOIN 
-        #     usuarisclase receiver ON receiver.id = messages.receiver_id
-        # WHERE 
-        #     (messages.sender_id = %s AND messages.receiver_id = %s)
-        #     OR (messages.sender_id = %s AND messages.receiver_id = %s)
-        # """
-        # params = [logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id]
-        # if since:
-        #     sql += " AND messages.created_at > %s"
-        #     params.append(since)
-        # sql += " ORDER BY messages.created_at"  
-        # # print(since)
+        params = [logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id]
+        if since:
+            sql += " AND messages.created_at > %s"
+            params.append(since)
+        sql += " ORDER BY messages.created_at"  
+        print(since)
 
-        # self.cursor.execute(sql, params)
-        # ResQuery = self.cursor.fetchall()
-        # return ResQuery
+        self.cursor.execute(sql, params)
+        ResQuery = self.cursor.fetchall()
+        return ResQuery
 
     def cargarConversacionGrupo(self, groupId):
         sql = """
@@ -224,9 +211,8 @@ class API_Mensajeria(object):
     def getConversacionesByUser(self, userId):
         sql = """
             
-            (SELECT 
+                    (SELECT 
             'user' AS interaction_type,
-
             CASE 
                 WHEN m.sender_id = %s THEN m.receiver_id
                 ELSE m.sender_id
@@ -235,8 +221,6 @@ class API_Mensajeria(object):
             (SELECT content FROM messages WHERE id = MAX(m.id)) AS last_message_content
          FROM 
             messages m
-        JOIN usuarisclase u1 ON u1.id = m.sender_id
-        JOIN usuarisclase u2 ON u2.id = m.receiver_id
          WHERE 
             m.sender_id = %s OR m.receiver_id = %s
          GROUP BY 
@@ -245,7 +229,6 @@ class API_Mensajeria(object):
         UNION ALL
 
         (SELECT 
-            
             'group' AS interaction_type,
             m.group_id AS interaction_id,
             MAX(m.created_at) AS last_interaction,
