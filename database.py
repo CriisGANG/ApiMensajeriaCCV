@@ -1,9 +1,11 @@
 import pymysql.cursors
+from fastapi import Depends
+
 import sqlalchemy as database
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 from passlib.context import CryptContext
-
+import pymysqlpool
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class API_Mensajeria(object):
@@ -16,7 +18,7 @@ class API_Mensajeria(object):
                                   autocommit=True,
                                   cursorclass=pymysql.cursors.DictCursor)
         self.cursor = self.db.cursor()
-
+        
     def desconecta(self):
         self.db.close()
 
@@ -25,6 +27,30 @@ class API_Mensajeria(object):
         self.cursor.execute(sql)
         ResQuery = self.cursor.fetchall()
         return ResQuery
+    
+    def carregaUsuari(self, idUsuario  ):
+        try:
+            config = {
+                "host": "localhost",
+                "user": "root",
+                "database": "whatsapp2425",
+                "autocommit": True,
+                "charset": "utf8mb4",
+                "cursorclass": pymysql.cursors.DictCursor
+            }
+            pool = pymysqlpool.ConnectionPool(size=10, name='mypool', **config)
+            conn = pool.get_connection()
+            with conn.cursor() as cursor:
+                sql = "SELECT id, username, user_profile_picture_url, user_bg_picture_url from usuarisclase where id = %s"
+                cursor.execute(sql, (idUsuario,))
+                result = cursor.fetchone()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            if conn:
+                conn.close()
+            return result
+    
     def carregaGrups(self, idUser):
         # sql = "SELECT * FROM Groups"
         sql = "SELECT g.name, g.id FROM Users u JOIN group_members gm ON gm.user_id = u.id JOIN groups g ON g.id = gm.group_id WHERE u.id = %s"
@@ -33,7 +59,7 @@ class API_Mensajeria(object):
         return ResQuery
 
     def verificar_usuario(self, username, password):
-        sql = "SELECT password FROM usuarisclase WHERE username = %s"
+        sql = "SELECT id, password FROM usuarisclase WHERE username = %s"
         self.cursor.execute(sql, (username,))
         ResQuery = self.cursor.fetchone()
         if ResQuery and ResQuery['password']:
@@ -71,16 +97,29 @@ class API_Mensajeria(object):
         return group['id'] if group else None
 
     def cargar_conversacion(self, logged_in_user_id, selected_user_id, since=None):
+        
+        
         sql = """
-        SELECT * FROM messages 
-        WHERE ((sender_id = %s AND receiver_id = %s) 
-        OR (sender_id = %s AND receiver_id = %s))
+            SELECT 
+            messages.*,
+            sender.username AS sender_username,
+            receiver.username AS receiver_username
+        FROM 
+            messages
+        JOIN 
+            usuarisclase sender ON sender.id = messages.sender_id
+        JOIN 
+            usuarisclase receiver ON receiver.id = messages.receiver_id
+        WHERE 
+            (messages.sender_id = %s AND messages.receiver_id = %s)
+            OR (messages.sender_id = %s AND messages.receiver_id = %s)
         """
         params = [logged_in_user_id, selected_user_id, selected_user_id, logged_in_user_id]
         if since:
-            sql += " AND created_at > %s"
+            sql += " AND messages.created_at > %s"
             params.append(since)
-        sql += " ORDER BY created_at"
+        sql += " ORDER BY messages.created_at"  
+        print(since)
 
         self.cursor.execute(sql, params)
         ResQuery = self.cursor.fetchall()
@@ -168,3 +207,42 @@ class API_Mensajeria(object):
         sql = "SELECT * FROM messages WHERE id = %s"
         self.cursor.execute(sql, (message_id,))
         return self.cursor.fetchone()
+    
+    def getConversacionesByUser(self, userId):
+        sql = """
+            
+                    (SELECT 
+            'user' AS interaction_type,
+            CASE 
+                WHEN m.sender_id = %s THEN m.receiver_id
+                ELSE m.sender_id
+            END AS interaction_id,
+            MAX(m.created_at) AS last_interaction,
+            (SELECT content FROM messages WHERE id = MAX(m.id)) AS last_message_content
+         FROM 
+            messages m
+         WHERE 
+            m.sender_id = %s OR m.receiver_id = %s
+         GROUP BY 
+            interaction_id)
+
+        UNION ALL
+
+        (SELECT 
+            'group' AS interaction_type,
+            m.group_id AS interaction_id,
+            MAX(m.created_at) AS last_interaction,
+            (SELECT content FROM messages WHERE id = MAX(m.id)) AS last_message_content
+         FROM 
+            messages m
+         JOIN 
+            group_members gm ON m.group_id = gm.group_id
+         WHERE 
+            gm.user_id = %s
+         GROUP BY 
+            m.group_id)
+
+        ORDER BY 
+            last_interaction DESC;"""
+        self.cursor.execute(sql, (userId,userId,userId,userId))
+        return self.cursor.fetchall()

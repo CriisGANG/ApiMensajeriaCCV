@@ -1,0 +1,160 @@
+/** 
+ * Peticiones al backend (endpoints)
+ * unicamente hace peticiones fetch, no interactua con el html */
+const apiEndpoint = "http://127.0.0.1:8000"
+
+/**
+ * HTTP POST
+*/
+
+
+async function login(username, password) {
+
+  let options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  }
+
+
+  return globalFetch("/login", options)
+
+
+}
+
+
+
+/**
+ * HTTP GET
+*/
+
+
+async function getConversacion(receiverUsername, lastMessageTimestamp) {
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  };
+
+  let url = `/conversation/${receiverUsername}?since=${lastMessageTimestamp}`;
+
+  return globalFetch(url, options);
+}
+
+async function currentUser() {
+
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  return globalFetch("/current_user", options)
+}
+async function getUser(idUser) {
+
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  return await globalFetch("/get-user/" + idUser, options)
+}
+
+
+async function callUsers() {
+
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  return await globalFetch("/users", options)
+}
+
+async function callGroups() {
+
+  try {
+    const data = await fetch(apiEndpoint + "/groups");
+    const datajson = await data.json();
+    //console.log("GRUPS", datajson);
+
+  } catch (error) {
+    //console.log(error);
+
+  }
+}
+
+async function conversacionesUserId() {
+  const ruta = "/conversacionesUserId"
+  let options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  return await globalFetch(ruta, options)
+}
+
+async function callConverGroups(groupId) {
+
+  const ruta = "/chat/" + groupId
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  return await globalFetch(ruta, options);
+}
+
+/**
+ * HTTP DELETE
+*/
+
+
+/**
+ * HTTP PUT
+*/
+
+async function globalFetch(ruta, options) {
+
+  //console.log("ruta: ", ruta);
+  //console.log("options", options);
+
+
+  try {
+
+    //console.log("Petición: " + ruta);
+    const data = await fetch(apiEndpoint + ruta, options);
+    const datajson = await data.json();
+    //console.log("Respuesta: ", datajson);
+
+
+    if (!data.ok) {
+      throw data
+    }
+
+
+    return datajson
+
+  } catch (eData) {
+    //console.log("ERROR", eData);
+
+    throw eData;
+
+
+
+  }
+
+}
+
+export { login, currentUser, callUsers, callGroups, conversacionesUserId, callConverGroups, getUser, getConversacion };

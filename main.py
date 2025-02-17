@@ -6,10 +6,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware  # Añadir CORSMiddleware
 import database
 import datetime
+import json
 from fastapi import WebSocket, WebSocketDisconnect
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import asyncio  # Añadir esta línea
+import uvicorn
 
 app = FastAPI()
 
@@ -17,15 +19,18 @@ app = FastAPI()
 origins = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
     # Añadir otros orígenes si es necesario
 ]
 
+# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # Las URLs que deben tener permiso de acceso
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Métodos permitidos
+    allow_headers=["*"],  # Cabeceras permitidas
 )
 
 # Montar la carpeta "static" para servir archivos como JavaScript, CSS, imágenes, etc.
@@ -59,19 +64,21 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_current_user(request: Request):
+    print("PEPE", request.cookies)
     token = request.cookies.get("access_token")
     if token is None:
         raise HTTPException(
             status_code=401,
             detail="No se proporcionó un token de autenticación",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) 
+    # me preparo el error que ya sé que no es de token vacío
     credentials_exception = HTTPException(
         status_code=401,
         detail="No se pudieron validar las credenciales",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
+    try: # gestionamos el token para conseguir el usuario, sino, tiramos el error de arriba
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
@@ -79,6 +86,8 @@ def get_current_user(request: Request):
     except JWTError:
         raise credentials_exception
     return username
+
+
 
 # Modelo para recibir datos del login
 class LoginRequest(BaseModel):
@@ -117,16 +126,27 @@ async def login(request: LoginRequest):
             data={"sub": request.username}, expires_delta=access_token_expires
         )
         response = JSONResponse(content={"message": "Login exitoso", "username": request.username, "access_token": access_token}, status_code=200)
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="access_token", value=access_token, httponly=False) #httpOnli --> no puedes leer la cookie desde el front si está en true
         return response
     else:
         raise HTTPException(
             status_code=401, detail="Usuario o contraseña incorrectos"
         )
+#TO DO --> /register
 
+@app.post("/logout")
+async def logout(response: Request):
+    response.delete_cookie("access_token")
+    return {"message": "Sesión cerrada, cookie eliminada"}
+
+@app.get("/current_user", response_class=JSONResponse)
+def get_users(request: Request, current_user: str = Depends(get_current_user)):
+    return current_user
+    
 @app.get("/users", response_class=JSONResponse)
 def get_users(request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
+    print(current_user)
     logged_in_user = current_user
     logged_in_user_id = db.get_user_id(logged_in_user)
     print("Pepe")
@@ -138,14 +158,10 @@ def get_users(request: Request, current_user: str = Depends(get_current_user)):
 
 # RUTAS HTML
 
-@app.get("/users_page")
-def users_page(request: Request):
-    return templates.TemplateResponse("users2.html", {"request": request})
-
 @app.get("/groups")
-async def groupList(request: Request):
+async def groupList(request: Request, idUser):
     db.conecta()
-    groups = db.carregaGrups()
+    groups = db.carregaGrups(idUser)
     db.desconecta()
 
     # Convert datetime objects to strings
@@ -173,6 +189,8 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
         if message['receiver_id'] == logged_in_user_id and message['status'] == 'enviat':
             db.actualizar_estado_mensaje(message['id'], 'rebut')
             message['status'] = 'rebut'
+            message["creted_at"] = str(message["creted_at"])
+            message["updated_at"] = str(message["creted_at"])
     
     db.desconecta()
 
@@ -182,7 +200,8 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
             message['status'] = 'llegit'
         else:
             message['status'] = 'enviat'
-
+    print("conversation")
+    print(conversation)
     return JSONResponse(content=conversation, status_code=200)
 
 @app.get("/chat/{username}", response_class=HTMLResponse)
@@ -220,7 +239,7 @@ def chat_page(username: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return templates.TemplateResponse("chat2.html", {
+    return ({
         "request": request,
         "conversation": conversation,
         "username": username,
@@ -353,12 +372,12 @@ async def update_bg_picture(request: Request, data: UpdateBgPictureRequest, curr
 
     return JSONResponse(content={"message": "Imagen de fondo actualizada"}, status_code=200)
 
-@app.get("/ultimas_conversaciones", response_class=JSONResponse)
-async def ultimas_conversaciones():
-    db.conecta()
-    lista_usuarios = db.carregaUsuaris()
-    print(lista_usuarios)
-    db.desconecta()
+# @app.get("/ultimas_conversaciones", response_class=JSONResponse)
+# async def ultimas_conversaciones():
+#     db.conecta()
+#     lista_usuarios = db.carregaUsuaris()
+#     print(lista_usuarios)
+#     db.desconecta()
     
 
 @app.post("/newGroup", response_class=JSONResponse)
@@ -442,6 +461,8 @@ async def websocket_chat(websocket: WebSocket, username: str):
     except WebSocketDisconnect:
         active_connections = [conn for conn in active_connections if conn["websocket"] != websocket]
 
+
+
 @app.post("/listen-for-new-messages")
 async def listen_for_new_messages(websocket: WebSocket, background_tasks: BackgroundTasks, current_user: str = Depends(get_current_user)):
     await websocket.accept()
@@ -477,7 +498,6 @@ def get_profile_picture_url(current_user: str = Depends(get_current_user)):
         return JSONResponse(content={"profile_picture_url": profile_picture_url}, status_code=200)
     else:
         return JSONResponse(content={"error": "Profile picture URL not found"}, status_code=404)
-
 
 @app.get("/api/get-chat-data", response_class=JSONResponse)
 def get_chat_data(username: str, current_user: str = Depends(get_current_user)):
@@ -526,12 +546,32 @@ def get_users(current_user: str = Depends(get_current_user)):
     db.desconecta()
     return JSONResponse(content=users, status_code=200)
 
+
 @app.get("/configuracion")
 def users_page(request: Request):
     return templates.TemplateResponse("configuracion.html", {"request": request})
 
+
+@app.get("/conversacionesUserId")
+def conversacionesUserId(current_user: str = Depends(get_current_user)):
+    db.conecta()
+    user_id = db.get_user_id(current_user)
+    
+    mensajes = db.getConversacionesByUser(user_id)
+    resultado = []
+    for mensaje in mensajes:
+        mensaje['last_interaction'] = str(mensaje['last_interaction'])
+        resultado.append(mensaje)
+
+    db.desconecta()   
+    print(mensajes)
+    return JSONResponse(content=resultado, status_code=200)
+
+@app.get("/get-user/{idUser}", response_class=JSONResponse)
+def get_users(idUser, current_user: str = Depends(get_current_user)):
+    users = db.carregaUsuari(idUser)
+    return JSONResponse(content=users, status_code=200)
+
 if __name__ == "__main__":
-    import uvicorn
+    
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)  # Añadir reload=True para recargar automáticamente
-
-

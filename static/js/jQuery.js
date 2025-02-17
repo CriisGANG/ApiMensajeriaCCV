@@ -1,10 +1,15 @@
-$(document).ready(function(){
-    // Verificar si ya está activado el modo oscuro en localStorage
+//Ready caller
+$(function() {
+    //console.log("JQuery");
+    // Verificar si ya está activado el mo
+    // do oscuro en localStorage
     if (localStorage.getItem("dark-mode") === "enabled") {
         $("body").addClass("dark-mode");
     }
 
-    $("#toggle-dark-mode").click(function() {
+    $("#toggle-dark-mode").on("click", function() {
+        //console.log("JQuery");
+        
         $("body").toggleClass("dark-mode");
     
         // Guardar la preferencia en localStorage
@@ -14,5 +19,6 @@ $(document).ready(function(){
             localStorage.setItem("dark-mode", "disabled");
         }
     });
-        
-      });
+});   
+     
+
