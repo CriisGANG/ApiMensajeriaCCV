@@ -7,6 +7,7 @@ import { initLogin } from "./login.js";
 import { initUsers } from "./users.js";
 import { initChats } from "./chats.js";
 
+
 const pantallas = [
     { key: "chats", value: "p-chats", onInit: initChats },
     { key: "users", value: "p-users", onInit: initUsers },
@@ -15,6 +16,11 @@ const pantallas = [
 const chatDIVs = [
     { key: "conversaciones", value: "divConversaciones", onInit: initChats },
     { key: "mensajes", value: "divMensajes", onInit: initChats }]
+
+
+/** const modales */
+
+//controla la NAVEGACION de las pantallas principales (p-chats, p-users y p-login)
 
 function show(target) {
 
@@ -46,8 +52,10 @@ function initDivs() {
 
 }
 
+//controla la NAVEGACION de los dos divs principales dentro de chats (conversaciones y mensajes)
 function showDIV(target) {
 
+    document.getElementById("div-btn-atras").removeAttribute("class") //elimina las clases, para mostrar el botón atras
     chatDIVs.forEach(div => {
         if (div.key === target) {
             document.getElementById(div.value).style.display = 'block';
@@ -61,10 +69,12 @@ function showDIV(target) {
     });
 }
 
+
 function showAllDIVs() {
 
+    document.getElementById("div-btn-atras").setAttribute("class", "escondido") //pone la clase, para ocultar el botón atras
     chatDIVs.forEach(div => {
-    
+        
         document.getElementById(div.value).style.display = 'block';
         anadirAtributosPorId(div.value,div.clases);
 

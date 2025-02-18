@@ -5,6 +5,8 @@ import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
 let screenMinorLg = false
 let ACTUAL_DIV = "conversaciones";
 
+//mantiene el estado en el utlimo div mostrado (foco)
+//implementación: "no se que div estaba mostrando y quiero mostrar el último"
 function showActualDIV(div = undefined) {
   if (div) {
     ACTUAL_DIV = div
@@ -13,6 +15,7 @@ function showActualDIV(div = undefined) {
     showDIV(ACTUAL_DIV)
   }
 }
+
 function initChats() {
   //console.log("Chats");
   pintarUsuarios("users", pintarMensajes);
@@ -20,7 +23,7 @@ function initChats() {
   initDivs()
 
   if (screenMinorLg) {
-    showActualDIV("conversaciones")
+    showActualDIV("conversaciones") 
   }
 }
 
@@ -29,6 +32,7 @@ window.addEventListener('resize', () => {
   screenMinorLg = window.innerWidth < 993
   if(screenMinorLg){
     showActualDIV(ACTUAL_DIV)
+    
   }else{
     showAllDIVs()
   }
@@ -152,6 +156,7 @@ async function pintarMensajes(conversationUsername, timestamp) {
 
   console.log("Por aquí");
 
+  //si la pantalla es pequeña, muestrame mensajes
   if (screenMinorLg) {
 
     showActualDIV("mensajes")
@@ -178,6 +183,16 @@ function displayMessages(currentUserId) {
   });
 }
 
+/** DIV USUARIOS nuevi chat
+ * 1) primero superponer en el index.html, en el div de chats
+ * 2) gestionar la vista enseño o no enseño
+ * 3) si es menor de 900px pantalla completa del modal, sino, a % y oscurecer el background para sendacion profundidad
+ * 4) si haces click en el background, será un evento de atrás imitando la funcionalidad del btn atras
+ * 
+ * no servirá el ShowDiv, que es para gestioanr cuando son pequeñas y grandes: (muestra una y oculta las demás)
+ * habrá que usar una nueva llamada showmodal (muestra una, la elegida (puede haber varias, pero es independiente
+ * a la de los showDivs))
+*/
 
 
 

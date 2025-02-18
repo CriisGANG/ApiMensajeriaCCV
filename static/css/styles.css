@@ -797,4 +797,7 @@
   }
   
   
-  
+  /*Boton atras*/
+  .escondido{
+    display: none;
+  }
