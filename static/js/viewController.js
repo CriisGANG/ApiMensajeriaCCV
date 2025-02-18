@@ -6,14 +6,12 @@
 import { initLogin } from "./login.js";
 import { initUsers } from "./users.js";
 import { initChats } from "./chats.js";
-import { initProfile } from "./configuracion.js";
 
 
 const pantallas = [
     { key: "chats", value: "p-chats", onInit: initChats },
     { key: "users", value: "p-users", onInit: initUsers },
-    { key: "login", value: "p-login", onInit: initLogin },
-    { key: "profile", value: "p-profile", onInit: initProfile }]
+    { key: "login", value: "p-login", onInit: initLogin }]
 
 const chatDIVs = [
     { key: "conversaciones", value: "divConversaciones", onInit: initChats },

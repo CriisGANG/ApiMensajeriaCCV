@@ -8,7 +8,6 @@
         <script defer src="/static/js/jQuery.js"></script>
         <script defer type="module" src="/static/js/httpFetch.js"></script>
         <script defer type="module" src="/static/js/users.js"></script>
-        <script defer type="module" src="/static/js/configuracion.js"></script>
         <script defer type="module" src="/static/js/index.js"></script>
         <script defer type="module" src="/static/js/login.js"></script>
         <script defer type="module" src="/static/js/utils.js"></script>
@@ -56,7 +55,7 @@
                                         
                                     </li>
                                     <li class="nav-item mx-3">
-                                        <svg  id="config-logo" xmlns="http://www.w3.org/2000/svg" class="btn-dark" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M437.02 74.98C388.668 26.63 324.379 0 256 0S123.332 26.629 74.98 74.98C26.63 123.332 0 187.621 0 256s26.629 132.668 74.98 181.02C123.332 485.37 187.621 512 256 512s132.668-26.629 181.02-74.98C485.37 388.668 512 324.379 512 256s-26.629-132.668-74.98-181.02zM111.105 429.297c8.454-72.735 70.989-128.89 144.895-128.89 38.96 0 75.598 15.179 103.156 42.734 23.281 23.285 37.965 53.687 41.742 86.152C361.641 462.172 311.094 482 256 482s-105.637-19.824-144.895-52.703zM256 269.507c-42.871 0-77.754-34.882-77.754-77.753C178.246 148.879 213.13 114 256 114s77.754 34.879 77.754 77.754c0 42.871-34.883 77.754-77.754 77.754zm170.719 134.427a175.9 175.9 0 0 0-46.352-82.004c-18.437-18.438-40.25-32.27-64.039-40.938 28.598-19.394 47.426-52.16 47.426-89.238C363.754 132.34 315.414 84 256 84s-107.754 48.34-107.754 107.754c0 37.098 18.844 69.875 47.465 89.266-21.887 7.976-42.14 20.308-59.566 36.542-25.235 23.5-42.758 53.465-50.883 86.348C50.852 364.242 30 312.512 30 256 30 131.383 131.383 30 256 30s226 101.383 226 226c0 56.523-20.86 108.266-55.281 147.934zm0 0" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
+                                        <svg  id= "config-logo" xmlns="http://www.w3.org/2000/svg" class="btn-dark" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M437.02 74.98C388.668 26.63 324.379 0 256 0S123.332 26.629 74.98 74.98C26.63 123.332 0 187.621 0 256s26.629 132.668 74.98 181.02C123.332 485.37 187.621 512 256 512s132.668-26.629 181.02-74.98C485.37 388.668 512 324.379 512 256s-26.629-132.668-74.98-181.02zM111.105 429.297c8.454-72.735 70.989-128.89 144.895-128.89 38.96 0 75.598 15.179 103.156 42.734 23.281 23.285 37.965 53.687 41.742 86.152C361.641 462.172 311.094 482 256 482s-105.637-19.824-144.895-52.703zM256 269.507c-42.871 0-77.754-34.882-77.754-77.753C178.246 148.879 213.13 114 256 114s77.754 34.879 77.754 77.754c0 42.871-34.883 77.754-77.754 77.754zm170.719 134.427a175.9 175.9 0 0 0-46.352-82.004c-18.437-18.438-40.25-32.27-64.039-40.938 28.598-19.394 47.426-52.16 47.426-89.238C363.754 132.34 315.414 84 256 84s-107.754 48.34-107.754 107.754c0 37.098 18.844 69.875 47.465 89.266-21.887 7.976-42.14 20.308-59.566 36.542-25.235 23.5-42.758 53.465-50.883 86.348C50.852 364.242 30 312.512 30 256 30 131.383 131.383 30 256 30s226 101.383 226 226c0 56.523-20.86 108.266-55.281 147.934zm0 0" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
                                     </li>
                                     </ul>
                                 </div>
@@ -94,10 +93,7 @@
                                     <ul id="users" class="user-list">
                                         <!-- Aquí se generarán los elementos de la lista de usuarios -->
                                     </ul>
-                                </div>
-                                <div class="card-footer d-flex justify-content-around">
                                     <svg  id="redirect_users" data-bs-toggle="tooltip" title="Nuevo Chat" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" x="0" y="0" viewBox="0 0 311.539 311.539" style="enable-background:new 0 0 512 512" xml:space="preserve" class="icon-trigger"><g><path d="M214.603 135.77H175.77V96.937c0-11.046-8.954-20-20-20s-20 8.954-20 20v38.833H96.937c-11.046 0-20 8.954-20 20s8.954 20 20 20h38.833v38.833c0 11.046 8.954 20 20 20s20-8.954 20-20V175.77h38.833c11.046 0 20-8.954 20-20s-8.954-20-20-20z" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path><path d="M155.77 0C69.74 0 0 69.74 0 155.77s69.74 155.77 155.77 155.77 155.77-69.74 155.77-155.77S241.799 0 155.77 0zm0 271.539C91.785 271.539 40 219.761 40 155.77 40 91.784 91.778 40 155.77 40c63.985 0 115.77 51.778 115.77 115.77-.001 63.985-51.779 115.769-115.77 115.769z" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
-                                    <svg xmlns="http://www.w3.org/2000/svg" data-bs-toggle="tooltip" title="Nuevo Grupo"  version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" x="0" y="0" viewBox="0 0 64 64" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M32 2a30 30 0 1 0 30 30A30.037 30.037 0 0 0 32 2zm-.01 18.54a6.04 6.04 0 1 1-3.25 11.13 6.047 6.047 0 0 1 3.25-11.13zm-13.55 1.94a5.033 5.033 0 1 1-2.98 9.09 5.042 5.042 0 0 1 2.98-9.09zm1.08 17.88h-8.2a1.818 1.818 0 0 1-1.82-1.81v-1.84a4.358 4.358 0 0 1 2.98-4.14l1.21-.4a6.648 6.648 0 0 0 7.41 1.42c-1.68 1.81-1.67 4.43-1.58 6.77zm3.66 1.94a2.063 2.063 0 0 1-2.06-2.06v-2.28a5.283 5.283 0 0 1 3.97-5.08l1.81-.6a7.651 7.651 0 0 0 10.18 0l.25.09a9.783 9.783 0 0 0-.51 3.07 9.56 9.56 0 0 0 2.89 6.86zm17.21-1.61c-4.47-4.96-.78-13.36 6.07-13.29a8.053 8.053 0 0 1 8.04 8.04c.04 7.38-9.36 10.85-14.11 5.25z" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path><path d="M49.96 34.64h-2.69v-2.7a.805.805 0 0 0-1.61 0v2.7h-2.69a.8.8 0 0 0 0 1.6h2.69v2.69a.805.805 0 1 0 1.61 0v-2.69h2.69a.8.8 0 0 0 0-1.6z" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
                                 </div>
                             </div>
                         </div>
@@ -118,7 +114,7 @@
                                                 <svg class="" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"  width="50" height="50" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M256 0C114.61 0 0 114.61 0 256s114.61 256 256 256c141.38 0 256-114.61 256-256S397.39 0 256 0zm129.36 263.78h-10.54v107.33c0 11.32-9.18 20.51-20.51 20.51h-58.76V322.3c0-10.92-4.43-20.81-11.59-27.97-7.15-7.15-17.04-11.58-27.96-11.58-21.84 0-39.55 17.7-39.55 39.55v69.32h-58.76c-11.33 0-20.51-9.19-20.51-20.51V263.78h-10.54c-19.24 0-27.98-24.04-13.23-36.4l116.24-97.42c15.25-12.77 37.45-12.77 52.7 0l116.24 97.42c14.75 12.36 6.01 36.4-13.23 36.4z" data-name="01.Home" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
                                             </li>
                                             <li class="nav-item mx-2">
-                                                <svg class="btn-dark" id="perfil-logo" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M437.02 74.98C388.668 26.63 324.379 0 256 0S123.332 26.629 74.98 74.98C26.63 123.332 0 187.621 0 256s26.629 132.668 74.98 181.02C123.332 485.37 187.621 512 256 512s132.668-26.629 181.02-74.98C485.37 388.668 512 324.379 512 256s-26.629-132.668-74.98-181.02zM111.105 429.297c8.454-72.735 70.989-128.89 144.895-128.89 38.96 0 75.598 15.179 103.156 42.734 23.281 23.285 37.965 53.687 41.742 86.152C361.641 462.172 311.094 482 256 482s-105.637-19.824-144.895-52.703zM256 269.507c-42.871 0-77.754-34.882-77.754-77.753C178.246 148.879 213.13 114 256 114s77.754 34.879 77.754 77.754c0 42.871-34.883 77.754-77.754 77.754zm170.719 134.427a175.9 175.9 0 0 0-46.352-82.004c-18.437-18.438-40.25-32.27-64.039-40.938 28.598-19.394 47.426-52.16 47.426-89.238C363.754 132.34 315.414 84 256 84s-107.754 48.34-107.754 107.754c0 37.098 18.844 69.875 47.465 89.266-21.887 7.976-42.14 20.308-59.566 36.542-25.235 23.5-42.758 53.465-50.883 86.348C50.852 364.242 30 312.512 30 256 30 131.383 131.383 30 256 30s226 101.383 226 226c0 56.523-20.86 108.266-55.281 147.934zm0 0" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
+                                                <svg class="" id= "config-logo" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="50" height="50" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M437.02 74.98C388.668 26.63 324.379 0 256 0S123.332 26.629 74.98 74.98C26.63 123.332 0 187.621 0 256s26.629 132.668 74.98 181.02C123.332 485.37 187.621 512 256 512s132.668-26.629 181.02-74.98C485.37 388.668 512 324.379 512 256s-26.629-132.668-74.98-181.02zM111.105 429.297c8.454-72.735 70.989-128.89 144.895-128.89 38.96 0 75.598 15.179 103.156 42.734 23.281 23.285 37.965 53.687 41.742 86.152C361.641 462.172 311.094 482 256 482s-105.637-19.824-144.895-52.703zM256 269.507c-42.871 0-77.754-34.882-77.754-77.753C178.246 148.879 213.13 114 256 114s77.754 34.879 77.754 77.754c0 42.871-34.883 77.754-77.754 77.754zm170.719 134.427a175.9 175.9 0 0 0-46.352-82.004c-18.437-18.438-40.25-32.27-64.039-40.938 28.598-19.394 47.426-52.16 47.426-89.238C363.754 132.34 315.414 84 256 84s-107.754 48.34-107.754 107.754c0 37.098 18.844 69.875 47.465 89.266-21.887 7.976-42.14 20.308-59.566 36.542-25.235 23.5-42.758 53.465-50.883 86.348C50.852 364.242 30 312.512 30 256 30 131.383 131.383 30 256 30s226 101.383 226 226c0 56.523-20.86 108.266-55.281 147.934zm0 0" fill="#2a9d8f" opacity="1" data-original="#000000" class=""></path></g></svg>
                                             </li>
                                         </span>
                                     </ul>
@@ -133,52 +129,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </section>
-                        <div id="p-profile" class="pantallas">
-                            <div class="container mt-5" id>
-                                <div class="settings-container text-center">
-                                    <h3>Ajustes de WhatsApp</h3>
-                                    <div class="mb-3">
-                                        <img src="" alt="Imagen de perfil" class="profile-img">
-                                        <div>
-                                            <!-- Button trigger modal -->
-                                        <button id="btn-imagen" type="button" class="btn btn-custom mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                            Cambiar Imagen
-                                        </button>
-                                        
-                                        <!-- Modal -->
-                                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                Insertar enlace de la imagen a continuación: 
-                                                <input type="text" class="form-control" id="input-imagen">
-                                                </div>
-                                                <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-primary">Save changes</button>
-                                                </div>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <button class="btn btn-custom w-100">Créditos</button>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-warning w-100">Cambiar Contraseña</button>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-danger w-100">Cerrar Sesión</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> 
+                        </section> 
                     </main>
                 </div>
             
