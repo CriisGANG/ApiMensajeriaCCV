@@ -1,4 +1,3 @@
-from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request, Depends, Query, Cookie, BackgroundTasks
 from fastapi.responses import JSONResponse, HTMLResponse  # Añadir HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -205,15 +204,6 @@ def get_conversation(username: str, request: Request, current_user: str = Depend
     print(conversation)
     return JSONResponse(content=conversation, status_code=200)
 
-@app.get("/conversacion/{user_id}/{current_user_id}")
-async def cargar_conversacion(user_id, current_user_id):
-    # Imagina que 'db.obtener_conversacion' es una función que recupera la conversación.
-    conversacion = db.cargar_conversacion(user_id, current_user_id)
-    if conversacion:
-        return conversacion
-    else:
-        raise HTTPException(status_code=404, detail="Conversación no encontrada")
-
 @app.get("/chat/{username}", response_class=HTMLResponse)
 def chat_page(username: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
@@ -293,16 +283,6 @@ def chat_page(request: Request, current_user: str = Depends(get_current_user)):
         "user_bg_picture_url": user_bg_picture_url,
         "conversations": conversations
     })
-
-@app.get("/getUserId/{username}")
-def get_user_id(username: str):
-    db.conecta()
-    user_id = db.get_user_id(username)
-    db.desconecta()
-    print("PAPA", user_id)
-    if user_id is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"user_id": user_id}
 
 @app.get("/chatsGrupos/{groupId}", response_class=HTMLResponse)
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
