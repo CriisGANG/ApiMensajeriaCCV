@@ -107,20 +107,17 @@ async function pintarUsuarios(idElementHTML) {
 
 async function pintarMensajes(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
-  const name = await currentUser()
-  console.log("USER-DATA", name);
-  const id_user = await getUserId(name)
-  console.log(id_user);
+  const name = await currentUser();
+  const id_user = await getUserId(name);
   
-  let newMessages = await fetchMessages(conversationUsername, id_user.user_id)
+  let newMessages = await fetchMessages(conversationUsername, id_user.user_id);
 
-  const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
-  let loggedInUser = true;
+  const displayedMessageIds = new Set();
   if (chatMessages.hasChildNodes()) {
     while (chatMessages.firstChild) {
       chatMessages.removeChild(chatMessages.firstChild);
     }
-  } // Limpia la lista antes de añadir nuevos usuarios
+  }
 
   newMessages.forEach(message => {
     try {
@@ -128,41 +125,26 @@ async function pintarMensajes(conversationUsername, timestamp) {
         const messageElement = document.createElement("div");
         messageElement.classList.add(
           "message",
-          message.sender_username === loggedInUser ? "received" : "sent",
+          message.sender_id === id_user.user_id ? "sent" : "received",
           "p-2",
           "mb-2",
           "rounded"
         );
-        console.log("here");
         
-        messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
-        messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
+        messageElement.style.textAlign = message.sender_id === id_user.user_id ? "right" : "left";
+        messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>: " + message.content + "</p>";
 
         chatMessages.appendChild(messageElement);
-
-        // Registrar el mensaje en el Set
         displayedMessageIds.add(message.id);
-        //console.log(displayedMessageIds);
-
-        // Actualizar el timestamp del último mensaje recibido
-        //lastMessageTimestamp.value = message.created_at;
       }
-
-
     } catch (error) {
       console.error("Error al obtener los últimos mensajes:", error);
     }
   });
 
-  console.log("Por aquí");
-
-  //si la pantalla es pequeña, muestrame mensajes
   if (screenMinorLg) {
-
-    showActualDIV("mensajes")
-
+    showActualDIV("mensajes");
   }
-
 }
 
 function displayMessages(currentUserId) {
