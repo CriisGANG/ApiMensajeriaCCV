@@ -1,4 +1,4 @@
-import { conversacionesUserId, fetchMessages, currentUser,getConversacion, getUser, getUserId } from "./httpFetch.js";
+import { conversacionesUserId, fetchMessages, currentUser, callGroups, getUser, getUserId } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
 import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
 
@@ -16,24 +16,29 @@ function showActualDIV(div = undefined) {
   }
 }
 
-function initChats() {
+async function initChats() {
+  const name = await currentUser();
+  const id_user = await getUserId(name);
+  console.log("ID DEL USAR", id_user);
   //console.log("Chats");
   pintarUsuarios("users", pintarMensajes);
+  pintarGrupos(id_user.user_id)
+
   screenMinorLg = window.innerWidth < 993
   initDivs()
 
   if (screenMinorLg) {
-    showActualDIV("conversaciones") 
+    showActualDIV("conversaciones")
   }
 }
 
 window.addEventListener('resize', () => {
-  console.log('mostrando:'+ACTUAL_DIV);
+  console.log('mostrando:' + ACTUAL_DIV);
   screenMinorLg = window.innerWidth < 993
-  if(screenMinorLg){
+  if (screenMinorLg) {
     showActualDIV(ACTUAL_DIV)
-    
-  }else{
+
+  } else {
     showAllDIVs()
   }
 });
@@ -47,8 +52,8 @@ async function getUsers(conversaciones) {
   try {
     // `users` será un array de los resultados de cada llamada a `getUser`
     let users = await Promise.all(userPromises);
-    
-    
+
+
     //console.log(users);  // Imprime o verifica el array de usuarios
     users.map((conversacion) => {
       conversacion.last_message_content = truncateString(conversacion.last_message_content)
@@ -85,7 +90,7 @@ async function pintarUsuarios(idElementHTML) {
     const img = document.createElement("img");
     const link = document.createElement('a');
     console.log("USER_ID", user.id);
-    
+
     link.href = `/conversation/${user.id}`;  // Configurar el enlace al endpoint deseado
     li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
     li.innerHTML = `
@@ -105,13 +110,40 @@ async function pintarUsuarios(idElementHTML) {
 
 }
 
+async function pintarGrupos(idUser) {
+  const grupos = await callGroups(idUser);
+  const groupEl = document.getElementById("users-users");
+  // const groupList = document.getElementById("groups");
+  console.log("GRUPOS:", grupos);
+
+  grupos.forEach(group => {
+    const li = document.createElement("li");
+    console.log("1G", group);
+    li.textContent = group.name;
+
+    li.addEventListener("click", function () {
+      window.location.href = `/chatsGrupos/${group.id}`;
+    });
+    li.append(document.createTextNode(group.name));
+    // li.append(document.createTextNode(group.id));
+    groupEl.appendChild(li);
+  });
+
+  document.getElementById("logout").addEventListener("click", function () {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "/";
+  });
+
+}
+
+
 async function pintarMensajes(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
   const name = await currentUser()
   console.log("USER-DATA", name);
   const id_user = await getUserId(name)
   console.log(id_user);
-  
+
   let newMessages = await fetchMessages(conversationUsername, id_user.user_id)
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
@@ -134,7 +166,7 @@ async function pintarMensajes(conversationUsername, timestamp) {
           "rounded"
         );
         console.log("here");
-        
+
         messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
         messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
 
@@ -166,20 +198,20 @@ async function pintarMensajes(conversationUsername, timestamp) {
 }
 
 function displayMessages(currentUserId) {
-  const chatMessages = document.getElementById("chat-messages");  
+  const chatMessages = document.getElementById("chat-messages");
   chatMessages.innerHTML = ''; // Limpiar contenedor actual
- let messages = fetchMessages(currentUserId)
+  let messages = fetchMessages(currentUserId)
   messages.forEach(message => {
-      const messageDiv = document.createElement('div');
-      const alignmentClass = message.sender_id === currentUserId ? 'right' : 'left';
-      
-      messageDiv.classList.add('message', alignmentClass);
-      messageDiv.innerHTML = `
+    const messageDiv = document.createElement('div');
+    const alignmentClass = message.sender_id === currentUserId ? 'right' : 'left';
+
+    messageDiv.classList.add('message', alignmentClass);
+    messageDiv.innerHTML = `
           <p>${message.sender_id === currentUserId ? 'You' : 'User ' + message.sender_id}: ${message.content}</p>
           <small>${new Date(message.created_at).toLocaleString()}</small>
       `;
 
-      container.appendChild(messageDiv);
+    container.appendChild(messageDiv);
   });
 }
 

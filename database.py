@@ -263,3 +263,54 @@ class API_Mensajeria(object):
             last_interaction DESC;"""
         self.cursor.execute(sql, (userId,userId,userId,userId))
         return self.cursor.fetchall()
+    
+    def isAdmin(self, user_id, group_id):
+        sql = "SELECT is_admin FROM group_members WHERE user_id =%s AND group_id =%s"
+        self.cursor.execute(sql, (user_id, group_id))
+        ResQuery = self.cursor.fetchone()
+        print(ResQuery)
+        return ResQuery['is_admin'] if ResQuery else None # La idea es mirar si el is_admin es 0 o 1. Si es 1, entonces el usuario tendrá unas configuraciones extra: para hacer admin a otra persona o expulsar a alguien
+
+    def getGroupMembersExceptYou(self, groupId, userId):
+        sql = """
+        SELECT u.id, u.username FROM usuarisclase u
+        JOIN group_members gm ON u.id = gm.user_id
+        WHERE gm.group_id = %s AND u.id != %s
+        """
+        self.cursor.execute(sql, (groupId, userId))
+        return self.cursor.fetchall()
+    
+    def leaveGroup(self, user_id, group_id):
+        sql = "DELETE FROM group_members WHERE user_id = %s AND group_id = %s"
+        self.cursor.execute(sql, (user_id, group_id))
+        self.db.commit()
+        
+    def convertToAdmin(self, user_id, group_id):
+        sql = "UPDATE group_members SET is_admin = 1 WHERE user_id = %s AND group_id = %s"
+        self.cursor.execute(sql, (user_id, group_id))
+        self.db.commit()
+        
+    def isOwner(self, admin_id, group_id):
+        sql = "SELECT COUNT(*) as isOwner FROM Groups WHERE admin_id = %s AND id = %s"
+        self.cursor.execute(sql, (admin_id, group_id))
+        ResQuery = self.cursor.fetchone()
+        return ResQuery
+
+    def delete_group(self, group_id):
+        sql = "DELETE FROM groups WHERE id = %s"
+        self.cursor.execute(sql, (group_id,))
+        self.db.commit()
+
+    def getUsersNotInGroup(self, group_id):
+        sql = """
+        SELECT u.id, u.username FROM usuarisclase u
+        WHERE u.id NOT IN (SELECT gm.user_id FROM group_members gm WHERE gm.group_id = %s)
+        """
+        self.cursor.execute(sql, (group_id,))
+        ResQuery = self.cursor.fetchall()
+        return ResQuery
+
+    def demoteToMember(self, user_id, group_id):
+        sql = "UPDATE group_members SET is_admin = 0 WHERE user_id = %s AND group_id = %s"
+        self.cursor.execute(sql, (user_id, group_id))
+        self.db.commit()

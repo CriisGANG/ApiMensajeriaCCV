@@ -114,18 +114,6 @@ async function callUsers() {
   return await globalFetch("/users", options)
 }
 
-async function callGroups() {
-
-  try {
-    const data = await fetch(apiEndpoint + "/groups");
-    const datajson = await data.json();
-    //console.log("GRUPS", datajson);
-
-  } catch (error) {
-    //console.log(error);
-
-  }
-}
 
 async function conversacionesUserId() {
   const ruta = "/conversacionesUserId"
@@ -138,16 +126,16 @@ async function conversacionesUserId() {
   return await globalFetch(ruta, options)
 }
 
-async function callConverGroups(groupId) {
+async function callGroups(idUser) {
 
-  const ruta = "/chat/" + groupId
+  const ruta = "/groups/" + idUser
   const options = {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     }
   }
-
+  console.log("Ruta grupo:", ruta);
   return await globalFetch(ruta, options);
 }
 
@@ -192,4 +180,4 @@ async function globalFetch(ruta, options) {
 
 }
 
-export { login, currentUser, getUserId,callUsers, callGroups, conversacionesUserId, callConverGroups, getUser, getConversacion, fetchMessages };
+export { login, currentUser, getUserId,callUsers, callGroups, conversacionesUserId, getUser, getConversacion, fetchMessages };

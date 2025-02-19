@@ -159,19 +159,21 @@ def get_users(request: Request, current_user: str = Depends(get_current_user)):
 
 # RUTAS HTML
 
-@app.get("/groups")
+@app.get("/groups/{idUser}", response_class=JSONResponse)
 async def groupList(request: Request, idUser):
     db.conecta()
     groups = db.carregaGrups(idUser)
+    print("GRUPOS: AKJSWBRKJWBRLK",groups)
     db.desconecta()
 
     # Convert datetime objects to strings
-    for group in groups:
-        for key, value in group.items():
-            if isinstance(value, datetime.datetime):
-                group[key] = value.isoformat()
+    # for group in groups:
+    #     for key, value in group.items():
+    #         if isinstance(value, datetime.datetime):
+    #             group[key] = value.isoformat()
 
-    return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
+    # return templates.TemplateResponse("groups.html", {"request": request, "groups": groups})
+    return groups
 
 @app.get("/conversation/{username}", response_class=JSONResponse)
 def get_conversation(username: str, request: Request, current_user: str = Depends(get_current_user), since: str = None):
@@ -304,7 +306,7 @@ def get_user_id(username: str):
         raise HTTPException(status_code=404, detail="User not found")
     return {"user_id": user_id}
 
-@app.get("/chatsGrupos/{groupId}", response_class=HTMLResponse)
+@app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
     db.conecta()
     loggedInUser = current_user
@@ -323,7 +325,8 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
+    return {"conversacion": conversation, "miembros": members}
+    # return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest, current_user: str = Depends(get_current_user)):
