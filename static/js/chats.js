@@ -105,6 +105,10 @@ async function pintarUsuarios(idElementHTML) {
 
 }
 
+let loggedInUser = await currentUser(); // Definir loggedInUser
+let receiverUsername = ""; // Inicializar receiverUsername vacío
+const displayedMessageIds = new Set(); // Mover la declaración aquí para que sea accesible
+
 async function pintarMensajes(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
   const name = await currentUser();
@@ -123,6 +127,7 @@ async function pintarMensajes(conversationUsername, timestamp) {
     try {
       if (!displayedMessageIds.has(message.id)) {
         const messageElement = document.createElement("div");
+        const isSent = message.sender_username === loggedInUser;
         messageElement.classList.add(
           "message",
           message.sender_id === id_user.user_id ? "sent" : "received",
@@ -189,7 +194,7 @@ document.getElementById("atras").addEventListener("click", () => {
   showActualDIV("conversaciones");
 })
 
-
+// SOCORRO
 
 
 export { initChats };
