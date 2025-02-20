@@ -335,7 +335,6 @@ async def send_message(request: Request, message: MessageRequest, current_user: 
 
     sender_id = db.get_user_id(logged_in_user)
     receiver_id = db.get_user_id(message.receiver_username)
-
     if not sender_id or not receiver_id:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -503,7 +502,6 @@ async def listen_for_new_messages(websocket: WebSocket, background_tasks: Backgr
                     await websocket.send_json(new_message)
                 last_message_id = new_last_message_id
             db.desconecta()
-            await io.sleep(5)  # Esperar 5 segundos antes de verificar nuevamente
 
     background_tasks.add_task(check_for_new_messages)
     return JSONResponse(content={"message": "Listening for new messages"}, status_code=200)

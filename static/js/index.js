@@ -9,9 +9,7 @@ import {show} from "./viewController.js";
 document.addEventListener("DOMContentLoaded", function () {
   
   show("login");
-
-
-
+  
   // Tooltip initialization
   $(document).ready(function() {
     $('.icon-trigger').tooltip({

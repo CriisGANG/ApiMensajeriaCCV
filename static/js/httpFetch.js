@@ -9,7 +9,6 @@ const apiEndpoint = "http://127.0.0.1:8000"
 
 
 async function login(username, password) {
-
   let options = {
     method: 'POST',
     headers: {
@@ -17,12 +16,23 @@ async function login(username, password) {
     },
     body: JSON.stringify({ username, password })
   }
-
-
   return globalFetch("/login", options)
-
-
 }
+
+async function send_message(username, content) {
+  let options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ receiver_username: username, content: content })
+  }
+  return globalFetch("/send-message", options)
+}
+
+
+
+
 
 
 
@@ -43,7 +53,7 @@ async function getUserId(username) {
   const response = await fetch(url, options);
   const data = await response.json();
   //console.log("ID_USERRRRR ", data);
-  
+
   return data;
 }
 
@@ -57,10 +67,10 @@ async function fetchMessages(userId, currentUserId) {
   let url = `/conversacion/${userId}/${currentUserId}`;
   const response = await fetch(url, options);
   //console.log(response);
-  
+
   const data = await response.json();
   //console.log("mensajes: ", data);
-  
+
   return data;
 }
 
@@ -191,4 +201,4 @@ async function globalFetch(ruta, options) {
 
 }
 
-export { login, currentUser, getUserId,callUsers, callGroups, conversacionesUserId, getUser, getConversacion, fetchMessages, mensajesGrupos };
+export { send_message, login, currentUser, getUserId, callUsers, callGroups, conversacionesUserId, getUser, getConversacion, fetchMessages, mensajesGrupos };

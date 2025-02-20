@@ -137,17 +137,20 @@ class API_Mensajeria(object):
         # self.cursor.execute(sql, params)
         # ResQuery = self.cursor.fetchall()
         # return ResQuery
+        
+    # def hayMensajes(self, id_user):
+        
 
     def cargarConversacionGrupo(self, groupId):
-        sql = """
+            sql = """
         SELECT m.*, u.username as sender_username FROM messages m
         JOIN usuarisclase u ON m.sender_id = u.id
         WHERE m.group_id = %s
         ORDER BY m.created_at
         """
-        self.cursor.execute(sql, (groupId,))
-        ResQuery = self.cursor.fetchall()
-        return ResQuery
+            self.cursor.execute(sql, (groupId,))
+            ResQuery = self.cursor.fetchall()
+            return ResQuery
 
     def insertar_mensaje(self, sender_id, receiver_id, content, status):
         sql = """

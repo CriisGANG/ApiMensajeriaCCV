@@ -1,9 +1,10 @@
-import { conversacionesUserId, fetchMessages, mensajesGrupos, currentUser, callGroups, getUser, getUserId } from "./httpFetch.js";
+import { conversacionesUserId, fetchMessages, mensajesGrupos, currentUser, callGroups, getUser, getUserId, send_message } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
 import { show, showDIV, initDivs, showAllDIVs, INTENTION_NEW_USER_CHAT } from "./viewController.js";
 
 let screenMinorLg = false
 let ACTUAL_DIV = "conversaciones";
+let USER_LAST_MESSAGES = undefined;
 
 //mantiene el estado en el utlimo div mostrado (foco)
 //implementación: "no se que div estaba mostrando y quiero mostrar el último"
@@ -27,10 +28,8 @@ async function initChats(context) {
   if (context) {
     switch (context.intention) {
       case INTENTION_NEW_USER_CHAT:
-        console.log(context);
         showActualDIV("mensajes")
         pintarMensajesUsuarios(context.id)
-
         break;
       default:
         showActualDIV("conversaciones")
@@ -138,10 +137,12 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
     userList.appendChild(li);
 
     // Agregar evento de click para cargar los mensajes del usuario
-    li.addEventListener("click", function () {
+    li.addEventListener("click", async function () {
 
       if (obj.interaction_type === "user") {
         pintarMensajesUsuarios(ide, ultimaInteraccion);
+        USER_LAST_MESSAGES = await getUser(ide)
+        console.log(USER_LAST_MESSAGES);
         //console.log("Usuario pulsado!");
       } else {
         pintarMensajesGrupos(obj)
@@ -369,6 +370,16 @@ function displayMessages(currentUserId) {
 
 /** ESTO HAY QUE IMPLEMENTARLO !!! PENDIENTE */
 
+document.getElementById("send-message").addEventListener("click", async() => {
+console.log("Enviar mensaje!");
+let content = document.getElementById("chat-input").value
+if(content.length >0){
+  await send_message(USER_LAST_MESSAGES.username,content)
+
+}
+
+
+})
 
 // Evento para el logout
 document.getElementById("logout").addEventListener("click", function () {
