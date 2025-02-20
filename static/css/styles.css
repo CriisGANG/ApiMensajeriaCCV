@@ -16,6 +16,12 @@
     align-items: center;
     height: 100vh;
     color: #264653; /* Texto principal */
+    
+
+  }
+
+  .noDecorationLinks{
+    text-decoration: none;
   }
   
   .app-container {
@@ -657,6 +663,7 @@
     list-style: none;
   }
   
+ 
   
   .error-message {
     display: none;

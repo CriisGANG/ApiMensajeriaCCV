@@ -212,7 +212,7 @@ async def cargar_conversacion(user_id, current_user_id):
     if conversacion:
         return conversacion
     else:
-        raise HTTPException(status_code=404, detail="Conversación no encontrada")
+        return False
 
 @app.get("/chat/{username}", response_class=HTMLResponse)
 def chat_page(username: str, request: Request, current_user: str = Depends(get_current_user)):
@@ -503,7 +503,7 @@ async def listen_for_new_messages(websocket: WebSocket, background_tasks: Backgr
                     await websocket.send_json(new_message)
                 last_message_id = new_last_message_id
             db.desconecta()
-            await asyncio.sleep(5)  # Esperar 5 segundos antes de verificar nuevamente
+            await io.sleep(5)  # Esperar 5 segundos antes de verificar nuevamente
 
     background_tasks.add_task(check_for_new_messages)
     return JSONResponse(content={"message": "Listening for new messages"}, status_code=200)

@@ -13,6 +13,7 @@ async function initLogin(){
       //el que llama al fetch, es el que trata el error que pueda haber en la peticion http
       if(await currentUser()){
           show("chats")
+          
       } 
       //callUsers()
      

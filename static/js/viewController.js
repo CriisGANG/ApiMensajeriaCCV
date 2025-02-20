@@ -7,6 +7,8 @@ import { initLogin } from "./login.js";
 import { initUsers } from "./users.js";
 import { initChats } from "./chats.js";
 
+const INTENTION_NEW_USER_CHAT =  "newUserChat";
+const INTENTION_NEW_GROUP_CHAT =  "newGroupChat";
 
 const pantallas = [
     { key: "chats", value: "p-chats", onInit: initChats },
@@ -22,14 +24,17 @@ const chatDIVs = [
 
 //controla la NAVEGACION de las pantallas principales (p-chats, p-users y p-login)
 
-function show(target) {
-
+function show(target, context) {
     pantallas.forEach(pantalla => {
         if (pantalla.key === target) {
             document.getElementById(pantalla.value).style.display = 'block';
             // Función que EJECUTA (inicia) cada componente 
             //llamador de iniciadores, ejecuta una función anónima.
-            pantalla.onInit()
+            if(context){
+                pantalla.onInit(context)
+            }else{
+                pantalla.onInit()
+            }
         } else {
             document.getElementById(pantalla.value).style.display = 'none';
 
@@ -52,7 +57,7 @@ function initDivs() {
 
 }
 
-//controla la NAVEGACION de los dos divs principales dentro de chats (conversaciones y mensajes)
+//controla la NAVEGACION de los dos divs principales de P-CHATS (conversaciones y mensajes)
 function showDIV(target) {
 
     document.getElementById("div-btn-atras").removeAttribute("class") //elimina las clases, para mostrar el botón atras
@@ -76,11 +81,10 @@ function showAllDIVs() {
     chatDIVs.forEach(div => {
         
         document.getElementById(div.value).style.display = 'block';
-        anadirAtributosPorId(div.value,div.clases);
+        anadirAtributosPorId(div.value, div.clases);
 
     });
 }
-
 
 function obtenerAtributosPorId(id) {
     
@@ -116,5 +120,5 @@ function eliminarAtributosPorId(id) {
 }
 
 
-export { show, showDIV, initDivs, showAllDIVs }
+export { show, showDIV, initDivs, showAllDIVs, INTENTION_NEW_USER_CHAT, INTENTION_NEW_GROUP_CHAT }
 

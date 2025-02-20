@@ -1,6 +1,6 @@
 import { conversacionesUserId, fetchMessages, mensajesGrupos, currentUser, callGroups, getUser, getUserId } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
-import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
+import { show, showDIV, initDivs, showAllDIVs, INTENTION_NEW_USER_CHAT } from "./viewController.js";
 
 let screenMinorLg = false
 let ACTUAL_DIV = "conversaciones";
@@ -8,15 +8,39 @@ let ACTUAL_DIV = "conversaciones";
 //mantiene el estado en el utlimo div mostrado (foco)
 //implementación: "no se que div estaba mostrando y quiero mostrar el último"
 function showActualDIV(div = undefined) {
+  screenMinorLg = window.innerWidth < 993
+
   if (div) {
     ACTUAL_DIV = div
   }
   if (screenMinorLg) {
+    //centralizado aqui el uso de viewcontroller para mostrar un solo div 
     showDIV(ACTUAL_DIV)
+  } else {
+    //centralizado aqui el uso de viewcontroller para mostrar todos los div
+    showAllDIVs()
+
   }
 }
 
-async function initChats() {
+async function initChats(context) {
+  if (context) {
+    switch (context.intention) {
+      case INTENTION_NEW_USER_CHAT:
+        console.log(context);
+        showActualDIV("mensajes")
+        pintarMensajesUsuarios(context.id)
+
+        break;
+      default:
+        showActualDIV("conversaciones")
+
+        break;
+    }
+
+  } else {
+
+  
   const name = await currentUser();
   const id_user = await getUserId(name);
   ////console.log("ID DEL USER", id_user);
@@ -30,17 +54,12 @@ async function initChats() {
   if (screenMinorLg) {
     showActualDIV("conversaciones")
   }
+
+}
 }
 
 window.addEventListener('resize', () => {
-  //console.log('mostrando:' + ACTUAL_DIV);
-  screenMinorLg = window.innerWidth < 993
-  if (screenMinorLg) {
-    showActualDIV(ACTUAL_DIV)
-
-  } else {
-    showAllDIVs()
-  }
+  showActualDIV(ACTUAL_DIV)
 });
 
 async function pintarUsuariosYGrupos(idUser, idElementHTML) {
@@ -71,17 +90,11 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
     let ide;
     let ultimaInteraccion = obj.last_interaction
 
-
-
-
     if (obj.interaction_type === "user") {
 
       profilePicture = obj.user_profile_picture_url;
       identification = obj.username;
       ide = obj.id;
-
-
-
     }
     else if (obj.interaction_type === "group") {
 
@@ -90,9 +103,6 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
       ide = obj.group_id;
       isGroup = true;
       console.log("Pasa por grupo");
-
-
-
     }
 
     const li = document.createElement("li");
@@ -131,7 +141,7 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
     li.addEventListener("click", function () {
 
       if (obj.interaction_type === "user") {
-        pintarMensajesUsuarios(ide, ultimaInteraccion, false, undefined);
+        pintarMensajesUsuarios(ide, ultimaInteraccion);
         //console.log("Usuario pulsado!");
       } else {
         pintarMensajesGrupos(obj)
@@ -189,13 +199,15 @@ async function getUsersAndGroups(conversaciones) {
     return [...users, ...groups];
 
   } catch (error) {
-    console.error("Error fetching user/group data:", error);
+    console.log(error)
     return []; // En caso de error, devuelve un array vacío
+
+
   }
 }
 
 //        pintarMensajes(ide, ultimaInteraccion, false, undefined);
-async function pintarMensajesUsuarios(conversationUsername, timestamp, ) {
+async function pintarMensajesUsuarios(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
   const name = await currentUser()
   ////console.log("USER-DATA", name);
@@ -229,9 +241,9 @@ async function pintarMensajesUsuarios(conversationUsername, timestamp, ) {
         const contenido = document.createTextNode(message.content)
         const messageDate = document.createElement("li");
         const messageStatus = document.createElement("span");
-        
+
         messageStatus.classList.add("message-status");
-        messageStatus.textContent = message.status === "enviat" ? "✔✔" : "✔";
+        messageStatus.textContent = message.status === "rebut" ? "✔✔" : "✔";
 
         messageDate.classList.add("custom-li")
         messageDate.classList.add("message-date");
@@ -240,14 +252,14 @@ async function pintarMensajesUsuarios(conversationUsername, timestamp, ) {
         strong.textContent = message.sender_username;
 
 
-        
+
         ul.append(strong)
         ul.append(contenido)
         ul.append(messageDate)
         ul.append(messageStatus)
         // messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
         // messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
-         
+
         messageElement.append(ul)
 
         chatMessages.appendChild(messageElement);
@@ -316,25 +328,15 @@ function pintarMensajesGrupos(dataGroup) {
     }
   })
 
-
   //Cuando la ventana sea pequeña, abre la ventana de mensajes
   if (screenMinorLg) {
 
     showActualDIV("mensajes")
 
   }
-
-
-
-
-
-
-
-
-
-
 }
 
+/** izq y derecha */
 function displayMessages(currentUserId) {
   const chatMessages = document.getElementById("chat-messages");
   chatMessages.innerHTML = ''; // Limpiar contenedor actual
@@ -353,7 +355,7 @@ function displayMessages(currentUserId) {
   });
 }
 
-/** DIV USUARIOS nuevi chat
+/** DIV USUARIOS nuevo chat
  * 1) primero superponer en el index.html, en el div de chats
  * 2) gestionar la vista enseño o no enseño
  * 3) si es menor de 900px pantalla completa del modal, sino, a % y oscurecer el background para sendacion profundidad
@@ -366,6 +368,8 @@ function displayMessages(currentUserId) {
 
 
 /** ESTO HAY QUE IMPLEMENTARLO !!! PENDIENTE */
+
+
 // Evento para el logout
 document.getElementById("logout").addEventListener("click", function () {
   localStorage.removeItem("loggedInUser");
@@ -373,17 +377,18 @@ document.getElementById("logout").addEventListener("click", function () {
 });
 
 
-document.getElementById("redirect_users").addEventListener("click", () => {
-  //console.log("redireccionando a usuarios...");
-  showActualDIV("conversaciones");
-})
 
 document.getElementById("atras").addEventListener("click", () => {
   //console.log("Atrás!");
   showActualDIV("conversaciones");
 })
 
+document.getElementById("add_users").addEventListener("click", () => {
 
+  show("users");
+
+
+})
 
 
 export { initChats };
