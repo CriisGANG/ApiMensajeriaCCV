@@ -375,7 +375,7 @@ console.log("Enviar mensaje!");
 let content = document.getElementById("chat-input").value
 if(content.length >0){
   await send_message(USER_LAST_MESSAGES.username,content)
-
+  pintarMensajesUsuarios(USER_LAST_MESSAGES.id) 
 }
 
 
