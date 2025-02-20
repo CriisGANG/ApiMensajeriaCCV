@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
 
 
-  //console.log("HOla", document.getElementById("redirect_users"));
+  ////console.log("HOla", document.getElementById("redirect_users"));
   
   
   // document.getElementById("go-to-chat").addEventListener("click", function() {

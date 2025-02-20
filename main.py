@@ -11,8 +11,6 @@ import json
 from fastapi import WebSocket, WebSocketDisconnect
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-import asyncio  # Añadir esta línea
-import uvicorn
 
 app = FastAPI()
 
@@ -312,7 +310,7 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
     loggedInUser = current_user
     loggedInUser = db.get_user_id(loggedInUser)
     selectedGroup = db.getGroup(groupId)
-
+    print(selectedGroup)
     if not loggedInUser or not selectedGroup:
         db.desconecta()
         raise HTTPException(status_code=404, detail="Grupo no encontrado")
@@ -325,8 +323,7 @@ def chat_group(groupId: str, request: Request, current_user: str = Depends(get_c
 
     db.desconecta()
 
-    return {"conversacion": conversation, "miembros": members}
-    # return templates.TemplateResponse("chatGrupo.html", {"request": request, "conversation": conversation, "groupName": selectedGroup['name'], "members": members})
+    return {"conversacion": conversation, "miembros": members, "group_name":selectedGroup["name"]}
 
 @app.post("/send-message", response_class=JSONResponse)
 async def send_message(request: Request, message: MessageRequest, current_user: str = Depends(get_current_user)):

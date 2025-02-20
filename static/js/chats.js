@@ -1,4 +1,4 @@
-import { conversacionesUserId, fetchMessages, currentUser, callGroups, getUser, getUserId } from "./httpFetch.js";
+import { conversacionesUserId, fetchMessages, mensajesGrupos, currentUser, callGroups, getUser, getUserId } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
 import { showDIV, initDivs, showAllDIVs } from "./viewController.js";
 
@@ -19,10 +19,10 @@ function showActualDIV(div = undefined) {
 async function initChats() {
   const name = await currentUser();
   const id_user = await getUserId(name);
-  console.log("ID DEL USAR", id_user);
-  //console.log("Chats");
-  pintarUsuarios("users", pintarMensajes);
-  pintarGrupos(id_user.user_id)
+  ////console.log("ID DEL USER", id_user);
+  ////console.log("Chats");
+
+  pintarUsuariosYGrupos(id_user.user_id, "users");
 
   screenMinorLg = window.innerWidth < 993
   initDivs()
@@ -33,7 +33,7 @@ async function initChats() {
 }
 
 window.addEventListener('resize', () => {
-  console.log('mostrando:' + ACTUAL_DIV);
+  //console.log('mostrando:' + ACTUAL_DIV);
   screenMinorLg = window.innerWidth < 993
   if (screenMinorLg) {
     showActualDIV(ACTUAL_DIV)
@@ -43,106 +43,164 @@ window.addEventListener('resize', () => {
   }
 });
 
-async function getUsers(conversaciones) {
-  // Filtrar y mapear las conversaciones a promesas de obtener datos de usuario
-  let userPromises = conversaciones
-    .filter(conversacion => conversacion.interaction_type === "user")
-    .map(async conversacion => conversacion = { ...conversacion, ...await getUser(conversacion.interaction_id) })
-  // Usar Promise.all para esperar todas las promesas de usuario al mismo tiempo
-  try {
-    // `users` será un array de los resultados de cada llamada a `getUser`
-    let users = await Promise.all(userPromises);
-
-
-    //console.log(users);  // Imprime o verifica el array de usuarios
-    users.map((conversacion) => {
-      conversacion.last_message_content = truncateString(conversacion.last_message_content)
-    })
-
-    // Ahora `users` es un array que contiene todos los objetos de usuario obtenidos
-    return users;  // Devuelve el array de usuarios para su uso posterior
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return [];  // Devuelve un array vacío en caso de error
-  }
-}
-
-async function pintarUsuarios(idElementHTML) {
+async function pintarUsuariosYGrupos(idUser, idElementHTML) {
   const userList = document.getElementById(idElementHTML);
-  const conversaciones = await conversacionesUserId();
-  let users = await getUsers(conversaciones)
 
-
-  console.log("users")
-  console.log(users)
-
+  // Limpiar la lista antes de agregar nuevos elementos
   if (userList.hasChildNodes()) {
     while (userList.firstChild) {
       userList.removeChild(userList.firstChild);
     }
-  } // Limpia la lista antes de añadir nuevos usuarios
-  //console.log(users)
+  }
 
-  users.forEach(user => {
-    //console.log(user)
-    const profilePictureUrl = user.user_profile_picture_url || '/static/default-profile.png';
+  //Obtener y pintar usuarios
+  const conversaciones = await conversacionesUserId();
+
+  // Devuelve toda la info de grupos y usuarios (completa la lista de conversaciones con los valores de usuario o grupo)
+  let conversationsUsersAndGroups = await getUsersAndGroups(conversaciones);
+  console.log("USERS de get Users", conversationsUsersAndGroups);
+  //console.log("convers", conversaciones);
+  //FOR
+  conversationsUsersAndGroups.forEach(obj => {
+
+    //console.log("object",obj);
+    let isGroup;
+    let profilePicture;
+    let identification;
+    let ultimoMensaje = obj.last_message_content
+    let ide;
+    let ultimaInteraccion = obj.last_interaction
+
+
+
+
+    if (obj.interaction_type === "user") {
+
+      profilePicture = obj.user_profile_picture_url;
+      identification = obj.username;
+      ide = obj.id;
+
+
+
+    }
+    else if (obj.interaction_type === "group") {
+
+      identification = obj.group_name;
+      profilePicture = obj.user_profile_picture_url || "https://img.freepik.com/foto-gratis/hombre-tomando-foto-el-sus-amigos-parque_1139-591.jpg";
+      ide = obj.group_id;
+      isGroup = true;
+      console.log("Pasa por grupo");
+
+
+
+    }
+
     const li = document.createElement("li");
-    const img = document.createElement("img");
-    const link = document.createElement('a');
-    console.log("USER_ID", user.id);
-
-    link.href = `/conversation/${user.id}`;  // Configurar el enlace al endpoint deseado
     li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
-    li.innerHTML = `
-            <img src="${user.user_profile_picture_url || '/static/default-profile.png'}" alt="Foto de perfil" class="profile-picture rounded-circle mr-2">
-              <div class="user-info">
-                  <span class="user-name">${user.username}</span>
-                  <span class="user-status">${user.last_message_content}</span>
-                  <span class="user-status">${user.lastMessageTimestamp}</span>
-              </div>
-        `;
-    li.addEventListener("click", function () {
-      pintarMensajes(user.id, user.last_interaction)
-    });
-    li.appendChild(link);
+
+    // Crear la imagen de perfil
+    const img = document.createElement("img");
+    img.setAttribute("src", profilePicture || "/static/default-profile.png");
+    img.setAttribute("alt", "Foto de perfil");
+    img.classList.add("profile-picture", "rounded-circle", "mr-2");
+
+    // Crear el div que contiene la info del usuario
+    const userInfo = document.createElement("div");
+    userInfo.classList.add("user-info");
+
+    // Crear el nombre del usuario
+    const userName = document.createElement("span");
+    userName.classList.add("user-name");
+    userName.textContent = identification;
+
+    // Crear el estado del usuario (último mensaje)
+    const userStatus = document.createElement("span");
+    userStatus.classList.add("user-status");
+    userStatus.textContent = ultimoMensaje;
+
+    // Agregar los elementos al div de info
+    userInfo.append(userName, userStatus);
+
+    // Agregar imagen y div con info dentro del <li>
+    li.append(img, userInfo);
+
+    // Agregar el <li> al contenedor principal (userList)
     userList.appendChild(li);
-  });
 
-}
-
-async function pintarGrupos(idUser) {
-  const grupos = await callGroups(idUser);
-  const groupEl = document.getElementById("users-users");
-  // const groupList = document.getElementById("groups");
-  console.log("GRUPOS:", grupos);
-
-  grupos.forEach(group => {
-    const li = document.createElement("li");
-    console.log("1G", group);
-    li.textContent = group.name;
-
+    // Agregar evento de click para cargar los mensajes del usuario
     li.addEventListener("click", function () {
-      window.location.href = `/chatsGrupos/${group.id}`;
+
+      if (obj.interaction_type === "user") {
+        pintarMensajesUsuarios(ide, ultimaInteraccion, false, undefined);
+        //console.log("Usuario pulsado!");
+      } else {
+        pintarMensajesGrupos(obj)
+      }
+
     });
-    li.append(document.createTextNode(group.name));
-    // li.append(document.createTextNode(group.id));
-    groupEl.appendChild(li);
   });
-
-  document.getElementById("logout").addEventListener("click", function () {
-    localStorage.removeItem("loggedInUser");
-    window.location.href = "/";
-  });
-
 }
 
+async function getUsersAndGroups(conversaciones) {
+  let userPromises = [];
+  let groupPromises = [];
 
-async function pintarMensajes(conversationUsername, timestamp) {
+  try {
+    for (let i = 0; i < conversaciones.length; i++) {
+      let conversacion = conversaciones[i];
+
+      if (conversacion.interaction_type === "user") {
+        let userPromise = getUser(conversacion.interaction_id)
+          .then(userData => {
+            // console.log("userData");
+            // console.log(userData);
+            return { ...conversacion, ...userData };
+          });
+        userPromises.push(userPromise);
+      }
+
+      else if (conversacion.interaction_type === "group") {
+        let groupPromise = mensajesGrupos(conversacion.interaction_id)
+          .then(groupData => {
+            //console.log("groupData");
+            //console.log(groupData);
+
+            return { ...conversacion, ...groupData };
+          });
+        groupPromises.push(groupPromise);
+      }
+    }
+    // Esperamos todas las promesas simultáneamente
+    let users = await Promise.all(userPromises);
+    let groups = await Promise.all(groupPromises);
+
+    // Recortar contenido de mensajes en ambos arrays
+    users.forEach(conversacion => {
+      conversacion.last_message_content = truncateString(conversacion.last_message_content);
+    });
+
+    groups.forEach(conversacion => {
+      conversacion.last_message_content = truncateString(conversacion.last_message_content);
+    });
+
+    // Devolver la combinación de usuarios y grupos
+    console.log("RESULT", [...users, ...groups]);
+
+    return [...users, ...groups];
+
+  } catch (error) {
+    console.error("Error fetching user/group data:", error);
+    return []; // En caso de error, devuelve un array vacío
+  }
+}
+
+//        pintarMensajes(ide, ultimaInteraccion, false, undefined);
+async function pintarMensajesUsuarios(conversationUsername, timestamp, ) {
   const chatMessages = document.getElementById("chat-messages");
   const name = await currentUser()
-  console.log("USER-DATA", name);
+  ////console.log("USER-DATA", name);
   const id_user = await getUserId(name)
-  console.log(id_user);
+  ////console.log(id_user);
 
   let newMessages = await fetchMessages(conversationUsername, id_user.user_id)
 
@@ -165,16 +223,38 @@ async function pintarMensajes(conversationUsername, timestamp) {
           "mb-2",
           "rounded"
         );
-        console.log("here");
+        //console.log("here");
+        const ul = document.createElement("ul")
+        const strong = document.createElement("strong")
+        const contenido = document.createTextNode(message.content)
+        const messageDate = document.createElement("li");
+        const messageStatus = document.createElement("span");
+        
+        messageStatus.classList.add("message-status");
+        messageStatus.textContent = message.status === "enviat" ? "✔✔" : "✔";
 
-        messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
-        messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
+        messageDate.classList.add("custom-li")
+        messageDate.classList.add("message-date");
+        messageDate.textContent = new Date(message.created_at).toLocaleString();
+
+        strong.textContent = message.sender_username;
+
+
+        
+        ul.append(strong)
+        ul.append(contenido)
+        ul.append(messageDate)
+        ul.append(messageStatus)
+        // messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
+        // messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
+         
+        messageElement.append(ul)
 
         chatMessages.appendChild(messageElement);
 
         // Registrar el mensaje en el Set
         displayedMessageIds.add(message.id);
-        //console.log(displayedMessageIds);
+        ////console.log(displayedMessageIds);
 
         // Actualizar el timestamp del último mensaje recibido
         //lastMessageTimestamp.value = message.created_at;
@@ -186,14 +266,72 @@ async function pintarMensajes(conversationUsername, timestamp) {
     }
   });
 
-  console.log("Por aquí");
-
   //si la pantalla es pequeña, muestrame mensajes
   if (screenMinorLg) {
 
     showActualDIV("mensajes")
 
   }
+
+}
+
+
+function pintarMensajesGrupos(dataGroup) {
+  const chatMessages = document.getElementById("chat-messages");
+  console.log(dataGroup);
+  const displayedMessageIds = new Set();
+
+
+  let loggedInUser = true;
+  if (chatMessages.hasChildNodes()) {
+    while (chatMessages.firstChild) {
+      chatMessages.removeChild(chatMessages.firstChild);
+    }
+  } // Limpia la lista antes de añadir nuevos usuarios
+
+  dataGroup.conversacion.forEach(message => {
+
+    if (!displayedMessageIds.has(message.id)) {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add(
+        "message",
+        message.sender_username === loggedInUser ? "received" : "sent",
+        "p-2",
+        "mb-2",
+        "rounded"
+      );
+      //console.log("here");
+
+      messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
+      messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
+
+      chatMessages.appendChild(messageElement);
+
+      // Registrar el mensaje en el Set
+      displayedMessageIds.add(message.id);
+      ////console.log(displayedMessageIds);
+
+      // Actualizar el timestamp del último mensaje recibido
+      //lastMessageTimestamp.value = message.created_at;
+    }
+  })
+
+
+  //Cuando la ventana sea pequeña, abre la ventana de mensajes
+  if (screenMinorLg) {
+
+    showActualDIV("mensajes")
+
+  }
+
+
+
+
+
+
+
+
+
 
 }
 
@@ -227,15 +365,21 @@ function displayMessages(currentUserId) {
 */
 
 
+/** ESTO HAY QUE IMPLEMENTARLO !!! PENDIENTE */
+// Evento para el logout
+document.getElementById("logout").addEventListener("click", function () {
+  localStorage.removeItem("loggedInUser");
+  window.location.href = "/";
+});
 
 
 document.getElementById("redirect_users").addEventListener("click", () => {
-  console.log("redireccionando a usuarios...");
+  //console.log("redireccionando a usuarios...");
   showActualDIV("conversaciones");
 })
 
 document.getElementById("atras").addEventListener("click", () => {
-  console.log("Atrás!");
+  //console.log("Atrás!");
   showActualDIV("conversaciones");
 })
 

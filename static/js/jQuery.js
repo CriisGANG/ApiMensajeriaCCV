@@ -1,6 +1,6 @@
 //Ready caller
 $(function() {
-    //console.log("JQuery");
+    ////console.log("JQuery");
     // Verificar si ya está activado el mo
     // do oscuro en localStorage
     if (localStorage.getItem("dark-mode") === "enabled") {
@@ -8,7 +8,7 @@ $(function() {
     }
 
     $("#toggle-dark-mode").on("click", function() {
-        //console.log("JQuery");
+        ////console.log("JQuery");
         
         $("body").toggleClass("dark-mode");
     

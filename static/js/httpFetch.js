@@ -42,12 +42,10 @@ async function getUserId(username) {
 
   const response = await fetch(url, options);
   const data = await response.json();
-  console.log("ID_USERRRRR ", data);
+  //console.log("ID_USERRRRR ", data);
   
   return data;
 }
-
-
 
 async function fetchMessages(userId, currentUserId) {
   let options = {
@@ -58,10 +56,10 @@ async function fetchMessages(userId, currentUserId) {
   }
   let url = `/conversacion/${userId}/${currentUserId}`;
   const response = await fetch(url, options);
-  console.log(response);
+  //console.log(response);
   
   const data = await response.json();
-  console.log("mensajes: ", data);
+  //console.log("mensajes: ", data);
   
   return data;
 }
@@ -92,6 +90,7 @@ async function currentUser() {
 }
 async function getUser(idUser) {
 
+  //console.log("getUser", idUser);
   let options = {
     method: 'GET',
     headers: {
@@ -135,7 +134,19 @@ async function callGroups(idUser) {
       'Content-Type': 'application/json'
     }
   }
-  console.log("Ruta grupo:", ruta);
+  ////console.log("Ruta grupo:", ruta);
+  return await globalFetch(ruta, options);
+}
+
+async function mensajesGrupos(groupId) {
+  const ruta = "/chatsGrupos/" + groupId
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  //console.log("Ruta grupo:", ruta);
   return await globalFetch(ruta, options);
 }
 
@@ -150,16 +161,16 @@ async function callGroups(idUser) {
 
 async function globalFetch(ruta, options) {
 
-  //console.log("ruta: ", ruta);
-  //console.log("options", options);
+  ////console.log("ruta: ", ruta);
+  ////console.log("options", options);
 
 
   try {
 
-    //console.log("Petición: " + ruta);
+    ////console.log("Petición: " + ruta);
     const data = await fetch(apiEndpoint + ruta, options);
     const datajson = await data.json();
-    //console.log("Respuesta: ", datajson);
+    ////console.log("Respuesta: ", datajson);
 
 
     if (!data.ok) {
@@ -170,7 +181,7 @@ async function globalFetch(ruta, options) {
     return datajson
 
   } catch (eData) {
-    //console.log("ERROR", eData);
+    ////console.log("ERROR", eData);
 
     throw eData;
 
@@ -180,4 +191,4 @@ async function globalFetch(ruta, options) {
 
 }
 
-export { login, currentUser, getUserId,callUsers, callGroups, conversacionesUserId, getUser, getConversacion, fetchMessages };
+export { login, currentUser, getUserId,callUsers, callGroups, conversacionesUserId, getUser, getConversacion, fetchMessages, mensajesGrupos };

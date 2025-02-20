@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(data => {
-        //console.log(data.message);
+        ////console.log(data.message);
         window.location.href = "/users"; // Redirect to the user list
       })
       .catch(error => {

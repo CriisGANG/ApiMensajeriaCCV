@@ -17,7 +17,7 @@ async function initLogin(){
       //callUsers()
      
     } catch (error) {
-      //console.log("ERROR Login: ", error);
+      ////console.log("ERROR Login: ", error);
 
     } 
 }

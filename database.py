@@ -86,7 +86,7 @@ class API_Mensajeria(object):
         return user['username'] if user else None
 
     def getGroup(self, groupId):
-        sql = "SELECT id, name FROM Groups WHERE id = %s"
+        sql = "SELECT id, name FROM groups WHERE id = %s"
         self.cursor.execute(sql, (groupId,))
         group = self.cursor.fetchone()
         return group if group else None

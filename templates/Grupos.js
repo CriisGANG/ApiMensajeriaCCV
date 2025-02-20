@@ -57,7 +57,7 @@ export default function CreateGroupPopup() {
             </Select>
             <input type="file" accept="image/*" onChange={handleImageUpload} />
             {groupImage && <img src={groupImage} alt="Imagen del grupo" className="w-20 h-20 rounded-full" />}
-            <Button onClick={() => //console.log("Grupo creado:", { groupName, selectedUsers, groupImage })}>
+            <Button onClick={() => ////console.log("Grupo creado:", { groupName, selectedUsers, groupImage })}>
               Confirmar
             </Button>
           </div>

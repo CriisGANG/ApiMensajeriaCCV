@@ -607,6 +607,13 @@
     border-color: #545b62;
   }
   
+  .grup-img{
+    width: 50px; /* Define el ancho fijo */
+    height: auto; /* Mantiene la proporción */
+    border-radius: 50%; /* Hace que la imagen sea redonda */
+    object-fit: cover; /* Evita distorsiones */
+  }
+
   .user-item {
     padding: 10px;
     border: 1px solid #ddd;
@@ -645,6 +652,11 @@
     font-size: 0.9rem;
     color: #6c757d;
   }
+
+  .custom-li{
+    list-style: none;
+  }
+  
   
   .error-message {
     display: none;
