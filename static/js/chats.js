@@ -25,11 +25,15 @@ function showActualDIV(div = undefined) {
 }
 
 async function initChats(context) {
+  initDivs()
+
   if (context) {
     switch (context.intention) {
       case INTENTION_NEW_USER_CHAT:
         showActualDIV("mensajes")
         pintarMensajesUsuarios(context.id)
+        USER_LAST_MESSAGES = await getUser(context.id)
+        console.log(USER_LAST_MESSAGES);
         break;
       default:
         showActualDIV("conversaciones")
@@ -48,7 +52,6 @@ async function initChats(context) {
   pintarUsuariosYGrupos(id_user.user_id, "users");
 
   screenMinorLg = window.innerWidth < 993
-  initDivs()
 
   if (screenMinorLg) {
     showActualDIV("conversaciones")
@@ -224,8 +227,8 @@ async function pintarMensajesUsuarios(conversationUsername, timestamp) {
       chatMessages.removeChild(chatMessages.firstChild);
     }
   } // Limpia la lista antes de añadir nuevos usuarios
-
-  newMessages.forEach(message => {
+  if(newMessages){
+  newMessages.map(message => {
     try {
       if (!displayedMessageIds.has(message.id)) {
         const messageElement = document.createElement("div");
@@ -278,7 +281,7 @@ async function pintarMensajesUsuarios(conversationUsername, timestamp) {
       console.error("Error al obtener los últimos mensajes:", error);
     }
   });
-
+  }
   //si la pantalla es pequeña, muestrame mensajes
   if (screenMinorLg) {
 
@@ -375,7 +378,8 @@ console.log("Enviar mensaje!");
 let content = document.getElementById("chat-input").value
 if(content.length >0){
   await send_message(USER_LAST_MESSAGES.username,content)
-  pintarMensajesUsuarios(USER_LAST_MESSAGES.id) 
+  await pintarMensajesUsuarios(USER_LAST_MESSAGES.id) 
+  await pintarUsuariosYGrupos(USER_LAST_MESSAGES.id, "users")
 }
 
 
