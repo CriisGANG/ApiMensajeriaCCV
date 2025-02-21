@@ -217,82 +217,66 @@ async function getUsersAndGroups(conversaciones) {
 //        pintarMensajes(ide, ultimaInteraccion, false, undefined);
 async function pintarMensajesUsuarios(conversationUsername, timestamp) {
   const chatMessages = document.getElementById("chat-messages");
-  const name = await currentUser()
-  ////console.log("USER-DATA", name);
-  const id_user = await getUserId(name)
-  ////console.log(id_user);
+  const name = await currentUser();
+  const id_user = await getUserId(name);
 
-  let newMessages = await fetchMessages(conversationUsername, id_user.user_id)
+  let newMessages = await fetchMessages(conversationUsername, id_user.user_id);
 
   const displayedMessageIds = new Set(); // Set para almacenar los IDs de los mensajes ya mostrados
-  let loggedInUser = true;
   if (chatMessages.hasChildNodes()) {
     while (chatMessages.firstChild) {
       chatMessages.removeChild(chatMessages.firstChild);
     }
   } // Limpia la lista antes de añadir nuevos usuarios
   if(newMessages){
-  newMessages.map(message => {
-    try {
-      if (!displayedMessageIds.has(message.id)) {
-        const messageElement = document.createElement("div");
-        messageElement.classList.add(
-          "message",
-          message.sender_username === loggedInUser ? "received" : "sent",
-          "p-2",
-          "mb-2",
-          "rounded"
-        );
-        //console.log("here");
-        const ul = document.createElement("ul")
-        const strong = document.createElement("strong")
-        const contenido = document.createTextNode(message.content)
-        const messageDate = document.createElement("li");
-        const messageStatus = document.createElement("span");
+    newMessages.map(message => {
+      try {
+        if (!displayedMessageIds.has(message.id)) {
+          const messageElement = document.createElement("div");
+          messageElement.classList.add(
+            "message",
+            message.sender_username === name ? "sent" : "received",
+            "p-2",
+            "mb-2",
+            "rounded"
+          );
 
-        messageStatus.classList.add("message-status");
-        messageStatus.textContent = message.status === "rebut" ? "✔✔" : "✔";
+          const ul = document.createElement("ul");
+          const strong = document.createElement("strong");
+          const contenido = document.createTextNode(message.content);
+          const messageDate = document.createElement("li");
+          const messageStatus = document.createElement("span");
 
-        messageDate.classList.add("custom-li")
-        messageDate.classList.add("message-date");
-        messageDate.textContent = new Date(message.created_at).toLocaleString();
+          messageStatus.classList.add("message-status");
+          messageStatus.textContent = message.status === "rebut" ? "✔✔" : "✔";
 
-        strong.textContent = message.sender_username;
+          messageDate.classList.add("custom-li");
+          messageDate.classList.add("message-date");
+          messageDate.textContent = new Date(message.created_at).toLocaleString();
 
+          strong.textContent = message.sender_username;
 
+          ul.append(strong);
+          ul.append(contenido);
+          ul.append(messageDate);
+          ul.append(messageStatus);
 
-        ul.append(strong)
-        ul.append(contenido)
-        ul.append(messageDate)
-        ul.append(messageStatus)
-        // messageElement.style.textAlign = message.sender_username === loggedInUser ? "left" : "right"; // Alinear a la izquierda si es el usuario
-        // messageElement.innerHTML = "<p><strong>" + message.sender_username + "</strong>:" + message.content + "</p>";
+          messageElement.append(ul);
 
-        messageElement.append(ul)
+          chatMessages.appendChild(messageElement);
 
-        chatMessages.appendChild(messageElement);
-
-        // Registrar el mensaje en el Set
-        displayedMessageIds.add(message.id);
-        ////console.log(displayedMessageIds);
-
-        // Actualizar el timestamp del último mensaje recibido
-        //lastMessageTimestamp.value = message.created_at;
+          // Registrar el mensaje en el Set
+          displayedMessageIds.add(message.id);
+        }
+      } catch (error) {
+        console.error("Error al obtener los últimos mensajes:", error);
       }
-
-
-    } catch (error) {
-      console.error("Error al obtener los últimos mensajes:", error);
-    }
-  });
+    });
   }
   //si la pantalla es pequeña, muestrame mensajes
   if (screenMinorLg) {
-
-    showActualDIV("mensajes")
-
+    showActualDIV("mensajes");
   }
-
 }
 
 
@@ -363,17 +347,9 @@ function displayMessages(currentUserId) {
   });
 }
 
-/** DIV USUARIOS nuevo chat
- * 1) primero superponer en el index.html, en el div de chats
- * 2) gestionar la vista enseño o no enseño
- * 3) si es menor de 900px pantalla completa del modal, sino, a % y oscurecer el background para sendacion profundidad
- * 4) si haces click en el background, será un evento de atrás imitando la funcionalidad del btn atras
- * 
- * no servirá el ShowDiv, que es para gestioanr cuando son pequeñas y grandes: (muestra una y oculta las demás)
- * habrá que usar una nueva llamada showmodal (muestra una, la elegida (puede haber varias, pero es independiente
- * a la de los showDivs))
-*/
-
+function setTituloMensajes(titulo){
+  document.getElementById("tituloMensajes").innerHTML = titulo;
+}
 
 /** ESTO HAY QUE IMPLEMENTARLO !!! PENDIENTE */
 
@@ -405,13 +381,9 @@ document.getElementById("atras").addEventListener("click", () => {
 document.getElementById("add_users").addEventListener("click", () => {
 
   show("users");
-
-
 })
 
-function setTituloMensajes(titulo){
-  document.getElementById("tituloMensajes").innerHTML = titulo;
-}
+
 export { initChats };
 
 
