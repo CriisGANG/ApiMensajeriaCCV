@@ -306,6 +306,8 @@ def get_user_id(username: str):
 
 @app.get("/chatsGrupos/{groupId}", response_class=JSONResponse)
 def chat_group(groupId: str, request: Request, current_user: str = Depends(get_current_user)):
+    db = database.API_Mensajeria()
+
     db.conecta()
     loggedInUser = current_user
     loggedInUser = db.get_user_id(loggedInUser)

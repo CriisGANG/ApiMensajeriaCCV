@@ -77,7 +77,8 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
 
   //Obtener y pintar usuarios
   const conversaciones = await conversacionesUserId();
-
+  console.log(conversaciones);
+  
   // Devuelve toda la info de grupos y usuarios (completa la lista de conversaciones con los valores de usuario o grupo)
   let conversationsUsersAndGroups = await getUsersAndGroups(conversaciones);
  //("USERS de get Users", conversationsUsersAndGroups);
@@ -201,6 +202,7 @@ async function getUsersAndGroups(conversaciones) {
 
     // Devolver la combinación de usuarios y grupos
    //("RESULT", [...users, ...groups]);
+    console.log([...users, ...groups]    );
 
     return [...users, ...groups];
 
