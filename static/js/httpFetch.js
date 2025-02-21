@@ -191,7 +191,7 @@ async function globalFetch(ruta, options) {
     return datajson
 
   } catch (eData) {
-   //("ERROR", eData);
+   console.log("ERROR", eData);
 
    //throw eData;
 
