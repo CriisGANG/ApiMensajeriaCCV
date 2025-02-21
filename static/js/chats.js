@@ -1,6 +1,6 @@
 import { conversacionesUserId, fetchMessages, mensajesGrupos, currentUser, callGroups, getUser, getUserId, send_message } from "./httpFetch.js";
 import { truncateString } from "./utils.js";
-import { show, showDIV, initDivs, showAllDIVs, INTENTION_NEW_USER_CHAT } from "./viewController.js";
+import { show, showDIV, initDivs, showAllDIVs, INTENTION_NEW_USER_CHAT, INTENTION_NEW_GROUP_CHAT } from "./viewController.js";
 
 let screenMinorLg = false
 let ACTUAL_DIV = "conversaciones";
@@ -10,7 +10,6 @@ let USER_LAST_MESSAGES = undefined;
 //implementación: "no se que div estaba mostrando y quiero mostrar el último"
 function showActualDIV(div = undefined) {
   screenMinorLg = window.innerWidth < 993
-
   if (div) {
     ACTUAL_DIV = div
   }
@@ -26,24 +25,26 @@ function showActualDIV(div = undefined) {
 
 async function initChats(context) {
   initDivs()
-
+  // INICIO CON CONTEXTO ( OTRO COMPONENTE NOS PASA CONTEXTO)
   if (context) {
     switch (context.intention) {
       case INTENTION_NEW_USER_CHAT:
         showActualDIV("mensajes")
         pintarMensajesUsuarios(context.id)
         USER_LAST_MESSAGES = await getUser(context.id)
-        console.log(USER_LAST_MESSAGES);
+        setTituloMensajes(USER_LAST_MESSAGES.username)
         break;
+      case INTENTION_NEW_GROUP_CHAT://TODO: implementar logica para
+
+       break;
       default:
         showActualDIV("conversaciones")
-
         break;
     }
 
   } else {
 
-  
+  // INICIO SIN CONTEXTO
   const name = await currentUser();
   const id_user = await getUserId(name);
   ////console.log("ID DEL USER", id_user);
@@ -79,7 +80,7 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
 
   // Devuelve toda la info de grupos y usuarios (completa la lista de conversaciones con los valores de usuario o grupo)
   let conversationsUsersAndGroups = await getUsersAndGroups(conversaciones);
-  console.log("USERS de get Users", conversationsUsersAndGroups);
+ //("USERS de get Users", conversationsUsersAndGroups);
   //console.log("convers", conversaciones);
   //FOR
   conversationsUsersAndGroups.forEach(obj => {
@@ -104,7 +105,7 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
       profilePicture = obj.user_profile_picture_url || "https://img.freepik.com/foto-gratis/hombre-tomando-foto-el-sus-amigos-parque_1139-591.jpg";
       ide = obj.group_id;
       isGroup = true;
-      console.log("Pasa por grupo");
+     //("Pasa por grupo");
     }
 
     const li = document.createElement("li");
@@ -145,7 +146,8 @@ async function pintarUsuariosYGrupos(idUser, idElementHTML) {
       if (obj.interaction_type === "user") {
         pintarMensajesUsuarios(ide, ultimaInteraccion);
         USER_LAST_MESSAGES = await getUser(ide)
-        console.log(USER_LAST_MESSAGES);
+        setTituloMensajes(USER_LAST_MESSAGES.username)
+       //(USER_LAST_MESSAGES);
         //console.log("Usuario pulsado!");
       } else {
         pintarMensajesGrupos(obj)
@@ -166,8 +168,8 @@ async function getUsersAndGroups(conversaciones) {
       if (conversacion.interaction_type === "user") {
         let userPromise = getUser(conversacion.interaction_id)
           .then(userData => {
-            // console.log("userData");
-            // console.log(userData);
+            ////("userData");
+            ////(userData);
             return { ...conversacion, ...userData };
           });
         userPromises.push(userPromise);
@@ -198,12 +200,12 @@ async function getUsersAndGroups(conversaciones) {
     });
 
     // Devolver la combinación de usuarios y grupos
-    console.log("RESULT", [...users, ...groups]);
+   //("RESULT", [...users, ...groups]);
 
     return [...users, ...groups];
 
   } catch (error) {
-    console.log(error)
+   //(error)
     return []; // En caso de error, devuelve un array vacío
 
 
@@ -294,7 +296,7 @@ async function pintarMensajesUsuarios(conversationUsername, timestamp) {
 
 function pintarMensajesGrupos(dataGroup) {
   const chatMessages = document.getElementById("chat-messages");
-  console.log(dataGroup);
+ //(dataGroup);
   const displayedMessageIds = new Set();
 
 
@@ -405,7 +407,9 @@ document.getElementById("add_users").addEventListener("click", () => {
 
 })
 
-
+function setTituloMensajes(titulo){
+  document.getElementById("tituloMensajes").innerHTML = titulo;
+}
 export { initChats };
 
 

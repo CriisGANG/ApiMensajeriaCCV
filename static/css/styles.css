@@ -820,3 +820,7 @@
   .escondido{
     display: none;
   }
+  
+  #tituloMensajes{
+   text-align: center;
+  }

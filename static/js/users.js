@@ -17,11 +17,11 @@ async function pintarUsuarios() {
     const users = await callUsers();
     let current_user = await currentUser()
     let user_id = await getUserId(current_user)
-    console.log("USER", user_id.user_id);
+   //("USER", user_id.user_id);
 
 
     users.users.forEach(user => {
-        console.log(user.id);
+       //(user.id);
 
         const li = document.createElement("li");
         li.classList.add("list-group-item", "user-item", "d-flex", "align-items-center");
@@ -67,7 +67,7 @@ async function pintarUsuarios() {
 
         // Agregar evento de click al li (opcional si necesitas más lógica antes de navegar)
         li.addEventListener("click", () => {
-            console.log("Click al usuario!");
+           //("Click al usuario!");
             show("chats", { ...{ "intention": INTENTION_NEW_USER_CHAT }, ...user })
             // Si quieres evitar que el click abra el enlace directamente, usa event.preventDefault();
         });
@@ -77,7 +77,7 @@ async function pintarUsuarios() {
     });
 
     // users.users.forEach(user => {
-    //     console.log(user.id);
+    //    //(user.id);
 
     //     const li = document.createElement("li");
     //     const link = document.createElement("a");
@@ -116,7 +116,7 @@ async function pintarUsuarios() {
     //     // Agregar evento de click al li para manejar la interacción del usuario
     //     li.addEventListener("click", function () {
 
-    //         console.log("Click al usuario!");
+    //        //("Click al usuario!");
     //         // corroborarSiExiste()
 
     //     });
@@ -129,11 +129,11 @@ async function pintarUsuarios() {
 }
 
 // async function corroborarSiExiste(){
-//     console.log("CorrocorroborarSiExiste");
+//    //("CorrocorroborarSiExiste");
 
 //     let current_user = await currentUser()
 //     let user_id = await getUserId(current_user)
-//     console.log(user_id);
+//    //(user_id);
 
 //     const mensagesUsuarios = fetchMessages(user_id.user_id)
 
