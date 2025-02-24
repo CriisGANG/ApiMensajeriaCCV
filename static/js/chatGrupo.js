@@ -116,9 +116,4 @@ async function pintarUsuariosYGruposChat(idUser, idElementHTML, pintarMensajes) 
       userList.appendChild(li);
     });
   
-    // Evento para el logout
-    document.getElementById("logout").addEventListener("click", function () {
-      localStorage.removeItem("loggedInUser");
-      window.location.href = "/";
-    });
   }
