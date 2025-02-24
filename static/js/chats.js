@@ -328,24 +328,6 @@ function pintarMensajesGrupos(dataGroup) {
   }
 }
 
-/** izq y derecha */
-function displayMessages(currentUserId) {
-  const chatMessages = document.getElementById("chat-messages");
-  chatMessages.innerHTML = ''; // Limpiar contenedor actual
-  let messages = fetchMessages(currentUserId)
-  messages.forEach(message => {
-    const messageDiv = document.createElement('div');
-    const alignmentClass = message.sender_id === currentUserId ? 'right' : 'left';
-
-    messageDiv.classList.add('message', alignmentClass);
-    messageDiv.innerHTML = `
-          <p>${message.sender_id === currentUserId ? 'You' : 'User ' + message.sender_id}: ${message.content}</p>
-          <small>${new Date(message.created_at).toLocaleString()}</small>
-      `;
-
-    container.appendChild(messageDiv);
-  });
-}
 
 function setTituloMensajes(titulo){
   document.getElementById("tituloMensajes").innerHTML = titulo;
@@ -370,7 +352,6 @@ document.getElementById("logout").addEventListener("click", function () {
   localStorage.removeItem("loggedInUser");
   window.location.href = "/";
 });
-
 
 
 document.getElementById("atras").addEventListener("click", () => {
